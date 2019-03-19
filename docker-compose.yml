@@ -1,0 +1,23 @@
+version: "3"
+
+services:
+  db:
+    build: ../openimis-db_dkr
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=${DB_SA_PASSWORD}
+    ports:
+      - 1433:1433
+  backend:
+    build: ../openimis-be_py
+    command: python3 manage.py runserver 0.0.0.0:8000 --noreload
+    environment:
+      - DB_HOST=db
+      - DB_PORT=1433
+      - DB_NAME=imis
+      - DB_USER=sa
+      - DB_PASSWORD=${DB_SA_PASSWORD}    
+    ports:
+      - 8000:8000    
+    depends_on:
+      - db
