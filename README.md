@@ -3,7 +3,6 @@
 | :bomb: Disclaimer : NOT FOR PRODUCTION USE :bomb: |
 | --- |
 | This repository provides a dockerized openIMIS (all components). It provides a quick setup for development, testing or demoing. ***It is NOT INTENDED FOR PRODUCTION USE.*** |
-| --- |
 | The docker-compose currently only contains the openIMIS database and openIMIS backend components. It will be completed as the other components are added to the platform (frontend,...) |
 
 
