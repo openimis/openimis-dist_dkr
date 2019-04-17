@@ -2,22 +2,52 @@ version: "3"
 
 services:
   db:
-    build: ../openimis-db_dkr
-    environment:
-      - ACCEPT_EULA=Y
-      - SA_PASSWORD=${DB_SA_PASSWORD}
-    ports:
-      - 1433:1433
+    build:
+      context: ../openimis-db_dkr
+      args:
+        - ACCEPT_EULA=Y
+        - SA_PASSWORD=${DB_PASSWORD}
+    networks:
+      - openimis-net
+    ## WARNING:
+    ## exposing the database port outside the openimis-net network
+    ## may lead to security issue (depending on your network topology)
+    # ports:
+    #  - 1433:1433
   backend:
     build: ../openimis-be_py
-    command: python3 manage.py runserver 0.0.0.0:8000 --noreload
     environment:
-      - DB_HOST=db
-      - DB_PORT=1433
-      - DB_NAME=imis
-      - DB_USER=sa
-      - DB_PASSWORD=${DB_SA_PASSWORD}    
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - REMOTE_USER_AUTHENTICATION=True
+      - SITE_ROOT=api
+    networks:
+      - openimis-net
+    ## WARNING:
+    ## exposing the backend port outside the openimis-net network
+    ## may lead to security issue (depending on your network topology)
+    # ports:
+    #  - 8000:8000
+    ## OPTION:
+    ## if you want to ensure the (demo) db is started prior to backend,
+    ## simply add the following dependency
+    # depends_on:
+    #   - db
+  gateway:
+    build:
+      context: ../openimis-gateway_dkr
+    networks:
+      - openimis-net
     ports:
-      - 8000:8000    
+      - 80:80
+    # WARNING:
+    # demo configuration doesn't setup the SSL (certficate,...)
+    # this is a security issue that has to be fixed before exposing the gateway to the internet!
+    # - 443:443
     depends_on:
-      - db
+      - backend
+networks:
+  openimis-net:
