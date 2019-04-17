@@ -12,6 +12,7 @@ To build necessary, docker images, docker-compose  relies on ***local*** docker 
 In order to build these images, you need to clone, next to `openimis-dist_dkr/` the following github repository:
 * openimis-db_dkr
 * openimis-be_py
+* openimis-gateway_dkr
 
 From within `openimis-dist_dkr/` directory:
 * create a `.env` file, providing the following variables:
