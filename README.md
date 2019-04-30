@@ -7,6 +7,8 @@
 | --- |
 | <ul><li>**The gateway is not secure** (no ssl,...) and must be adapted before being exposed to the internet! For demo, it is also configured with basic auth for external application accesses, while the intend is to have a certificate-based authentication.</li><li>**The database is contenerized**, not even with a mounted volume. Production should run on a full SQL Server installation.</li><li>**The backend secret key** must be generated (specific) to your production platform</li><li>...</li></ul>|
 
+In case of troubles, please consult/contact our service desk via our [ticketing site](https://openimis.atlassian.net/servicedesk/customer).
+
 # First startup
 First startup is special since it will create the necessary docker images and containers to run openIMIS.
 To build necessary, docker images, docker-compose  relies on ***local*** docker files.
