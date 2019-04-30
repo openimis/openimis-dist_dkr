@@ -2,6 +2,7 @@ version: "3"
 
 services:
   db:
+    container_name: openimis-db
     build:
       context: ../openimis-db_dkr
       args:
@@ -15,6 +16,7 @@ services:
     # ports:
     #  - 1433:1433
   backend:
+    container_name: openimis-backend
     build: ../openimis-be_py
     environment:
       - DB_HOST=${DB_HOST}
@@ -37,6 +39,7 @@ services:
     # depends_on:
     #   - db
   gateway:
+    container_name: openimis-gateway
     build:
       context: ../openimis-gateway_dkr
     networks:
