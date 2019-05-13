@@ -2,6 +2,7 @@ version: "3"
 
 services:
   db:
+    container_name: openimis-db
     build:
       context: ../openimis-db_dkr
       args:
@@ -15,6 +16,7 @@ services:
     # ports:
     #  - 1433:1433
   backend:
+    container_name: openimis-backend
     build: ../openimis-be_py
     environment:
       - DB_HOST=${DB_HOST}
@@ -36,7 +38,19 @@ services:
     ## simply add the following dependency
     # depends_on:
     #   - db
+  frontend:
+    container_name: openimis-frontend
+    build: ../openimis-fe_js
+    command: serve -s build
+    networks:
+      - openimis-net
+    ## WARNING:
+    ## exposing the frontend port outside the openimis-net network
+    ## may lead to security issue (depending on your network topology)
+    # ports:
+    #  - 5000:5000
   gateway:
+    container_name: openimis-gateway
     build:
       context: ../openimis-gateway_dkr
     networks:
@@ -49,5 +63,6 @@ services:
     # - 443:443
     depends_on:
       - backend
+      - frontend
 networks:
   openimis-net:
