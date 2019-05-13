@@ -3,9 +3,9 @@
  This repository provides a dockerized openIMIS (all components) as a quick setup for development, testing or demoing.
  
  The docker-compose currently only contains the openIMIS database, backend and gateway components. It will be completed as the other components are added to the platform (frontend,...)
-| :bomb: Disclaimer : NOT FOR PRODUCTION USE :bomb: |
+ 
+| Disclaimer : NOT FOR PRODUCTION USE  |
 | --- |
-
 | <ul><li>**The gateway is not secure** (no ssl,...) and must be adapted before being exposed to the internet! For demo, it is also configured with basic auth for external application accesses, while the intend is to have a certificate-based authentication.</li><li>**The database is contenerized**, not even with a mounted volume. Production should run on a full SQL Server installation.</li><li>**The backend secret key** must be generated (specific) to your production platform</li><li>...</li></ul>|
 
 In case of troubles, please consult/contact our service desk via our [ticketing site](https://openimis.atlassian.net/servicedesk/customer).
