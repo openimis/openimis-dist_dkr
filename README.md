@@ -15,6 +15,7 @@ To build necessary, docker images, docker-compose  relies on ***local*** docker 
 In order to build these images, you need to clone, next to `openimis-dist_dkr/` the following github repository:
 * openimis-db_dkr
 * openimis-be_py
+* openimis-fe_js
 * openimis-gateway_dkr
 
 From within `openimis-dist_dkr/` directory:
@@ -29,9 +30,9 @@ From within `openimis-dist_dkr/` directory:
 * If you use the demo docker 'db' service:
   * build and start the database docker image:  `docker-compose up db`
   (note: use --force-recreate if you already created the image but want to change the password)
-  * restore the openIMIS default backup into the container:
+  * create the imis database into the container:
     * `docker container ls` and spot the line (CONTAINER ID) with `openimis-db` IMAGE name
-    * `docker exec <CONTAINER ID> /restore.sh`
+    * `docker exec <CONTAINER ID> /create_database.sh`
 * build and start the gateway (and backend) docker image: `docker-compose up gateway`
   (note: at each start, openIMIS will apply the necessary database migrations to update the database scheme)
 * register your openIMIS superuser in the gateway:
