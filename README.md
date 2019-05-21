@@ -26,6 +26,7 @@ From within `openimis-dist_dkr/` directory:
  DB_NAME=<your database name, imis if you use the demo docker 'db' service>
  DB_USER=<your database user, sa if you use the demo docker 'db' service >
  DB_PASSWORD=<your database password, generate one if you use the demo docker 'db' service>
+ ACCEPT_EULA=Y
 ```
 * If you use the demo docker 'db' service:
   * build and start the database docker image:  `docker-compose up db`
