@@ -2,7 +2,7 @@
 
  This repository provides a dockerized openIMIS (all components) as a quick setup for development, testing or demoing.
  
- The docker-compose currently only contains the openIMIS database, backend and gateway components. It will be completed as the other components are added to the platform (frontend,...)
+ The docker-compose currently only contains the openIMIS database, backend, forntend and gateway components. It will be completed as the other components are added to the platform (batch platform,...)
  
 | Disclaimer : NOT FOR PRODUCTION USE  |
 | --- |
@@ -27,6 +27,7 @@ From within `openimis-dist_dkr/` directory:
  DB_NAME=<your database name, imis if you use the demo docker 'db' service>
  DB_USER=<your database user, sa if you use the demo docker 'db' service >
  DB_PASSWORD=<your database password, generate one if you use the demo docker 'db' service>
+ LEGACY_OPENIMIS_HOST=<(sub)domain under which legacy openIMIS is served (e.g. demo.openimis.org) >
 ```
 * If you use the demo docker 'db' service:
   * build and start the database docker image:  `docker-compose up db`
