@@ -54,15 +54,13 @@ services:
     build:
       context: ../openimis-gateway_dkr
       args:
-      - LEGACY_OPENIMIS_HOST=${LEGACY_OPENIMIS_HOST}
+        - NEW_OPENIMIS_HOST=${NEW_OPENIMIS_HOST}
+        - LEGACY_OPENIMIS_HOST=${LEGACY_OPENIMIS_HOST}
     networks:
       - openimis-net
     ports:
       - 80:80
-    # WARNING:
-    # demo configuration doesn't setup the SSL (certficate,...)
-    # this is a security issue that has to be fixed before exposing the gateway to the internet!
-    # - 443:443
+      - 443:443
     depends_on:
       - backend
       - frontend
