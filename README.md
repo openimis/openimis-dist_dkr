@@ -27,7 +27,7 @@ From within `openimis-dist_dkr/` directory:
  DB_NAME=<your database name, imis if you use the demo docker 'db' service>
  DB_USER=<your database user, sa if you use the demo docker 'db' service >
  DB_PASSWORD=<your database password, generate one if you use the demo docker 'db' service>
- NEW_OPENIMIS_HOST=<(sub)domain under which the (new) openIMIS will be served (e.g. openimis.org) >
+ NEW_OPENIMIS_HOST=<(sub)domain under which the (new) openIMIS will be served (e.g. openimis.domaine) >
  LEGACY_OPENIMIS_HOST=<(sub)domain under which legacy openIMIS is served (e.g. demo.openimis.org) >
 ```
 
@@ -39,6 +39,10 @@ From within `openimis-dist_dkr/` directory:
     * `docker exec <CONTAINER ID> /create_database.sh`
 * build and start the gateway (and backend) docker image: `docker-compose up gateway`
   (note: at each start, openIMIS will apply the necessary database migrations to update the database scheme)
+* register a letsencrypt certificate for your openIMIS gateway
+  * list running containers and spot the gateway: `docker container ls` (the gateway should be named `openimis-gateway`)
+  * connect to the gateway: `docker exec -it <CONTAINER ID> /bin/sh` (sh and not bash)
+  * issue the command `certbot --nginx -d <openimis.domaine>` ... and follow the setup wizzard (provide contact address,...)
 * register your openIMIS superuser in the gateway:
   * list running containers and spot the gateway: `docker container ls` (the gateway should be named `openimis-gateway`)
   * connect to the gateway: `docker exec -it <CONTAINER ID> /bin/sh` (sh and not bash)
