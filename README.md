@@ -22,6 +22,7 @@ In order to build these images, you need to clone, next to `openimis-dist_dkr/` 
 From within `openimis-dist_dkr/` directory:
 * create a `.env` file, providing the following variables:
 ```
+ DB_SQL_SCRIPT=<URL pointing to the SQL script>
  DB_HOST=<your database host, or db to use the demo docker 'db' service>
  DB_PORT=<your database port on the host, 1433 if you use the demo docker 'db' service>
  DB_NAME=<your database name, imis if you use the demo docker 'db' service>
@@ -32,6 +33,9 @@ From within `openimis-dist_dkr/` directory:
 ```
 
 * If you use the demo docker 'db' service:
+  * choose the SQL script to create/restore the database. Reference models are provided in [database_ms_sqlserver](https://github.com/openimis/database_ms_sqlserver) github. Example:
+    * Empty database: `https://github.com/openimis/database_ms_sqlserver/raw/master/Empty%20databases/openIMIS_ONLINE.sql`
+    * Demo database: `https://github.com/openimis/database_ms_sqlserver/raw/develop/Demo%20database/openIMIS_demo_1.3.0.sql`
   * build and start the database docker image:  `docker-compose up db`
   (note: use --force-recreate if you already created the image but want to change the password)
   * create the imis database into the container:
