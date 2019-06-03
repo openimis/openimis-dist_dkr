@@ -1,12 +1,13 @@
-version: "3"
+version: "2.4"
 
 services:
-  db:
+  database:
+    platform: linux
     container_name: openimis-db
     build:
       context: ../openimis-db_dkr
       args:
-        - ACCEPT_EULA=Y
+        - ACCEPT_EULA=${ACCEPT_EULA}
         - SA_PASSWORD=${DB_PASSWORD}
     networks:
       - openimis-net
@@ -15,20 +16,8 @@ services:
     ## may lead to security issue (depending on your network topology)
     # ports:
     #  - 1433:1433
-  legacy_frontend:
-    build:
-      context: ./VB_app
-      dockerfile: ./Dockerfile
-    environment:
-      - DB_PASS=${DB_PASSWORD}
-      - DB_HOST=${DB_HOST}
-      - DB_NAME=${DB_NAME}
-      - DB_USER=${DB_USER}
-    ports:
-      - "8080:80"
-    networks:
-      - openimis-net
   backend:
+    platform: linux
     container_name: openimis-backend
     build: ../openimis-be_py
     environment:
@@ -52,6 +41,7 @@ services:
     # depends_on:
     #   - db
   frontend:
+    platform: linux
     container_name: openimis-frontend
     build: ../openimis-fe_js
     command: serve -s build
@@ -63,6 +53,7 @@ services:
     # ports:
     #  - 5000:5000
   gateway:
+    platform: linux
     container_name: openimis-gateway
     build:
       context: ../openimis-gateway_dkr
@@ -77,5 +68,20 @@ services:
     depends_on:
       - backend
       - frontend
+  legacy_frontend:
+    platform: windows
+    container_name: openimis-webapp
+    build:
+      context: ./VB_app
+      dockerfile: ./Dockerfile
+    environment:
+      - DB_PASS=${DB_PASSWORD}
+      - DB_HOST=${DB_HOST}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+    ports:
+      - "8080:80"
+    networks:
+      - openimis-net
 networks:
   openimis-net:
