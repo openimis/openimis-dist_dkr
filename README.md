@@ -46,7 +46,7 @@ From within `openimis-dist_dkr/` directory:
 * register a letsencrypt certificate for your openIMIS gateway
   * list running containers and spot the gateway: `docker container ls` (the gateway should be named `openimis-gateway`)
   * connect to the gateway: `docker exec -it <CONTAINER ID> /bin/sh` (sh and not bash)
-  * issue the command `certbot --nginx -d <openimis.domaine>` ... and follow the setup wizzard (provide contact address,...)
+  * issue the command `install-certificate.sh` ... and follow the setup wizzard (provide contact address,
 * register your openIMIS superuser in the gateway:
   * list running containers and spot the gateway: `docker container ls` (the gateway should be named `openimis-gateway`)
   * connect to the gateway: `docker exec -it <CONTAINER ID> /bin/sh` (sh and not bash)
