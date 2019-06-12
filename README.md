@@ -2,21 +2,27 @@
 
  This repository provides a dockerized openIMIS (all components) as a quick setup for development, testing or demoing.
  
- The docker-compose currently only contains the openIMIS database, backend and gateway components. It will be completed as the other components are added to the platform (frontend,...)
+ The docker-compose currently only contains the openIMIS database, frontend and backend and gateway components.
 | :bomb: Disclaimer : NOT FOR PRODUCTION USE :bomb: |
 | --- |
 | <ul><li>**The gateway is not secure** (no ssl,...) and must be adapted before being exposed to the internet! For demo, it is also configured with basic auth for external application accesses, while the intend is to have a certificate-based authentication.</li><li>**The database is contenerized**, not even with a mounted volume. Production should run on a full SQL Server installation.</li><li>**The backend secret key** must be generated (specific) to your production platform</li><li>...</li></ul>|
 
 In case of troubles, please consult/contact our service desk via our [ticketing site](https://openimis.atlassian.net/servicedesk/customer).
 
+#Prerequisit
+- Windows 10 or Windows server 2016
+- Docker installed and in Windows container mode
+- Docker Experimental features on <https://github.com/docker/cli/tree/master/experimental#docker-experimental-features>
+
+
 # First startup
 First startup is special since it will create the necessary docker images and containers to run openIMIS.
 To build necessary, docker images, docker-compose  relies on ***local*** docker files.
-In order to build these images, you need to clone, next to `openimis-dist_dkr/` the following github repository:
-* openimis-db_dkr
-* openimis-be_py
-* openimis-fe_js
-* openimis-gateway_dkr
+In order to build these images, you need to clone, next to `openimis-dist_dkr/` the following github repository:branch: 
+* openimis-db_dkr:windows_container
+* openimis-be_py:master
+* openimis-fe_js:master
+* openimis-gateway_dkr:master
 
 From within `openimis-dist_dkr/` directory:
 * create a `.env` file, providing the following variables:
@@ -33,7 +39,7 @@ From within `openimis-dist_dkr/` directory:
   (note: use --force-recreate if you already created the image but want to change the password)
   * create the imis database into the container:
     * `docker container ls` and spot the line (CONTAINER ID) with `openimis-db` IMAGE name
-    * `docker exec <CONTAINER ID> /create_database.sh`
+    * `docker exec <CONTAINER ID> /create_database.bat`
 * build and start the gateway (and backend) docker image: `docker-compose up gateway`
   (note: at each start, openIMIS will apply the necessary database migrations to update the database scheme)
 * register your openIMIS superuser in the gateway:
