@@ -83,9 +83,15 @@ services:
       - DB_HOST=${DB_HOST}
       - DB_NAME=${DB_NAME}
       - DB_USER=${DB_USER}
+    # volumes:
+    #   - vol_photo_updated:/inetpub/wwwroot/openIMIS/Images/Updated:rw
+    #   - vol_photo_submitted:/inetpub/wwwroot/openIMIS/Images/Submitted:rw
     ports:
       - "8080:80"
     networks:
       - openimis-net
+# volumes:
+#   vol_photo_updated:
+#   vol_photo_submitted:
 networks:
   openimis-net:

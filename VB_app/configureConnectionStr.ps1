@@ -4,10 +4,20 @@ param(
 [string]$DB_USER=$Env:DB_USER,
 [string]$DB_PASSWORD=$Env:DB_PASS
 )
-Write-Output 'Source=[DatabaseIPAdress];Initial Catalog=IMIS;User ID=[ImisUserId];Password=[ImisUserPassword]', "Source=$DB_HOSTNAME;Initial Catalog=$DB_NAME;User ID=$DB_USER;Password=$DB_PASSWORD"
-(Get-Content /inetpub/wwwroot/Web.config.sample).replace('Source=[DatabaseIPAdress];Initial Catalog=IMIS;User ID=[ImisUserId];Password=[ImisUserPassword]', "Source=$DB_HOSTNAME;Initial Catalog=$DB_NAME;User ID=$DB_USER;Password=$DB_PASSWORD") | Set-Content /inetpub/wwwroot/Web.config
-#Write-Output "sleep for 15 seconds"
-#Start-Sleep -s 15
+
+Write-Output 'Old config: '
+Write-Output 'Source=[DatabaseIPAdress];Initial Catalog=IMIS;User ID=[ImisUserId];Password=[ImisUserPassword]'
+Write-Output 'New config: '
+Write-Output "Source=$DB_HOSTNAME;Initial Catalog=$DB_NAME;User ID=$DB_USER;Password=$DB_PASSWORD"
+$WebDirectories = Get-ChildItem -Directory /inetpub/wwwroot/
+foreach($webRoot in $WebDirectories){
+    $webRootName = $webRoot.Name
+    Write-Output "write the $webRootName config files"
+    if (Test-Path /inetpub/wwwroot/$webRootName/Web.config){
+        (Get-Content /inetpub/wwwroot/$webRootName/Web.config.sample).replace('Source=[DatabaseIPAdress];Initial Catalog=IMIS;User ID=[ImisUserId];Password=[ImisUserPassword]', "Source=$DB_HOSTNAME;Initial Catalog=$DB_NAME;User ID=$DB_USER;Password=$DB_PASSWORD") | Set-Content /inetpub/wwwroot/$webRootName/Web.config
+    }
+}
+
 Write-Output "launch IIS"
 $ISSprocess = (Start-Process C:\ServiceMonitor.exe -ArgumentList 'w3svc' -PassThru )
 $handle = $proc.Handle
