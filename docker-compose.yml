@@ -49,7 +49,7 @@ services:
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
       - REMOTE_USER_AUTHENTICATION=True
-      - SITE_ROOT=api
+      - SITE_ROOT=iapi
     networks:
       - openimis-net
     ## WARNING:
