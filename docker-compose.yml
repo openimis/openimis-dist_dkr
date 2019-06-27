@@ -43,6 +43,8 @@ services:
     container_name: openimis-frontend
     build: ../openimis-fe_js
     command: serve -s build
+    environment:
+      - REACT_APP_API_URL=/iapi
     networks:
       - openimis-net
     ## WARNING:
