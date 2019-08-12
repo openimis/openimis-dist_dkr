@@ -82,6 +82,8 @@ services:
       args:
         - NEW_OPENIMIS_HOST=${NEW_OPENIMIS_HOST}
         - LEGACY_OPENIMIS_HOST=${LEGACY_OPENIMIS_HOST}
+    volumes:
+      - ../conf:/conf
     networks:
       - openimis-net
     ports:
