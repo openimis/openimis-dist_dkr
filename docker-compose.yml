@@ -19,7 +19,8 @@ services:
   backend:
     container_name: openimis-backend
     build: ../openimis-be_py
-    environment:
+    command: start
+    environment: &backend-env
       - DB_HOST=${DB_HOST}
       - DB_PORT=${DB_PORT}
       - DB_NAME=${DB_NAME}
@@ -27,6 +28,7 @@ services:
       - DB_PASSWORD=${DB_PASSWORD}
       - REMOTE_USER_AUTHENTICATION=True
       - SITE_ROOT=api
+      - CELERY_BROKER_URL=amqp://rabbitmq
     networks:
       - openimis-net
     ## WARNING:
@@ -39,6 +41,29 @@ services:
     ## simply add the following dependency
     # depends_on:
     #   - db
+  rabbitmq:
+    container_name: openimis-rabbitmq
+    # 3-management is the 3.x version including the admin interface. For a barebones image, use 3-alpine
+    image: rabbitmq:3-management
+    networks:
+      - openimis-net
+    ## WARNING:
+    ## exposing the frontend port outside the openimis-net network
+    ## may lead to security issue (depending on your network topology)
+    ports:
+      # Management port, default credentials: guest/guest
+      - 15672:15672
+      # Other RabbitMQ ports
+      - 5672:5672
+      - 6379:6379
+      - 4369:4369
+  worker:
+    build: ../openimis-be_py
+    environment: *backend-env
+    command: worker
+    container_name: openimis-worker
+    networks:
+      - openimis-net
   ibackend:
     container_name: openimis-ibackend
     build: ../openimis-be_py
@@ -61,7 +86,7 @@ services:
     ## if you want to ensure the (demo) db is started prior to backend,
     ## simply add the following dependency
     # depends_on:
-    #   - db    
+    #   - db
   frontend:
     container_name: openimis-frontend
     build: ../openimis-fe_js
