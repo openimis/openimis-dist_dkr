@@ -1,16 +1,16 @@
 version: "3"
 
 services:
-  db:
-    container_name: openimis-db
-    build:
-      context: ../openimis-db_dkr
-      args:
-        - ACCEPT_EULA=Y
-        - SA_PASSWORD=${DB_PASSWORD}
-        - SQL_SCRIPT_URL=${DB_SQL_SCRIPT}
-    networks:
-      - openimis-net
+ # db:
+ #   container_name: openimis-db
+ #   build:
+ #     context: ../openimis-db_dkr
+ #     args:
+ #       - ACCEPT_EULA=${ACCEPT_EULA}
+ #       - SA_PASSWORD=${DB_PASSWORD}
+ #       - SQL_SCRIPT_URL=${DB_SQL_SCRIPT}
+ #   networks:
+ #     - openimis-net
     ## WARNING:
     ## exposing the database port outside the openimis-net network
     ## may lead to security issue (depending on your network topology)
