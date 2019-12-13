@@ -22,7 +22,8 @@ In order to build these images, you need to clone, next to `openimis-dist_dkr/` 
 From within `openimis-dist_dkr/` directory:
 * create a `.env` file, providing the following variables:
 ```
- DB_SQL_SCRIPT=<URL pointing to the SQL script>
+ #DB_SQL_SCRIPT=<URL pointing to the SQL script>
+ #ACCEPT_EULA=<must put Y but it means you accept Microsoft EULA for the MSSQL database container>
  DB_HOST=<your database host, or db to use the demo docker 'db' service>
  DB_PORT=<your database port on the host, 1433 if you use the demo docker 'db' service>
  DB_NAME=<your database name, imis if you use the demo docker 'db' service>
