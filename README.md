@@ -2,7 +2,7 @@
 
  This repository provides a dockerized openIMIS (all components) as a quick setup for development, testing or demoing.
  
- The docker-compose currently only contains the openIMIS database, backend, forntend and gateway components. It will be completed as the other components are added to the platform (batch platform,...)
+ The docker-compose currently only contains the openIMIS database, backend, frontend and gateway components. It will be completed as the other components are added to the platform (batch platform,...)
  
 | Disclaimer : NOT FOR PRODUCTION USE  |
 | --- |

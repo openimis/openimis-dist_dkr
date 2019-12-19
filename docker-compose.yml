@@ -67,6 +67,7 @@ services:
   ibackend:
     container_name: openimis-ibackend
     build: ../openimis-be_py
+    command: start
     environment:
       - DB_HOST=${DB_HOST}
       - DB_PORT=${DB_PORT}
