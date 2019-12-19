@@ -1,15 +1,16 @@
 version: "3"
 
 services:
-  db:
-    container_name: openimis-db
-    build:
-      context: ../openimis-db_dkr
-      args:
-        - ACCEPT_EULA=Y
-        - SA_PASSWORD=${DB_PASSWORD}
-    networks:
-      - openimis-net
+ # db:
+ #   container_name: openimis-db
+ #   build:
+ #     context: ../openimis-db_dkr
+ #     args:
+ #       - ACCEPT_EULA=${ACCEPT_EULA}
+ #       - SA_PASSWORD=${DB_PASSWORD}
+ #       - SQL_SCRIPT_URL=${DB_SQL_SCRIPT}
+ #   networks:
+ #     - openimis-net
     ## WARNING:
     ## exposing the database port outside the openimis-net network
     ## may lead to security issue (depending on your network topology)
@@ -18,7 +19,8 @@ services:
   backend:
     container_name: openimis-backend
     build: ../openimis-be_py
-    environment:
+    command: start
+    environment: &backend-env
       - DB_HOST=${DB_HOST}
       - DB_PORT=${DB_PORT}
       - DB_NAME=${DB_NAME}
@@ -26,6 +28,54 @@ services:
       - DB_PASSWORD=${DB_PASSWORD}
       - REMOTE_USER_AUTHENTICATION=True
       - SITE_ROOT=api
+      - CELERY_BROKER_URL=amqp://rabbitmq
+    networks:
+      - openimis-net
+    ## WARNING:
+    ## exposing the backend port outside the openimis-net network
+    ## may lead to security issue (depending on your network topology)
+    # ports:
+    #  - 8000:8000
+    ## OPTION:
+    ## if you want to ensure the (demo) db is started prior to backend,
+    ## simply add the following dependency
+    # depends_on:
+    #   - db
+  rabbitmq:
+    container_name: openimis-rabbitmq
+    # 3-management is the 3.x version including the admin interface. For a barebones image, use 3-alpine
+    image: rabbitmq:3-management
+    networks:
+      - openimis-net
+    ## WARNING:
+    ## exposing the frontend port outside the openimis-net network
+    ## may lead to security issue (depending on your network topology)
+    ports:
+      # Management port, default credentials: guest/guest
+      - 15672:15672
+      # Other RabbitMQ ports
+      - 5672:5672
+      - 6379:6379
+      - 4369:4369
+  worker:
+    build: ../openimis-be_py
+    environment: *backend-env
+    command: worker
+    container_name: openimis-worker
+    networks:
+      - openimis-net
+  ibackend:
+    container_name: openimis-ibackend
+    build: ../openimis-be_py
+    command: start
+    environment:
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - REMOTE_USER_AUTHENTICATION=True
+      - SITE_ROOT=iapi
     networks:
       - openimis-net
     ## WARNING:
@@ -42,6 +92,8 @@ services:
     container_name: openimis-frontend
     build: ../openimis-fe_js
     command: serve -s build
+    environment:
+      - REACT_APP_API_URL=/iapi
     networks:
       - openimis-net
     ## WARNING:
@@ -53,16 +105,19 @@ services:
     container_name: openimis-gateway
     build:
       context: ../openimis-gateway_dkr
+      args:
+        - NEW_OPENIMIS_HOST=${NEW_OPENIMIS_HOST}
+        - LEGACY_OPENIMIS_HOST=${LEGACY_OPENIMIS_HOST}
+    volumes:
+      - ../conf:/conf
     networks:
       - openimis-net
     ports:
       - 80:80
-    # WARNING:
-    # demo configuration doesn't setup the SSL (certficate,...)
-    # this is a security issue that has to be fixed before exposing the gateway to the internet!
-    # - 443:443
+      - 443:443
     depends_on:
       - backend
+      - ibackend
       - frontend
 networks:
   openimis-net:
