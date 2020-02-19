@@ -19,6 +19,14 @@ In order to build these images, you need to clone, next to `openimis-dist_dkr/` 
 * openimis-fe_js
 * openimis-gateway_dkr
 
+```
+git clone https://github.com/openimis/openimis-dist_dkr.git
+git clone https://github.com/openimis/openimis-db_dkr.git
+git clone https://github.com/openimis/openimis-be_py.git
+git clone https://github.com/openimis/openimis-fe_js.git
+git clone https://github.com/openimis/openimis-gateway_dkr.git
+```
+
 From within `openimis-dist_dkr/` directory:
 * create a `.env` file, providing the following variables:
 ```
