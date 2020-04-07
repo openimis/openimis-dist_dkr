@@ -1,16 +1,16 @@
 version: "3"
 
 services:
- # db:
- #   container_name: openimis-db
- #   build:
- #     context: ../openimis-db_dkr
- #     args:
- #       - ACCEPT_EULA=${ACCEPT_EULA}
- #       - SA_PASSWORD=${DB_PASSWORD}
- #       - SQL_SCRIPT_URL=${DB_SQL_SCRIPT}
- #   networks:
- #     - openimis-net
+  # db:
+  #   container_name: openimis-db
+  #   build:
+  #     context: ../openimis-db_dkr
+  #     args:
+  #       - ACCEPT_EULA=${ACCEPT_EULA}
+  #       - SA_PASSWORD=${DB_PASSWORD}
+  #       - SQL_SCRIPT_URL=${DB_SQL_SCRIPT}
+  #   networks:
+  #     - openimis-net
     ## WARNING:
     ## exposing the database port outside the openimis-net network
     ## may lead to security issue (depending on your network topology)
@@ -90,34 +90,24 @@ services:
     #   - db
   frontend:
     container_name: openimis-frontend
-    build: ../openimis-fe_js
-    command: serve -s build
+    build: 
+      context: ../openimis-fe_js
+#    command: serve -s build
     environment:
       - REACT_APP_API_URL=/iapi
-    networks:
-      - openimis-net
-    ## WARNING:
-    ## exposing the frontend port outside the openimis-net network
-    ## may lead to security issue (depending on your network topology)
-    # ports:
-    #  - 5000:5000
-  gateway:
-    container_name: openimis-gateway
-    build:
-      context: ../openimis-gateway_dkr
-      args:
-        - NEW_OPENIMIS_HOST=${NEW_OPENIMIS_HOST}
-        - LEGACY_OPENIMIS_HOST=${LEGACY_OPENIMIS_HOST}
-    volumes:
-      - ../conf:/conf
+      - NEW_OPENIMIS_HOST=${NEW_OPENIMIS_HOST}
+      - LEGACY_OPENIMIS_HOST=${LEGACY_OPENIMIS_HOST}
     networks:
       - openimis-net
     ports:
       - 80:80
       - 443:443
-    depends_on:
-      - backend
-      - ibackend
-      - frontend
+#    volumes:
+#      - ../conf:/conf
+    ## WARNING:
+    ## exposing the frontend port outside the openimis-net network
+    ## may lead to security issue (depending on your network topology)
+    # ports:
+    #  - 5000:5000
 networks:
   openimis-net:

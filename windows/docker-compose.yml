@@ -1,0 +1,130 @@
+version: "2.4"
+
+services:
+  #  in such context the database will not have enough memory, http://www.teamfoundation.co.za/2018/05/07/docker-linux-and-windows-event-more-3-from-containers-lcow/
+  database:
+    platform: windows
+    container_name: openimis-db
+    build:
+      context: ../../openimis-db_dkr
+      dockerfile: Dockerfile_win
+      args:
+        - ACCEPT_EULA=${ACCEPT_EULA}
+        - SA_PASSWORD=${DB_PASSWORD}
+    environment:
+        - ACCEPT_EULA=${ACCEPT_EULA}
+        - SA_PASSWORD=${DB_PASSWORD}
+        - SQL_SCRIPT_URL=${DB_SQL_SCRIPT}
+        - DB_NAME=${DB_NAME}
+        - DB_USER=${DB_USER}
+    networks:
+      - openimis-net
+    ## WARNING:
+    ## exposing the database port outside the openimis-net network
+    ## may lead to security issue (depending on your network topology)
+    ports:
+      - 1433:1433
+  backend:
+    platform: windows
+    container_name: openimis-backend
+    build: 
+      context: ../../openimis-be_py
+      dockerfile: Dockerfile_win
+    command: start database 1433
+    environment:
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - REMOTE_USER_AUTHENTICATION=True
+      - SITE_ROOT=api
+    networks:
+      - openimis-net
+    ## WARNING:
+    ## exposing the backend port outside the openimis-net network
+    ## may lead to security issue (depending on your network topology)
+    # ports:
+    #  - 8000:8000
+    ## OPTION:
+    ## if you want to ensure the (demo) db is started prior to backend,
+    ## simply add the following dependency
+    # depends_on:
+    #   - db
+ # frontend:
+  #  platform: windows
+  #  container_name: openimis-frontend
+  #  build:
+  #    context: ../../openimis-fe_js
+  #    dockerfile: Dockerfile_win
+  #  command: C:\\Users\\ContainerAdministrator\\AppData\\Local\\Yarn\\bin\\serve -s build
+  #  environment:
+  #    - REACT_APP_API_URL=/iapi
+  #  networks:
+  #    - openimis-net
+    ## WARNING:
+    ## exposing the frontend port outside the openimis-net network
+    ## may lead to security issue (depending on your network topology)
+    # ports:
+    #  - 5000:5000
+  ibackend:
+    platform: windows
+    container_name: openimis-ibackend
+    build: 
+      context: ../../openimis-be_py
+      dockerfile: Dockerfile_win
+    command: start database 1433
+    environment:
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - REMOTE_USER_AUTHENTICATION=True
+      - SITE_ROOT=iapi
+    networks:
+        - openimis-net
+  frontend:
+    platform: windows
+    container_name: openimis-frontend
+    build:
+      context: ../../openimis-fe_js
+      dockerfile: Dockerfile_win
+      shm_size: '4gb'
+      args:
+        - NEW_OPENIMIS_HOST=${NEW_OPENIMIS_HOST}
+        - LEGACY_OPENIMIS_HOST=${LEGACY_OPENIMIS_HOST}
+   # command:
+    networks:
+      - openimis-net
+    ports:
+      - 80:80
+      - 443:443
+    depends_on:
+      - backend
+      - ibackend
+#    volumes:
+#      - C:/Users/delcpa/Development/openimis-fe_js/conf:c:/openresty/conf
+  legacy_frontend:
+    platform: windows
+    container_name: openimis-webapp
+    build:
+      context: ./VB_app
+      dockerfile: ./Dockerfile
+    environment:
+      - DB_PASS=${DB_PASSWORD}
+      - DB_HOST=${DB_HOST}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+    # volumes:
+    #   - vol_photo_updated:/inetpub/wwwroot/openIMIS/Images/Updated:rw
+    #   - vol_photo_submitted:/inetpub/wwwroot/openIMIS/Images/Submitted:rw
+    ports:
+      - "8080:80"
+    networks:
+      - openimis-net
+# volumes:
+#   vol_photo_updated:
+#   vol_photo_submitted:
+networks:
+  openimis-net:
