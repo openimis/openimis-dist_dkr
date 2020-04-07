@@ -19,6 +19,14 @@ In order to build these images, you need to clone, next to `openimis-dist_dkr/` 
 * openimis-fe_js
 * openimis-gateway_dkr
 
+```
+git clone https://github.com/openimis/openimis-dist_dkr.git
+git clone https://github.com/openimis/openimis-db_dkr.git
+git clone https://github.com/openimis/openimis-be_py.git
+git clone https://github.com/openimis/openimis-fe_js.git
+git clone https://github.com/openimis/openimis-gateway_dkr.git
+```
+
 From within `openimis-dist_dkr/` directory:
 * create a `.env` file, providing the following variables:
 ```
@@ -44,10 +52,12 @@ From within `openimis-dist_dkr/` directory:
     * `docker exec <CONTAINER ID> /create_database.sh`
 * build and start the gateway (and backend) docker image: `docker-compose up gateway`
   (note: at each start, openIMIS will apply the necessary database migrations to update the database scheme)
-* register a letsencrypt certificate for your openIMIS gateway
+* (if your are not working on localhost) register a letsencrypt certificate for your openIMIS gateway
   * list running containers and spot the gateway: `docker container ls` (the gateway should be named `openimis-gateway`)
   * connect to the gateway: `docker exec -it <CONTAINER ID> /bin/sh` (sh and not bash)
   * issue the command `install-certificate.sh` ... and follow the setup wizzard (provide contact address,
+    * in case you are using your own computer and localhost NEW_OPENIMIS_HOST, running the lets encrypt script will activate the SSL but the SSL generation will fail, to solve this you can use self signed certificates
+     `openssl req -sha256 -newkey rsa:4096 -nodes -keyout privkey.pem -x509 -days 730 -out /etc/letsencrypt/live/localhost/fullchain.pem`
 * register your openIMIS superuser in the gateway:
   * list running containers and spot the gateway: `docker container ls` (the gateway should be named `openimis-gateway`)
   * connect to the gateway: `docker exec -it <CONTAINER ID> /bin/sh` (sh and not bash)
