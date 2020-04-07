@@ -2,8 +2,9 @@
 
  This repository provides a dockerized openIMIS (all components) as a quick setup for development, testing or demoing.
  
- The docker-compose currently only contains the openIMIS database, backend, forntend and gateway components. It will be completed as the other components are added to the platform (batch platform,...)
-| :bomb: Disclaimer : NOT FOR PRODUCTION USE :bomb: |
+ The docker-compose currently only contains the openIMIS database, backend, frontend and gateway components. It will be completed as the other components are added to the platform (batch platform,...)
+ 
+| Disclaimer : NOT FOR PRODUCTION USE  |
 | --- |
 | <ul><li>**The gateway is not secure** (no ssl,...) and must be adapted before being exposed to the internet! For demo, it is also configured with basic auth for external application accesses, while the intend is to have a certificate-based authentication.</li><li>**The database is contenerized**, not even with a mounted volume. Production should run on a full SQL Server installation.</li><li>**The backend secret key** must be generated (specific) to your production platform</li><li>...</li></ul>|
 
@@ -25,10 +26,19 @@ In order to build these images, you need to clone, next to `openimis-dist_dkr/` 
 * openimis-fe_js:master
 * openimis-gateway_dkr:master
 
+```
+git clone https://github.com/openimis/openimis-dist_dkr.git
+git clone https://github.com/openimis/openimis-db_dkr.git
+git clone https://github.com/openimis/openimis-be_py.git
+git clone https://github.com/openimis/openimis-fe_js.git
+git clone https://github.com/openimis/openimis-gateway_dkr.git
+```
+
 From within `openimis-dist_dkr/` directory:
 * create a `.env` file, providing the following variables:
 ```
- DB_SQL_SCRIPT=<URL pointing to the SQL script>
+ #DB_SQL_SCRIPT=<URL pointing to the SQL script>
+ #ACCEPT_EULA=<must put Y but it means you accept Microsoft EULA for the MSSQL database container>
  DB_HOST=<your database host, or db to use the demo docker 'db' service>
  DB_PORT=<your database port on the host, 1433 if you use the demo docker 'db' service>
  DB_NAME=<your database name, imis if you use the demo docker 'db' service>
@@ -50,10 +60,12 @@ From within `openimis-dist_dkr/` directory:
     * `docker exec <CONTAINER ID> /create_database.bat`
 * build and start the gateway (and backend) docker image: `docker-compose up gateway`
   (note: at each start, openIMIS will apply the necessary database migrations to update the database scheme)
-* register a letsencrypt certificate for your openIMIS gateway
+* (if your are not working on localhost) register a letsencrypt certificate for your openIMIS gateway
   * list running containers and spot the gateway: `docker container ls` (the gateway should be named `openimis-gateway`)
   * connect to the gateway: `docker exec -it <CONTAINER ID> /bin/sh` (sh and not bash)
   * issue the command `install-certificate.sh` ... and follow the setup wizzard (provide contact address,
+    * in case you are using your own computer and localhost NEW_OPENIMIS_HOST, running the lets encrypt script will activate the SSL but the SSL generation will fail, to solve this you can use self signed certificates
+     `openssl req -sha256 -newkey rsa:4096 -nodes -keyout privkey.pem -x509 -days 730 -out /etc/letsencrypt/live/localhost/fullchain.pem`
 * register your openIMIS superuser in the gateway:
   * list running containers and spot the gateway: `docker container ls` (the gateway should be named `openimis-gateway`)
   * connect to the gateway: `docker exec -it <CONTAINER ID> /bin/sh` (sh and not bash)
