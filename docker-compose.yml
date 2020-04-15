@@ -94,16 +94,13 @@ services:
     container_name: openimis-frontend
     build: 
       context: ../openimis-fe_js
-#    command: serve -s build
+    command: serve -s build
     environment:
       - REACT_APP_API_URL=/iapi
       - NEW_OPENIMIS_HOST=${NEW_OPENIMIS_HOST}
       - LEGACY_OPENIMIS_HOST=${LEGACY_OPENIMIS_HOST}
     networks:
       - openimis-net
-    ports:
-      - 80:80
-      - 443:443
 #    volumes:
 #      - ../conf:/conf
     ## WARNING:
@@ -111,5 +108,24 @@ services:
     ## may lead to security issue (depending on your network topology)
     # ports:
     #  - 5000:5000
+  gateway:
+    platform: linux
+    container_name: openimis-gateway
+    build:
+      context: ../openimis-gateway_dkr
+    environment:
+      - NEW_OPENIMIS_HOST=${NEW_OPENIMIS_HOST}
+      - LEGACY_OPENIMIS_HOST=${LEGACY_OPENIMIS_HOST}
+    volumes:
+      - ../conf:/conf
+    networks:
+      - openimis-net
+    ports:
+      - 80:80
+      - 443:443
+    depends_on:
+      - backend
+      - ibackend
+      - frontend
 networks:
   openimis-net:

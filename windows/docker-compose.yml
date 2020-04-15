@@ -11,6 +11,7 @@ services:
       args:
         - ACCEPT_EULA=${ACCEPT_EULA}
         - SA_PASSWORD=${DB_PASSWORD}
+        - DB_SQL_SCRIPT=${DB_SQL_SCRIPT}
     environment:
         - ACCEPT_EULA=${ACCEPT_EULA}
         - SA_PASSWORD=${DB_PASSWORD}
@@ -30,7 +31,7 @@ services:
     build: 
       context: ../../openimis-be_py
       dockerfile: Dockerfile_win
-    command: start database 1433
+    command: start
     environment:
       - DB_HOST=${DB_HOST}
       - DB_PORT=${DB_PORT}
@@ -73,7 +74,7 @@ services:
     build: 
       context: ../../openimis-be_py
       dockerfile: Dockerfile_win
-    command: start database 1433
+    command: start
     environment:
       - DB_HOST=${DB_HOST}
       - DB_PORT=${DB_PORT}
@@ -83,17 +84,17 @@ services:
       - REMOTE_USER_AUTHENTICATION=True
       - SITE_ROOT=iapi
     networks:
-        - openimis-net
-  frontend:
+      - openimis-net
+  gateway:
     platform: windows
-    container_name: openimis-frontend
+    container_name: openimis-gateway
     build:
-      context: ../../openimis-fe_js
+      context: ../../openimis-gateway_dkr
       dockerfile: Dockerfile_win
       shm_size: '4gb'
-      args:
-        - NEW_OPENIMIS_HOST=${NEW_OPENIMIS_HOST}
-        - LEGACY_OPENIMIS_HOST=${LEGACY_OPENIMIS_HOST}
+    environment:
+      - NEW_OPENIMIS_HOST=${NEW_OPENIMIS_HOST}
+      - LEGACY_OPENIMIS_HOST=${LEGACY_OPENIMIS_HOST}
    # command:
     networks:
       - openimis-net
@@ -103,14 +104,16 @@ services:
     depends_on:
       - backend
       - ibackend
+      - frontend
 #    volumes:
 #      - C:/Users/delcpa/Development/openimis-fe_js/conf:c:/openresty/conf
-  legacy_frontend:
+  frontend:
     platform: windows
-    container_name: openimis-webapp
+    container_name: openimis-frontend
     build:
-      context: ./VB_app
-      dockerfile: ./Dockerfile
+      context: ../../openimis-fe_js
+      dockerfile: Dockerfile_win
+      shm_size: '4gb'
     environment:
       - DB_PASS=${DB_PASSWORD}
       - DB_HOST=${DB_HOST}
