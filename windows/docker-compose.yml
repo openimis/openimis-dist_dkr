@@ -11,7 +11,7 @@ services:
       args:
         - ACCEPT_EULA=${ACCEPT_EULA}
         - SA_PASSWORD=${DB_PASSWORD}
-        - DB_SQL_SCRIPT=${DB_SQL_SCRIPT}
+        - SQL_SCRIPT_URL=${DB_SQL_SCRIPT}
     environment:
         - ACCEPT_EULA=${ACCEPT_EULA}
         - SA_PASSWORD=${DB_PASSWORD}
@@ -20,6 +20,9 @@ services:
         - DB_USER=${DB_USER}
     networks:
       - openimis-net
+    healthcheck:
+      test: ["CMD","sqlcmd","-U","$DB_USER","-P","$DB_PASSWORD","-d","$DB_NAME","-Q","SELECT 1"]
+      interval: 30s
     ## WARNING:
     ## exposing the database port outside the openimis-net network
     ## may lead to security issue (depending on your network topology)
@@ -42,6 +45,13 @@ services:
       - SITE_ROOT=api
     networks:
       - openimis-net
+    depends_on:
+      database:
+        condition: service_healthy
+    healthcheck:
+      test:  ["CMD","powershell","-Command","/openimis-be/script/healthcheck.ps1"]
+      interval: 1m
+      timeout: 5m
     ## WARNING:
     ## exposing the backend port outside the openimis-net network
     ## may lead to security issue (depending on your network topology)
@@ -85,6 +95,15 @@ services:
       - SITE_ROOT=iapi
     networks:
       - openimis-net
+    ports:
+      - 8000:8000
+    depends_on:
+      database:
+        condition: service_healthy
+    healthcheck:
+      test:  ["CMD","powershell","-Command","/openimis-be/script/healthcheck.ps1"]
+      interval: 1m
+      timeout: 5m
   gateway:
     platform: windows
     container_name: openimis-gateway
@@ -102,9 +121,13 @@ services:
       - 80:80
       - 443:443
     depends_on:
-      - backend
-      - ibackend
-      - frontend
+      backend:
+        condition: service_healthy
+      frontend:
+        condition: service_started
+      ibackend:
+        condition: service_healthy
+      
 #    volumes:
 #      - C:/Users/delcpa/Development/openimis-fe_js/conf:c:/openresty/conf
   frontend:
