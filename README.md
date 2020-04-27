@@ -43,8 +43,8 @@ From within `openimis-dist_dkr/` directory:
 
 * If you use the demo docker 'db' service:
   * choose the SQL script to create/restore the database. Reference models are provided in [database_ms_sqlserver](https://github.com/openimis/database_ms_sqlserver) github. Example:
-    * Empty database: `https://github.com/openimis/database_ms_sqlserver/raw/master/Empty%20databases/openIMIS_ONLINE.sql`
-    * Demo database: `https://github.com/openimis/database_ms_sqlserver/raw/develop/Demo%20database/openIMIS_demo_1.3.0.sql`
+    * Empty database: `https://raw.githubusercontent.com/openimis/database_ms_sqlserver/v1.4.2/Empty%20databases/openIMIS_ONLINE.sql`
+    * Demo database: `https://raw.githubusercontent.com/openimis/database_ms_sqlserver/v1.4.2/Demo%20database/openIMIS_demo_ONLINE.sql`
   * build and start the database docker image:  `docker-compose up db`
   (note: use --force-recreate if you already created the image but want to change the password)
   * create the imis database into the container:
