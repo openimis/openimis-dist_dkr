@@ -17,11 +17,11 @@ services:
     # ports:
     #  - 1433:1433
   backend:
-    platform: linux
     container_name: openimis-backend
-    build: ../openimis-be_py
+    build:
+      context: https://github.com/openimis/openimis-be_py.git#${BE_BRANCH}:/
     command: start
-    environment: &backend-env
+    environment:
       - DB_HOST=${DB_HOST}
       - DB_PORT=${DB_PORT}
       - DB_NAME=${DB_NAME}
@@ -32,42 +32,38 @@ services:
       - CELERY_BROKER_URL=amqp://rabbitmq
     networks:
       - openimis-net
-    ## WARNING:
-    ## exposing the backend port outside the openimis-net network
-    ## may lead to security issue (depending on your network topology)
-    # ports:
-    #  - 8000:8000
-    ## OPTION:
-    ## if you want to ensure the (demo) db is started prior to backend,
-    ## simply add the following dependency
-    # depends_on:
-    #   - db
+    restart: always
   rabbitmq:
     container_name: openimis-rabbitmq
-    # 3-management is the 3.x version including the admin interface. For a barebones image, use 3-alpine
     image: rabbitmq:3-management
     networks:
       - openimis-net
-    ## WARNING:
-    ## exposing the frontend port outside the openimis-net network
-    ## may lead to security issue (depending on your network topology)
     ports:
-      # Management port, default credentials: guest/guest
       - 15672:15672
-      # Other RabbitMQ ports
       - 5672:5672
       - 6379:6379
       - 4369:4369
   worker:
-    build: ../openimis-be_py
-    environment: *backend-env
+    build:
+      context: https://github.com/openimis/openimis-be_py.git#${BE_BRANCH}:/
+    environment:
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - REMOTE_USER_AUTHENTICATION=True
+      - SITE_ROOT=api
+      - CELERY_BROKER_URL=amqp://rabbitmq
     command: worker
     container_name: openimis-worker
     networks:
       - openimis-net
+    restart: always
   ibackend:
     container_name: openimis-ibackend
-    build: ../openimis-be_py
+    build:
+      context: https://github.com/openimis/openimis-be_py.git#${BE_BRANCH}:/
     command: start
     environment:
       - DB_HOST=${DB_HOST}
@@ -79,21 +75,11 @@ services:
       - SITE_ROOT=iapi
     networks:
       - openimis-net
-    ## WARNING:
-    ## exposing the backend port outside the openimis-net network
-    ## may lead to security issue (depending on your network topology)
-    # ports:
-    #  - 8000:8000
-    ## OPTION:
-    ## if you want to ensure the (demo) db is started prior to backend,
-    ## simply add the following dependency
-    # depends_on:
-    #   - db
+    restart: always
   frontend:
-    platform: linux
     container_name: openimis-frontend
-    build: 
-      context: ../openimis-fe_js
+    build:
+      context: https://github.com/openimis/openimis-fe_js.git#${FE_BRANCH}:/
     command: serve -s build
     environment:
       - REACT_APP_API_URL=/iapi
@@ -101,18 +87,11 @@ services:
       - LEGACY_OPENIMIS_HOST=${LEGACY_OPENIMIS_HOST}
     networks:
       - openimis-net
-#    volumes:
-#      - ../conf:/conf
-    ## WARNING:
-    ## exposing the frontend port outside the openimis-net network
-    ## may lead to security issue (depending on your network topology)
-    # ports:
-    #  - 5000:5000
+    restart: always
   gateway:
-    platform: linux
     container_name: openimis-gateway
     build:
-      context: ../openimis-gateway_dkr
+      context: https://github.com/openimis/openimis-gateway_dkr.git#${GW_BRANCH}:/
     environment:
       - NEW_OPENIMIS_HOST=${NEW_OPENIMIS_HOST}
       - LEGACY_OPENIMIS_HOST=${LEGACY_OPENIMIS_HOST}
@@ -127,5 +106,6 @@ services:
       - backend
       - ibackend
       - frontend
+    restart: always
 networks:
   openimis-net:
