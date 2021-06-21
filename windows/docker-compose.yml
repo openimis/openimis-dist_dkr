@@ -20,6 +20,7 @@ services:
         - DB_USER=${DB_USER}
     networks:
       - openimis-net
+    
     healthcheck:
       test: ["CMD","sqlcmd","-U","$DB_USER","-P","$DB_PASSWORD","-d","$DB_NAME","-Q","SELECT 1"]
       interval: 30s
@@ -45,6 +46,9 @@ services:
       - SITE_ROOT=api
     networks:
       - openimis-net
+    volumes:
+      - "${BE_CONF_PATH}:/openimis-be/openimis.json"
+      - "${DEV_CONF_PATH:-/dev/null}:/openimis-dev"
     depends_on:
       database:
         condition: service_healthy
@@ -106,6 +110,9 @@ services:
       test:  ["CMD","powershell","-Command","c:/openimis-be/script/healthcheck.ps1"]
       interval: 1m
       timeout: 5m
+    volumes:
+      - "${BE_CONF_PATH}:/openimis-be/openimis.json"
+      - "${DEV_CONF_PATH:-/dev/null}:/openimis-dev"
   gateway:
     platform: windows
     container_name: openimis-gateway
@@ -144,9 +151,11 @@ services:
       - DB_HOST=${DB_HOST}
       - DB_NAME=${DB_NAME}
       - DB_USER=${DB_USER}
-    # volumes:
+    volumes:
     #   - vol_photo_updated:/inetpub/wwwroot/openIMIS/Images/Updated:rw
     #   - vol_photo_submitted:/inetpub/wwwroot/openIMIS/Images/Submitted:rw
+      - "${BE_CONF_PATH}:/openimis-fe/openimis.json"
+      - "${DEV_CONF_PATH:-/dev/null}:/openimis-dev"
     networks:
       - openimis-net
 # volumes:

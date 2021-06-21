@@ -32,6 +32,9 @@ services:
       - CELERY_BROKER_URL=amqp://rabbitmq
     networks:
       - openimis-net
+    volumes:
+      - "${BE_CONF_PATH}:/openimis-be/openimis.json"
+      - "${DEV_CONF_PATH:-/dev/null}:/openimis-dev"
     ## WARNING:
     ## exposing the backend port outside the openimis-net network
     ## may lead to security issue (depending on your network topology)
@@ -79,6 +82,9 @@ services:
       - SITE_ROOT=iapi
     networks:
       - openimis-net
+    volumes:
+      - "${BE_CONF_PATH}:/openimis-be/openimis.json"
+      - "${DEV_CONF_PATH:-/dev/null}:/openimis-dev"    
     ## WARNING:
     ## exposing the backend port outside the openimis-net network
     ## may lead to security issue (depending on your network topology)
@@ -101,8 +107,8 @@ services:
       - LEGACY_OPENIMIS_HOST=${LEGACY_OPENIMIS_HOST}
     networks:
       - openimis-net
-#    volumes:
-#      - ../conf:/conf
+    volumes:
+      - "${FE_CONF_PATH}:/openimis-fe/openimis.json"
     ## WARNING:
     ## exposing the frontend port outside the openimis-net network
     ## may lead to security issue (depending on your network topology)

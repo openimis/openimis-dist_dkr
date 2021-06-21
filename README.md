@@ -47,6 +47,10 @@ From within `openimis-dist_dkr/windows` directory:
  DB_PASSWORD=<your database password, generate one if you use the demo docker 'db' service>
  NEW_OPENIMIS_HOST=<(sub)domain under which the (new) openIMIS will be served (e.g. openimis.domaine) >
  LEGACY_OPENIMIS_HOST=frontend
+ BE_CONF_PATH=<the path to your config file, has to be local>
+ FE_CONF_PATH=<the path to your config file, has to be local>
+ DEV_CONF_PATH=<the path to your developer config, optional> 
+
 ```
 
 * If you use the demo docker 'db' service:
