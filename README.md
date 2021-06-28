@@ -47,6 +47,14 @@ From within `openimis-dist_dkr/windows` directory:
  DB_PASSWORD=<your database password, generate one if you use the demo docker 'db' service>
  NEW_OPENIMIS_HOST=<(sub)domain under which the (new) openIMIS will be served (e.g. openimis.domaine) >
  LEGACY_OPENIMIS_HOST=frontend
+ BE_CONF_PATH=<the path to your config file, has to be local>
+ FE_CONF_PATH=<the path to your config file, has to be local>
+ DEV_PATH=<the path to your developer config, optional>
+ BE_BRANCH=<branch of the backend repository to be used>
+ FE_BRANCH=<branch of the frontend repository to be used>
+ DB_BRANCH=<branch of the database repository to be used>
+ GW_BRANCH=<branch of the gateway repository to be used>
+
 ```
 
 * If you use the demo docker 'db' service:
@@ -61,6 +69,7 @@ From within `openimis-dist_dkr/windows` directory:
     * `docker exec <CONTAINER ID> /create_user_db.bat`
 * build and start rest of the container (and backend) docker image: `docker-compose up`
   (note: at each start, openIMIS will apply the necessary database migrations to update the database scheme)
+  With this command, docker-compose.override.yml will be used. To use the main docker-compose file, it should be specified as `docker-compose -f docker-compose.yml up`
 * register your openIMIS superuser in the gateway:
   * list running containers and spot the gateway: `docker container ls` (the gateway should be named `openimis-gateway`)
   * connect to the gateway: `docker exec -it <CONTAINER ID> /bin/sh` (sh and not bash)
