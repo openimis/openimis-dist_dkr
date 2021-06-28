@@ -49,7 +49,11 @@ From within `openimis-dist_dkr/windows` directory:
  LEGACY_OPENIMIS_HOST=frontend
  BE_CONF_PATH=<the path to your config file, has to be local>
  FE_CONF_PATH=<the path to your config file, has to be local>
- DEV_PATH=<the path to your developer config, optional> 
+ DEV_PATH=<the path to your developer config, optional>
+ BE_BRANCH=<branch of the backend repository to be used>
+ FE_BRANCH=<branch of the frontend repository to be used>
+ DB_BRANCH=<branch of the database repository to be used>
+ GW_BRANCH=<branch of the gateway repository to be used>
 
 ```
 

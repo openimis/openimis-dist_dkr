@@ -6,7 +6,7 @@ services:
     platform: windows
     container_name: openimis-db
     build:
-      context: ../../openimis-db_dkr
+      context: https://github.com/openimis/openimis-db_dkr.git#${DB_BRANCH}:/
       dockerfile: Dockerfile_win
       args:
         - ACCEPT_EULA=${ACCEPT_EULA}
@@ -33,7 +33,7 @@ services:
     platform: windows
     container_name: openimis-backend
     build: 
-      context: ../../openimis-be_py
+      context: https://github.com/openimis/openimis-be_py.git#${BE_BRANCH}:/
       dockerfile: Dockerfile_win
     command: start
     environment:
@@ -69,7 +69,7 @@ services:
     platform: windows
     container_name: openimis-frontend
     build:
-      context: ../../openimis-fe_js
+      context: https://github.com/openimis/openimis-fe_js.git#${FE_BRANCH}:/
       dockerfile: Dockerfile_win
     command: C:\\Users\\ContainerAdministrator\\AppData\\Local\\Yarn\\bin\\serve -s build
     environment:
@@ -85,7 +85,7 @@ services:
     platform: windows
     container_name: openimis-ibackend
     build: 
-      context: ../../openimis-be_py
+      context: https://github.com/openimis/openimis-be_py.git#${BE_BRANCH}:/
       dockerfile: Dockerfile_win
     command: start
     environment:
@@ -111,7 +111,7 @@ services:
     platform: windows
     container_name: openimis-gateway
     build:
-      context: ../../openimis-gateway_dkr
+      context: https://github.com/openimis/openimis-gateway_dkr.git#${GW_BRANCH}:/
       dockerfile: Dockerfile_win
       shm_size: '4gb'
     environment:
@@ -137,7 +137,7 @@ services:
     platform: windows
     container_name: openimis-frontend
     build:
-      context: ../../openimis-fe_js
+      context: https://github.com/openimis/openimis-fe_js.git#${FE_BRANCH}:/
       dockerfile: Dockerfile_win
       shm_size: '4gb'
     environment:

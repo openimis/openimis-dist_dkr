@@ -4,7 +4,7 @@ services:
   # db:
   #   container_name: openimis-db
   #   build:
-  #     context: ../openimis-db_dkr
+  #     context: https://github.com/openimis/openimis-db_dkr.git#${DB_BRANCH}:/
   #     args:
   #       - ACCEPT_EULA=${ACCEPT_EULA}
   #       - SA_PASSWORD=${DB_PASSWORD}
@@ -19,7 +19,8 @@ services:
   backend:
     platform: linux
     container_name: openimis-backend
-    build: ../openimis-be_py
+    build:
+      context: https://github.com/openimis/openimis-be_py.git#${BE_BRANCH}:/
     command: start
     environment: &backend-env
       - DB_HOST=${DB_HOST}
@@ -59,7 +60,8 @@ services:
       - 6379:6379
       - 4369:4369
   worker:
-    build: ../openimis-be_py
+    build:
+      context:  https://github.com/openimis/openimis-be_py.git#${BE_BRANCH}:/
     environment: *backend-env
     command: worker
     container_name: openimis-worker
@@ -67,7 +69,8 @@ services:
       - openimis-net
   ibackend:
     container_name: openimis-ibackend
-    build: ../openimis-be_py
+    build:
+      context:  https://github.com/openimis/openimis-be_py.git#${BE_BRANCH}:/
     command: start
     environment:
       - DB_HOST=${DB_HOST}
@@ -93,7 +96,7 @@ services:
     platform: linux
     container_name: openimis-frontend
     build: 
-      context: ../openimis-fe_js
+      context: https://github.com/openimis/openimis-fe_js.git#${FE_BRANCH}:/
     command: serve -s build
     environment:
       - REACT_APP_API_URL=/iapi
@@ -110,7 +113,7 @@ services:
     platform: linux
     container_name: openimis-gateway
     build:
-      context: ../openimis-gateway_dkr
+      context: https://github.com/openimis/openimis-gateway_dkr.git#${GW_BRANCH}:/
     environment:
       - NEW_OPENIMIS_HOST=${NEW_OPENIMIS_HOST}
       - LEGACY_OPENIMIS_HOST=${LEGACY_OPENIMIS_HOST}
