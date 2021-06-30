@@ -6,7 +6,7 @@ services:
     platform: windows
     container_name: openimis-db
     build:
-      context: https://github.com/openimis/openimis-db_dkr.git#${DB_BRANCH}:/
+      context: https://github.com/openimis/openimis-db_dkr.git#${DB_BRANCH:-main}:/
       dockerfile: Dockerfile_win
       args:
         - ACCEPT_EULA=${ACCEPT_EULA}
@@ -33,7 +33,7 @@ services:
     platform: windows
     container_name: openimis-backend
     build: 
-      context: https://github.com/openimis/openimis-be_py.git#${BE_BRANCH}:/
+      context: https://github.com/openimis/openimis-be_py.git#${BE_BRANCH:-main}:/
       dockerfile: Dockerfile_win
     command: start
     environment:
@@ -72,7 +72,7 @@ services:
     platform: windows
     container_name: openimis-frontend
     build:
-      context: https://github.com/openimis/openimis-fe_js.git#${FE_BRANCH}:/
+      context: https://github.com/openimis/openimis-fe_js.git#${FE_BRANCH:-main}:/
       dockerfile: Dockerfile_win
     command: C:\\Users\\ContainerAdministrator\\AppData\\Local\\Yarn\\bin\\serve -s build
     environment:
@@ -91,7 +91,7 @@ services:
     platform: windows
     container_name: openimis-ibackend
     build: 
-      context: https://github.com/openimis/openimis-be_py.git#${BE_BRANCH}:/
+      context: https://github.com/openimis/openimis-be_py.git#${BE_BRANCH:-main}:/
       dockerfile: Dockerfile_win
     command: start
     environment:
@@ -120,7 +120,7 @@ services:
     platform: windows
     container_name: openimis-gateway
     build:
-      context: https://github.com/openimis/openimis-gateway_dkr.git#${GW_BRANCH}:/
+      context: https://github.com/openimis/openimis-gateway_dkr.git#${GW_BRANCH:-main}:/
       dockerfile: Dockerfile_win
       shm_size: '4gb'
     environment:
@@ -146,7 +146,7 @@ services:
     platform: windows
     container_name: openimis-frontend
     build:
-      context: https://github.com/openimis/openimis-fe_js.git#${FE_BRANCH}:/
+      context: https://github.com/openimis/openimis-fe_js.git#${FE_BRANCH:-main}:/
       dockerfile: Dockerfile_win
       shm_size: '4gb'
     environment:
