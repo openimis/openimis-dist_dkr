@@ -19,21 +19,9 @@ In case of troubles, please consult/contact our service desk via our [ticketing 
 In case of troubles, please consult/contact our service desk via our [ticketing site](https://openimis.atlassian.net/servicedesk/customer).
 
 # First startup
-First startup is special since it will create the necessary docker images and containers to run openIMIS.
-To build necessary, docker images, docker-compose  relies on ***local*** docker files.
-In order to build these images, you need to clone, next to `openimis-dist_dkr/` the following github repository:branch: 
-* openimis-db_dkr
-* openimis-be_py
-* openimis-fe_js
-* openimis-gateway_dkr
+First startup is special since it will create the necessary docker images and containers to run openIMIS. \
+This will be done, using the GitHub URL of the different openIMIS components in the main docker-compose file. The branch from where to build each of those components can be specified with the appropriate variables BE/FE/DB/GW BRANCH (as specified in the following list). 
 
-```
-git clone https://github.com/openimis/openimis-dist_dkr.git
-git clone https://github.com/openimis/openimis-db_dkr.git
-git clone https://github.com/openimis/openimis-be_py.git
-git clone https://github.com/openimis/openimis-fe_js.git
-git clone https://github.com/openimis/openimis-gateway_dkr.git
-```
 
 From within `openimis-dist_dkr/windows` directory:
 * create a `.env` file, providing the following variables:
@@ -54,8 +42,8 @@ From within `openimis-dist_dkr/windows` directory:
  FE_BRANCH=<branch of the frontend repository to be used>
  DB_BRANCH=<branch of the database repository to be used>
  GW_BRANCH=<branch of the gateway repository to be used>
-
 ```
+Note: BE and FE openimis.json file has to be provided locally. The user can with it use their own configuration. Additionally if the user wants to provide development settings, there is a variable for the path where this configuration file would be located with the DEV_PATH. 
 
 * If you use the demo docker 'db' service:
   * choose the SQL script to create/restore the database. Reference models are provided in [database_ms_sqlserver](https://github.com/openimis/database_ms_sqlserver) github. Example:
@@ -83,3 +71,7 @@ From within `openimis-dist_dkr/windows` directory:
 From within `openimis-dist_dkr/windows` directory:
 To stop all docker containers: `docker-compose stop`
 To (re-)start all docker containers: `docker-compose start` 
+
+# Integrating services
+
+If you require a larger infrastructure to use e.g. OpenHIM mediators to talk to a FHIR server, please refer to the repository [openIMIS instant OHIE](https://github.com/openimis/openimis-dist_instant_openhie/tree/develop)
