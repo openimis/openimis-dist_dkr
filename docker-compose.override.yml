@@ -70,6 +70,9 @@ services:
     container_name: openimis-worker
     networks:
       - openimis-net
+    volumes:
+      - "${BE_CONF_PATH}:/openimis-be/openimis.json"
+      - "${DEV_PATH:-/dev/null}:/openimis-dev"    
   ibackend:
     container_name: openimis-ibackend
     build: 
