@@ -35,6 +35,9 @@ services:
     build: 
       context: https://github.com/openimis/openimis-be_py.git#${BE_BRANCH:-main}:/
       dockerfile: Dockerfile_win
+      args: 
+        - OPENIMIS_CONF_JSON=${OPENIMIS_BE_CONF_JSON}
+
     command: start
     environment:
       - DB_HOST=${DB_HOST}
@@ -47,7 +50,6 @@ services:
     networks:
       - openimis-net
     volumes:
-      - "${BE_CONF_PATH}:/openimis-be/openimis.json"
       - "${DEV_PATH:-nul}:/openimis-dev"
     depends_on:
       database:
@@ -68,20 +70,21 @@ services:
     ## simply add the following dependency
     # depends_on:
     #   - db
-  frontend:
-    platform: windows
-    container_name: openimis-frontend
-    build:
-      context: https://github.com/openimis/openimis-fe_js.git#${FE_BRANCH:-main}:/
-      dockerfile: Dockerfile_win
-    command: C:\\Users\\ContainerAdministrator\\AppData\\Local\\Yarn\\bin\\serve -s build
-    environment:
-      - REACT_APP_API_URL=/iapi
-    networks:
-      - openimis-net
-    volumes:
-      - "${FE_CONF_PATH}:/openimis-be/openimis.json"
-      - "${DEV_PATH:-nul}:/openimis-dev"  
+  #frontend:
+  #  platform: windows
+  #  container_name: openimis-frontend
+  #  build:
+  #    context: https://github.com/openimis/openimis-fe_js.git#${FE_BRANCH:-main}:/
+  #    dockerfile: Dockerfile_win
+  #    args: 
+  #      - OPENIMIS_CONF_JSON=${OPENIMIS_FE_CONF_JSON}
+  #  command: C:\\Users\\ContainerAdministrator\\AppData\\Local\\Yarn\\bin\\serve -s build
+  #  environment:
+  #    - REACT_APP_API_URL=/iapi
+  #  networks:
+  #    - openimis-net
+  #  volumes:
+  #    - "${DEV_PATH:-nul}:/openimis-dev"  
     ## WARNING:
     ## exposing the frontend port outside the openimis-net network
     ## may lead to security issue (depending on your network topology)
@@ -93,6 +96,8 @@ services:
     build: 
       context: https://github.com/openimis/openimis-be_py.git#${BE_BRANCH:-main}:/
       dockerfile: Dockerfile_win
+      args: 
+        - OPENIMIS_CONF_JSON=${OPENIMIS_BE_CONF_JSON}
     command: start
     environment:
       - DB_HOST=${DB_HOST}
@@ -114,7 +119,6 @@ services:
       interval: 1m
       timeout: 5m
     volumes:
-      - "${BE_CONF_PATH}:/openimis-be/openimis.json"
       - "${DEV_PATH:-nul}:/openimis-dev"
   gateway:
     platform: windows
@@ -149,6 +153,8 @@ services:
       context: https://github.com/openimis/openimis-fe_js.git#${FE_BRANCH:-main}:/
       dockerfile: Dockerfile_win
       shm_size: '4gb'
+      args: 
+        - OPENIMIS_CONF_JSON=${OPENIMIS_FE_CONF_JSON}
     environment:
       - DB_PASS=${DB_PASSWORD}
       - DB_HOST=${DB_HOST}
@@ -157,7 +163,6 @@ services:
     volumes:
     #   - vol_photo_updated:/inetpub/wwwroot/openIMIS/Images/Updated:rw
     #   - vol_photo_submitted:/inetpub/wwwroot/openIMIS/Images/Submitted:rw
-      - "${BE_CONF_PATH}:/openimis-fe/openimis.json"
       - "${DEV_PATH:-nul}:/openimis-dev"
     networks:
       - openimis-net

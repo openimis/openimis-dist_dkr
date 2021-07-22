@@ -21,6 +21,8 @@ services:
     container_name: openimis-backend
     build: 
       context: https://github.com/openimis/openimis-be_py.git#${BE_BRANCH:-main}:/
+      args:
+        OPENIMIS_CONF_JSON: ${OPENIMIS_BE_CONF_JSON}
     command: start
     environment: &backend-env
       - DB_HOST=${DB_HOST}
@@ -34,7 +36,6 @@ services:
     networks:
       - openimis-net
     volumes:
-      - "${BE_CONF_PATH}:/openimis-be/openimis.json"
       - "${DEV_PATH:-/dev/null}:/openimis-dev"
     ## WARNING:
     ## exposing the backend port outside the openimis-net network
@@ -65,18 +66,21 @@ services:
   worker:
     build:
       context: https://github.com/openimis/openimis-be_py.git#${BE_BRANCH:-main}:/
+      args:
+        OPENIMIS_CONF_JSON: ${OPENIMIS_BE_CONF_JSON}
     environment: *backend-env
     command: worker
     container_name: openimis-worker
     networks:
       - openimis-net
     volumes:
-      - "${BE_CONF_PATH}:/openimis-be/openimis.json"
       - "${DEV_PATH:-/dev/null}:/openimis-dev"    
   ibackend:
     container_name: openimis-ibackend
     build: 
       context: https://github.com/openimis/openimis-be_py.git#${BE_BRANCH:-main}:/
+      args:
+        OPENIMIS_CONF_JSON: ${OPENIMIS_BE_CONF_JSON}
     command: start
     environment:
       - DB_HOST=${DB_HOST}
@@ -89,7 +93,6 @@ services:
     networks:
       - openimis-net
     volumes:
-      - "${BE_CONF_PATH}:/openimis-be/openimis.json"
       - "${DEV_PATH:-/dev/null}:/openimis-dev"    
     ## WARNING:
     ## exposing the backend port outside the openimis-net network
@@ -106,6 +109,8 @@ services:
     container_name: openimis-frontend
     build: 
       context: https://github.com/openimis/openimis-fe_js.git#${FE_BRANCH:-main}:/
+      args:
+        OPENIMIS_CONF_JSON: ${OPENIMIS_FE_CONF_JSON}
     command: serve -s build
     environment:
       - REACT_APP_API_URL=/iapi
@@ -114,7 +119,6 @@ services:
     networks:
       - openimis-net
     volumes:
-      - "${FE_CONF_PATH}:/openimis-fe/openimis.json"
       - "${DEV_PATH:-/dev/null}:/openimis-dev"
       
     ## WARNING:
