@@ -11,11 +11,11 @@ services:
   #       - SQL_SCRIPT_URL=${DB_SQL_SCRIPT}
   #   networks:
   #     - openimis-net
-    ## WARNING:
-    ## exposing the database port outside the openimis-net network
-    ## may lead to security issue (depending on your network topology)
-    # ports:
-    #  - 1433:1433
+  ## WARNING:
+  ## exposing the database port outside the openimis-net network
+  ## may lead to security issue (depending on your network topology)
+  # ports:
+  #  - 1433:1433
   backend:
     platform: linux
     container_name: openimis-backend
@@ -61,7 +61,7 @@ services:
       - 4369:4369
   worker:
     build:
-      context:  https://github.com/openimis/openimis-be_py.git#${BE_BRANCH}:/
+      context: https://github.com/openimis/openimis-be_py.git#${BE_BRANCH}:/
     environment: *backend-env
     command: worker
     container_name: openimis-worker
@@ -70,7 +70,7 @@ services:
   ibackend:
     container_name: openimis-ibackend
     build:
-      context:  https://github.com/openimis/openimis-be_py.git#${BE_BRANCH}:/
+      context: https://github.com/openimis/openimis-be_py.git#${BE_BRANCH}:/
     command: start
     environment:
       - DB_HOST=${DB_HOST}
@@ -95,10 +95,11 @@ services:
   frontend:
     platform: linux
     container_name: openimis-frontend
-    build: 
+    build:
       context: https://github.com/openimis/openimis-fe_js.git#${FE_BRANCH}:/
     command: serve -s build
     environment:
+      - PUBLIC_URL=/front
       - REACT_APP_API_URL=/iapi
       - NEW_OPENIMIS_HOST=${NEW_OPENIMIS_HOST}
       - LEGACY_OPENIMIS_HOST=${LEGACY_OPENIMIS_HOST}

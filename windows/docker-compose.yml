@@ -74,6 +74,7 @@ services:
     command: C:\\Users\\ContainerAdministrator\\AppData\\Local\\Yarn\\bin\\serve -s build
     environment:
       - REACT_APP_API_URL=/iapi
+      - PUBLIC_URL=/front
     networks:
       - openimis-net  
     ## WARNING:
