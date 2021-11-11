@@ -19,7 +19,7 @@ services:
   backend:
     platform: linux
     container_name: openimis-backend
-    build:
+    build: 
       context: https://github.com/openimis/openimis-be_py.git#${BE_BRANCH}:/
     command: start
     environment: &backend-env
@@ -33,6 +33,9 @@ services:
       - CELERY_BROKER_URL=amqp://rabbitmq
     networks:
       - openimis-net
+    volumes:
+      - "${BE_CONF_PATH}:/openimis-be/openimis.json"
+      - "${DEV_PATH:-/dev/null}:/openimis-dev"
     ## WARNING:
     ## exposing the backend port outside the openimis-net network
     ## may lead to security issue (depending on your network topology)
@@ -61,7 +64,7 @@ services:
       - 4369:4369
   worker:
     build:
-      context:  https://github.com/openimis/openimis-be_py.git#${BE_BRANCH}:/
+      context: https://github.com/openimis/openimis-be_py.git#${BE_BRANCH}:/
     environment: *backend-env
     command: worker
     container_name: openimis-worker
@@ -69,8 +72,8 @@ services:
       - openimis-net
   ibackend:
     container_name: openimis-ibackend
-    build:
-      context:  https://github.com/openimis/openimis-be_py.git#${BE_BRANCH}:/
+    build: 
+      context: https://github.com/openimis/openimis-be_py.git#${BE_BRANCH}:/
     command: start
     environment:
       - DB_HOST=${DB_HOST}
@@ -82,6 +85,9 @@ services:
       - SITE_ROOT=iapi
     networks:
       - openimis-net
+    volumes:
+      - "${BE_CONF_PATH}:/openimis-be/openimis.json"
+      - "${DEV_PATH:-/dev/null}:/openimis-dev"    
     ## WARNING:
     ## exposing the backend port outside the openimis-net network
     ## may lead to security issue (depending on your network topology)
@@ -104,6 +110,10 @@ services:
       - LEGACY_OPENIMIS_HOST=${LEGACY_OPENIMIS_HOST}
     networks:
       - openimis-net
+    volumes:
+      - "${FE_CONF_PATH}:/openimis-fe/openimis.json"
+      - "${DEV_PATH:-/dev/null}:/openimis-dev"
+      
     ## WARNING:
     ## exposing the frontend port outside the openimis-net network
     ## may lead to security issue (depending on your network topology)
