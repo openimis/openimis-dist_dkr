@@ -16,8 +16,8 @@ services:
       - ACCEPT_EULA=${ACCEPT_EULA}
     healthcheck:
       test: "bash /app/healthcheck.sh"
-      interval: 10s
-      timeout: 5s
+      interval: 40s
+      timeout: 10s
       retries: 5
     networks:
       openimis-net:
