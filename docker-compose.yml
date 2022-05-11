@@ -1,25 +1,39 @@
 version: "2.4"
 
 services:
-  # db:
-  #   container_name: openimis-db
-  #   build:
-  #     context: ../openimis-db_dkr
-  #     args:
-  #       - ACCEPT_EULA=${ACCEPT_EULA}
-  #       - SA_PASSWORD=${DB_PASSWORD}
-  #       - SQL_SCRIPT_URL=${DB_SQL_SCRIPT}
-  #   networks:
-  #     - openimis-net
-    ## WARNING:
+  db:
+    container_name: ${PROJECT_NAME:-openimis}-db
+    build:
+      context: ../openimis-be_py/openimis_env/openimis-db_dkr
+      args:
+        - ACCEPT_EULA=${ACCEPT_EULA}
+        - SA_PASSWORD=${DB_PASSWORD}
+    environment:
+      - DB_USER_PASSWORD=${DB_PASSWORD}
+      - SA_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - ACCEPT_EULA=${ACCEPT_EULA}
+    healthcheck:
+      test: "bash /app/healthcheck.sh"
+      interval: 40s
+      timeout: 10s
+      retries: 5
+    networks:
+      openimis-net:
+        ipv4_address: 172.20.${IP_SUB:-20}.99
+  ## WARNING:
     ## exposing the database port outside the openimis-net network
     ## may lead to security issue (depending on your network topology)
     # ports:
     #  - 1433:1433
   backend:
-    platform: linux
-    container_name: openimis-backend
-    build: ../openimis-be_py
+    container_name: ${PROJECT_NAME:-openimis}-backend
+    build:
+      context: https://github.com/openimis/openimis-be_py.git#${BE_BRANCH:-develop}
+      args:
+        OPENIMIS_CONF_JSON: ${OPENIMIS_BE_CONF_JSON}
+    image: openimis/backend:${PROJECT_NAME:-local}
     command: start
     environment: &backend-env
       - DB_HOST=${DB_HOST}
@@ -27,105 +41,87 @@ services:
       - DB_NAME=${DB_NAME}
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
-      - REMOTE_USER_AUTHENTICATION=True
       - SITE_ROOT=api
+      - SITE_URL=${NEW_OPENIMIS_HOST}
       - CELERY_BROKER_URL=amqp://rabbitmq
+    depends_on:  
+      db:
+        condition: service_healthy
     networks:
-      - openimis-net
-    ## WARNING:
-    ## exposing the backend port outside the openimis-net network
-    ## may lead to security issue (depending on your network topology)
-    # ports:
-    #  - 8000:8000
-    ## OPTION:
-    ## if you want to ensure the (demo) db is started prior to backend,
-    ## simply add the following dependency
-    # depends_on:
-    #   - db
-  rabbitmq:
-    container_name: openimis-rabbitmq
-    # 3-management is the 3.x version including the admin interface. For a barebones image, use 3-alpine
-    image: rabbitmq:3-management
-    networks:
-      - openimis-net
-    ## WARNING:
-    ## exposing the frontend port outside the openimis-net network
-    ## may lead to security issue (depending on your network topology)
-    ports:
-      # Management port, default credentials: guest/guest
-      - 15672:15672
-      # Other RabbitMQ ports
-      - 5672:5672
-      - 6379:6379
-      - 4369:4369
-  worker:
-    build: ../openimis-be_py
-    environment: *backend-env
-    command: worker
-    container_name: openimis-worker
-    networks:
-      - openimis-net
-  ibackend:
-    container_name: openimis-ibackend
-    build: ../openimis-be_py
-    command: start
-    environment:
-      - DB_HOST=${DB_HOST}
-      - DB_PORT=${DB_PORT}
-      - DB_NAME=${DB_NAME}
-      - DB_USER=${DB_USER}
-      - DB_PASSWORD=${DB_PASSWORD}
-      - REMOTE_USER_AUTHENTICATION=True
-      - SITE_ROOT=iapi
-    networks:
-      - openimis-net
-    ## WARNING:
-    ## exposing the backend port outside the openimis-net network
-    ## may lead to security issue (depending on your network topology)
-    # ports:
-    #  - 8000:8000
-    ## OPTION:
-    ## if you want to ensure the (demo) db is started prior to backend,
-    ## simply add the following dependency
-    # depends_on:
-    #   - db
+      openimis-net:
+         ipv4_address: 172.20.${IP_SUB:-20}.12
+
   frontend:
-    platform: linux
-    container_name: openimis-frontend
-    build: 
-      context: ../openimis-fe_js
+    container_name: ${PROJECT_NAME:-openimis}-frontend
+    build:
+      context: https://github.com/openimis/openimis-fe_js.git#${FE_BRANCH:-develop}
+      args:
+         OPENIMIS_CONF_JSON: ${OPENIMIS_FE_CONF_JSON}
     command: serve -s build
     environment:
-      - REACT_APP_API_URL=/iapi
+      - PORT=5000
+      - REACT_APP_API_URL=/api
+      - PUBLIC_URL=/front
       - NEW_OPENIMIS_HOST=${NEW_OPENIMIS_HOST}
-      - LEGACY_OPENIMIS_HOST=${LEGACY_OPENIMIS_HOST}
+      - OPENIMIS_CONF_JSON=${OPENIMIS_FE_CONF_JSON}
     networks:
-      - openimis-net
-#    volumes:
-#      - ../conf:/conf
-    ## WARNING:
-    ## exposing the frontend port outside the openimis-net network
-    ## may lead to security issue (depending on your network topology)
-    # ports:
-    #  - 5000:5000
+      openimis-net:
+        ipv4_address: 172.20.${IP_SUB:-20}.13
   gateway:
-    platform: linux
-    container_name: openimis-gateway
+    container_name: ${PROJECT_NAME:-openimis}-gateway
     build:
-      context: ../openimis-gateway_dkr
+      context: https://github.com/openimis/openimis-gateway_dkr.git#${GW_BRANCH:-develop}
     environment:
       - NEW_OPENIMIS_HOST=${NEW_OPENIMIS_HOST}
-      - LEGACY_OPENIMIS_HOST=${LEGACY_OPENIMIS_HOST}
-    volumes:
-      - ../conf:/conf
+    #volumes:
+    #  - ./conf/gateway:/conf
     networks:
-      - openimis-net
+      openimis-net:
+        ipv4_address: 172.20.${IP_SUB:-20}.14
     ports:
-      - 80:80
-      - 443:443
+      - ${HTTP_PORT:-80}:80
+      - ${HTTPS_PORT:-443}:443
     depends_on:
       - backend
-      - ibackend
       - frontend
+  worker:
+    container_name: ${PROJECT_NAME:-openimis}-worker
+    image: openimis/backend:${PROJECT_NAME:-local}
+    command: worker
+    restart: always
+    depends_on: 
+      - backend
+    environment: *backend-env
+    networks:
+      openimis-net:
+         ipv4_address: 172.20.${IP_SUB:-20}.15
+  rabbitmq:
+    container_name: ${PROJECT_NAME:-openimis}-rabbitmq
+    image: rabbitmq:3-management
+    restart: always
+    networks:
+      openimis-net:
+         ipv4_address: 172.20.${IP_SUB:-20}.16
+  restapi:
+    container_name: ${PROJECT_NAME}-restapi
+    build:
+      context:  https://github.com/openimis/rest_api_c-sharp.git#${RESTAPI_BRANCH:-develop}
+      args:
+        BUILD-FLAVOUR: ${RESTAPI_BUILD_FLAVOUR:-Release}
+    volumes:
+      - ./conf/restapi:/app/config
+      - ./logs:/app/log
+    restart: always
+    depends_on:  
+      db:
+        condition: service_healthy
+    networks:
+      openimis-net:
+         ipv4_address: 172.20.${IP_SUB:-20}.17
 networks:
   openimis-net:
+    name: ${PROJECT_NAME}-openimis-net
+    ipam:
+      config:
+        - subnet: 172.20.${IP_SUB:-20}.0/24
+          ip_range: 172.20.${IP_SUB:-20}.0/24
