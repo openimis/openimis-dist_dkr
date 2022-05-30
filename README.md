@@ -24,18 +24,12 @@ In case of troubles, please consult/contact our service desk via our [ticketing 
 ## configure the gateway (optionnal)
 if you want to change the gateway config, you can uncomment the volume in the docker-compose:gateway and then edit ./conf/gateway/openimis.json
 
-
-
-
-
 ## init database
 * If you use the demo docker 'db' service:
   * choose the SQL script to create/restore the database. Reference models are provided in [database_ms_sqlserver](https://github.com/openimis/database_ms_sqlserver) github
-  * create the imis database into the container:
-    * `docker-compose up -d db` 
-    * `docker-compose exec db /create_database.sh`
 * build and start rest of the container (and backend) docker image: `docker-compose up -d`
-  (note: at each start, openIMIS will apply the necessary database migrations to update the database scheme)
+  * note: if the db is a container, it can take 90 to start the first time
+  * note: at each start, openIMIS will apply the necessary database migrations to update the database scheme
 * register your openIMIS superuser in the gateway:
   * list running containers and spot the gateway: `docker container ls` (the gateway should be named `openimis-gateway`)
   * connect to the gateway: `docker exec -it <CONTAINER ID> /bin/sh` (sh and not bash)

@@ -84,6 +84,7 @@ services:
     depends_on:
       - backend
       - frontend
+      - restapi
   worker:
     container_name: ${PROJECT_NAME:-openimis}-worker
     image: openimis/backend:${PROJECT_NAME:-local}
