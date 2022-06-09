@@ -14,6 +14,9 @@ services:
       - DB_NAME=${DB_NAME}
       - DB_USER=${DB_USER}
       - ACCEPT_EULA=${ACCEPT_EULA}
+    volumes:
+      - logs:/var/opt/mssql/log 
+      - database:/var/opt/mssql/data
     healthcheck:
       test: "bash /app/healthcheck.sh"
       interval: 40s
@@ -34,6 +37,8 @@ services:
       args:
         OPENIMIS_CONF_JSON: ${OPENIMIS_BE_CONF_JSON}
     image: openimis/backend:${PROJECT_NAME:-local}
+    volumes:
+      - photos:/openimis-be/openIMIS/images/insurees
     command: start
     environment: &backend-env
       - DB_HOST=${DB_HOST}
@@ -90,6 +95,8 @@ services:
     image: openimis/backend:${PROJECT_NAME:-local}
     command: worker
     restart: always
+    volumes:
+      - photos:/openimis-be/openIMIS/images/insurees
     depends_on: 
       - backend
     environment: *backend-env
@@ -111,7 +118,8 @@ services:
         BUILD-FLAVOUR: ${RESTAPI_BUILD_FLAVOUR:-Release}
     volumes:
       - ./conf/restapi:/app/config
-      - ./logs:/app/log
+      - logs:/app/log
+      - photos:/app/photos
     restart: always
     depends_on:  
       db:
@@ -126,3 +134,7 @@ networks:
       config:
         - subnet: 172.20.${IP_SUB:-20}.0/24
           ip_range: 172.20.${IP_SUB:-20}.0/24
+volumes:
+  photos:
+  logs:
+  database:
