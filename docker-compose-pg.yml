@@ -4,24 +4,16 @@ services:
   db:
     container_name: ${PROJECT_NAME:-openimis}-db
     build:
-      context: https://github.com/openimis/openimis-db_dkr.git#${DB_BRANCH:-develop}
+      context: https://github.com/openimis/database_postgresql.git#${DB_BRANCH:-develop}
       args:
-        - ACCEPT_EULA=${ACCEPT_EULA}
-        - SA_PASSWORD=${DB_PASSWORD}
+        - POSTGRES_PASSWORD=${DB_PASSWORD}
     environment:
-      - DB_USER_PASSWORD=${DB_PASSWORD}
-      - SA_PASSWORD=${DB_PASSWORD}
-      - DB_NAME=${DB_NAME}
-      - DB_USER=${DB_USER}
-      - ACCEPT_EULA=${ACCEPT_EULA}
-    volumes:
-      - logs:/var/opt/mssql/log 
-      - database:/var/opt/mssql/data
-    healthcheck:
-      test: "bash /app/healthcheck.sh"
-      interval: 40s
-      timeout: 10s
-      retries: 5
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=${DB_USER}
+#    volumes:
+#      - logs:/var/opt/mssql/log
+#      - database:/var/opt/mssql/data
     networks:
       openimis-net:
         ipv4_address: 172.20.${IP_SUB:-20}.99
@@ -35,6 +27,7 @@ services:
     build:
       context: https://github.com/openimis/openimis-be_py.git#${BE_BRANCH:-develop}
       args:
+        DB_ENGINE: ${DB_ENGINE:-django.db.backends.postgresql}
         OPENIMIS_CONF_JSON: ${OPENIMIS_BE_CONF_JSON}
     image: openimis/backend:${PROJECT_NAME:-local}
     volumes:
@@ -46,7 +39,7 @@ services:
       - DB_NAME=${DB_NAME}
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
-      - DB_ENGINE=${DB_ENGINE}
+      - DB_ENGINE=${DB_ENGINE:-django.db.backends.postgresql}
       - SITE_ROOT=api
       - SITE_URL=${NEW_OPENIMIS_HOST}
       - CELERY_BROKER_URL=amqp://rabbitmq
