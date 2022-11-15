@@ -49,6 +49,7 @@ services:
       - SITE_ROOT=api
       - SITE_URL=${NEW_OPENIMIS_HOST}
       - CELERY_BROKER_URL=amqp://rabbitmq
+      - PHOTO_ROOT_PATH=images/insurees
     depends_on:  
       db:
         condition: service_healthy
@@ -116,6 +117,8 @@ services:
       context:  https://github.com/openimis/rest_api_c-sharp.git#${RESTAPI_BRANCH:-develop}
       args:
         BUILD-FLAVOUR: ${RESTAPI_BUILD_FLAVOUR:-Release}
+    environment:
+        - ASPNETCORE_URLS=${ASPNETCORE_URLS:-http://+:80}
     volumes:
       - ./conf/restapi:/app/config
       - logs:/app/log
