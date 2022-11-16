@@ -4,24 +4,22 @@ services:
   db:
     container_name: ${PROJECT_NAME:-openimis}-db
     build:
-      context: https://github.com/openimis/openimis-db_dkr.git#${DB_BRANCH:-develop}
+      context: https://github.com/openimis/database_postgresql.git#${DB_BRANCH:-develop}
       args:
-        - ACCEPT_EULA=${ACCEPT_EULA}
-        - SA_PASSWORD=${DB_PASSWORD}
+        - POSTGRES_PASSWORD=${DB_PASSWORD}
     environment:
-      - DB_USER_PASSWORD=${DB_PASSWORD}
-      - SA_PASSWORD=${DB_PASSWORD}
-      - DB_NAME=${DB_NAME}
-      - DB_USER=${DB_USER}
-      - ACCEPT_EULA=${ACCEPT_EULA}
-    volumes:
-      - logs:/var/opt/mssql/log 
-      - database:/var/opt/mssql/data
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=${DB_USER}
     healthcheck:
-      test: "bash /app/healthcheck.sh"
-      interval: 40s
-      timeout: 10s
+      test: psql -h localhost -p 5432 -U postgres -v ON_ERROR_STOP=1 -c 'select version()' &> /dev/null
+      test: pg_isready -U ${DB_USER} -d ${DB_NAME}
+      test: psql -h localhost -p 5432 -U postgres -v ON_ERROR_STOP=1 -c 'SELECT pg_sleep(15);' &> /dev/null
+      interval: 10s
+      timeout: 3s
       retries: 5
+    volumes:
+      - database:/var/lib/postgresql/data
     networks:
       openimis-net:
         ipv4_address: 172.20.${IP_SUB:-20}.99
@@ -37,8 +35,6 @@ services:
       args:
         OPENIMIS_CONF_JSON: ${OPENIMIS_BE_CONF_JSON}
     image: openimis/backend:${PROJECT_NAME:-local}
-    volumes:
-      - photos:/openimis-be/openIMIS/images/insurees
     command: start
     environment: &backend-env
       - DB_HOST=${DB_HOST}
@@ -50,9 +46,12 @@ services:
       - SITE_URL=${NEW_OPENIMIS_HOST}
       - CELERY_BROKER_URL=amqp://rabbitmq
       - PHOTO_ROOT_PATH=images/insurees
-    depends_on:  
+      - DB_ENGINE=${DB_ENGINE:-django.db.backends.postgresql}
+    depends_on:
       db:
         condition: service_healthy
+    volumes:
+      - photos:/openimis-be/openIMIS/images/insurees    
     networks:
       openimis-net:
          ipv4_address: 172.20.${IP_SUB:-20}.12
@@ -67,7 +66,6 @@ services:
     environment:
       - PORT=5000
       - REACT_APP_API_URL=/api
-      - PUBLIC_URL=/front
       - NEW_OPENIMIS_HOST=${NEW_OPENIMIS_HOST}
       - OPENIMIS_CONF_JSON=${OPENIMIS_FE_CONF_JSON}
     networks:
@@ -90,17 +88,16 @@ services:
     depends_on:
       - backend
       - frontend
-      - restapi
   worker:
     container_name: ${PROJECT_NAME:-openimis}-worker
     image: openimis/backend:${PROJECT_NAME:-local}
     command: worker
     restart: always
-    volumes:
-      - photos:/openimis-be/openIMIS/images/insurees
-    depends_on: 
+    depends_on:
       - backend
     environment: *backend-env
+    volumes:
+      - photos:/openimis-be/openIMIS/images/insurees
     networks:
       openimis-net:
          ipv4_address: 172.20.${IP_SUB:-20}.15
@@ -117,19 +114,19 @@ services:
       context:  https://github.com/openimis/rest_api_c-sharp.git#${RESTAPI_BRANCH:-develop}
       args:
         BUILD-FLAVOUR: ${RESTAPI_BUILD_FLAVOUR:-Release}
-    environment:
-        - ASPNETCORE_URLS=${ASPNETCORE_URLS:-http://+:80}
     volumes:
       - ./conf/restapi:/app/config
-      - logs:/app/log
-      - photos:/app/photos
+      - ./logs:/app/log
     restart: always
-    depends_on:  
+    depends_on:
       db:
         condition: service_healthy
     networks:
       openimis-net:
          ipv4_address: 172.20.${IP_SUB:-20}.17
+volumes:
+  database:
+  photos:
 networks:
   openimis-net:
     name: ${PROJECT_NAME}-openimis-net
@@ -137,7 +134,4 @@ networks:
       config:
         - subnet: 172.20.${IP_SUB:-20}.0/24
           ip_range: 172.20.${IP_SUB:-20}.0/24
-volumes:
-  photos:
-  logs:
-  database:
+
