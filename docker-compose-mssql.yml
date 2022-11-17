@@ -116,6 +116,7 @@ services:
     volumes:
       - ./conf/restapi:/app/config
       - ./logs:/app/log
+      - photos:/app/photos
     restart: always
     depends_on:
       db:
