@@ -2,7 +2,9 @@
 
  This repository provides a dockerized openIMIS (all components) as a quick setup for development, testing or demoing.
  
+
  Please look for further instructions on the openIMIS Wiki: https://openimis.atlassian.net/wiki/spaces/OP/pages/963182705/MO1.1+Install+the+modular+openIMIS+using+Docker
+
  
  The docker-compose currently contains the openIMIS database, backend + worker, frontend, restapi and gateway components.
  
