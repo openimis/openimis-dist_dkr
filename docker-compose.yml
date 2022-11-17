@@ -13,9 +13,11 @@ services:
       - POSTGRES_USER=${DB_USER}
     healthcheck:
       test: pg_isready -U ${DB_USER} -d ${DB_NAME} && true_isready.sh
+      test: pg_isready -U ${DB_USER} -d ${DB_NAME}
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 30s
     volumes:
       - database:/var/lib/postgresql/data
     networks:
@@ -69,6 +71,12 @@ services:
     container_name: ${PROJECT_NAME:-openimis}-gateway
     build:
       context: https://github.com/openimis/openimis-gateway_dkr.git#${GW_BRANCH:-develop}
+    healthcheck:
+      test: service nginx status || exit 1
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    restart: always
     environment:
       - NEW_OPENIMIS_HOST=${NEW_OPENIMIS_HOST}
     #volumes:
@@ -105,15 +113,13 @@ services:
   restapi:
     container_name: ${PROJECT_NAME}-restapi
     build:
-      context: https://github.com/openimis/openimis-gateway_dkr.git#${GW_BRANCH:-develop}
-    healthcheck:
-      test: service nginx status || exit 1
-      interval: 10s
-      timeout: 3s
-      retries: 5
-    restart: always
-    environment:
-      - NEW_OPENIMIS_HOST=${NEW_OPENIMIS_HOST}
+      context:  https://github.com/openimis/rest_api_c-sharp.git#${RESTAPI_BRANCH:-develop}
+      args:
+        BUILD-FLAVOUR: ${RESTAPI_BUILD_FLAVOUR:-Release}
+    volumes:
+      - ./conf/restapi:/app/config
+      - ./logs:/app/log
+      - photos:/app/photos
     depends_on:
       db:
         condition: service_healthy
