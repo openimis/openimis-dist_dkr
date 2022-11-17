@@ -12,11 +12,9 @@ services:
       - POSTGRES_DB=${DB_NAME}
       - POSTGRES_USER=${DB_USER}
     healthcheck:
-      test: psql -h localhost -p 5432 -U postgres -v ON_ERROR_STOP=1 -c 'select version()' &> /dev/null
-      test: pg_isready -U ${DB_USER} -d ${DB_NAME}
-      test: psql -h localhost -p 5432 -U postgres -v ON_ERROR_STOP=1 -c 'SELECT pg_sleep(15);' &> /dev/null
+      test: pg_isready -U ${DB_USER} -d ${DB_NAME} && true_isready.sh
       interval: 10s
-      timeout: 3s
+      timeout: 5s
       retries: 5
     volumes:
       - database:/var/lib/postgresql/data
@@ -107,14 +105,15 @@ services:
   restapi:
     container_name: ${PROJECT_NAME}-restapi
     build:
-      context:  https://github.com/openimis/rest_api_c-sharp.git#${RESTAPI_BRANCH:-develop}
-      args:
-        BUILD-FLAVOUR: ${RESTAPI_BUILD_FLAVOUR:-Release}
-    volumes:
-      - ./conf/restapi:/app/config
-      - ./logs:/app/log
-      - photos:/app/photos
+      context: https://github.com/openimis/openimis-gateway_dkr.git#${GW_BRANCH:-develop}
+    healthcheck:
+      test: service nginx status || exit 1
+      interval: 10s
+      timeout: 3s
+      retries: 5
     restart: always
+    environment:
+      - NEW_OPENIMIS_HOST=${NEW_OPENIMIS_HOST}
     depends_on:
       db:
         condition: service_healthy
@@ -131,4 +130,3 @@ networks:
       config:
         - subnet: 172.20.${IP_SUB:-20}.0/24
           ip_range: 172.20.${IP_SUB:-20}.0/24
-
