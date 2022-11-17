@@ -78,6 +78,12 @@ services:
       - NEW_OPENIMIS_HOST=${NEW_OPENIMIS_HOST}
     #volumes:
     #  - ./conf/gateway:/conf
+    healthcheck:
+      test: service nginx status || exit 1
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    restart: always
     networks:
       openimis-net:
         ipv4_address: 172.20.${IP_SUB:-20}.14
