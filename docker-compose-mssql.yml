@@ -42,11 +42,14 @@ services:
       - DB_NAME=${DB_NAME}
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
-      - DB_ENGINE=${DB_ENGINE:-django.db.backends.postgresql}
+      - DB_ENGINE=${DB_ENGINE:-mssql}
       - SITE_ROOT=api
       - SITE_URL=${NEW_OPENIMIS_HOST}
       - CELERY_BROKER_URL=amqp://rabbitmq
       - PHOTO_ROOT_PATH=images/insurees
+    depends_on:
+      db:
+        condition: service_healthy
     networks:
       openimis-net:
          ipv4_address: 172.20.${IP_SUB:-20}.12
@@ -79,8 +82,8 @@ services:
       openimis-net:
         ipv4_address: 172.20.${IP_SUB:-20}.14
     ports:
-      - ${HTTP_PORT:-81}:81
-      - ${HTTPS_PORT:-444}:444
+      - ${HTTP_PORT:-80}:80
+      - ${HTTPS_PORT:-443}:443
     depends_on:
       - backend
       - frontend
@@ -104,6 +107,26 @@ services:
     networks:
       openimis-net:
          ipv4_address: 172.20.${IP_SUB:-20}.16
+  restapi:
+    container_name: ${PROJECT_NAME}-restapi
+    build:
+      context:  https://github.com/openimis/rest_api_c-sharp.git#${RESTAPI_BRANCH:-develop}
+      args:
+        BUILD-FLAVOUR: ${RESTAPI_BUILD_FLAVOUR:-Release}
+    volumes:
+      - ./conf/restapi:/app/config
+      - ./logs:/app/log
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      openimis-net:
+         ipv4_address: 172.20.${IP_SUB:-20}.17
+volumes:
+  database:
+  logs:
+  photos:
 networks:
   openimis-net:
     name: ${PROJECT_NAME}-openimis-net
@@ -111,7 +134,3 @@ networks:
       config:
         - subnet: 172.20.${IP_SUB:-20}.0/24
           ip_range: 172.20.${IP_SUB:-20}.0/24
-volumes:
-  photos:
-  logs:
-  database:
