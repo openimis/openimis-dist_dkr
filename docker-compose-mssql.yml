@@ -4,21 +4,25 @@ services:
   db:
     container_name: ${PROJECT_NAME:-openimis}-db
     build:
-      context: https://github.com/openimis/database_postgresql.git#${DB_BRANCH:-develop}
+      context: https://github.com/openimis/openimis-db_dkr.git#${DB_BRANCH:-develop} 
       args:
-        - POSTGRES_PASSWORD=${DB_PASSWORD}
+        - ACCEPT_EULA=${ACCEPT_EULA}
+        - SA_PASSWORD=${DB_PASSWORD}
     environment:
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
-      - POSTGRES_DB=${DB_NAME}
-      - POSTGRES_USER=${DB_USER}
+      - DB_USER_PASSWORD=${DB_PASSWORD}
+      - SA_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - ACCEPT_EULA=${ACCEPT_EULA}
     healthcheck:
-      test: pg_isready -U ${DB_USER} -d ${DB_NAME}
+      test: "bash /app/healthcheck.sh"
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 30s
+      start_period: 100s
     volumes:
-      - database:/var/lib/postgresql/data
+      - logs:/var/opt/mssql/log
+      - database:/var/opt/mssql/data
     networks:
       openimis-net:
         ipv4_address: 172.20.${IP_SUB:-20}.99
@@ -38,11 +42,11 @@ services:
       - DB_NAME=${DB_NAME}
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
+      - DB_ENGINE=${DB_ENGINE:-mssql}
       - SITE_ROOT=api
       - SITE_URL=${NEW_OPENIMIS_HOST}
       - CELERY_BROKER_URL=amqp://rabbitmq
       - PHOTO_ROOT_PATH=images/insurees
-      - DB_ENGINE=${DB_ENGINE:-django.db.backends.postgresql}
     depends_on:
       db:
         condition: service_healthy
@@ -70,16 +74,16 @@ services:
     container_name: ${PROJECT_NAME:-openimis}-gateway
     build:
       context: https://github.com/openimis/openimis-gateway_dkr.git#${GW_BRANCH:-develop}
+    environment:
+      - NEW_OPENIMIS_HOST=${NEW_OPENIMIS_HOST}
+    #volumes:
+    #  - ./conf/gateway:/conf
     healthcheck:
       test: service nginx status || exit 1
       interval: 10s
       timeout: 3s
       retries: 5
     restart: always
-    environment:
-      - NEW_OPENIMIS_HOST=${NEW_OPENIMIS_HOST}
-    #volumes:
-    #  - ./conf/gateway:/conf
     networks:
       openimis-net:
         ipv4_address: 172.20.${IP_SUB:-20}.14
@@ -94,11 +98,11 @@ services:
     image: openimis/backend:${PROJECT_NAME:-local}
     command: worker
     restart: always
-    depends_on:
-      - backend
-    environment: *backend-env
     volumes:
       - photos:/openimis-be/openIMIS/images/insurees
+    depends_on: 
+      - backend
+    environment: *backend-env
     networks:
       openimis-net:
          ipv4_address: 172.20.${IP_SUB:-20}.15
@@ -119,6 +123,7 @@ services:
       - ./conf/restapi:/app/config
       - ./logs:/app/log
       - photos:/app/photos
+    restart: always
     depends_on:
       db:
         condition: service_healthy
@@ -127,6 +132,7 @@ services:
          ipv4_address: 172.20.${IP_SUB:-20}.17
 volumes:
   database:
+  logs:
   photos:
 networks:
   openimis-net:
