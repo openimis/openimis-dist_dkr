@@ -18,7 +18,9 @@ services:
       retries: 5
       start_period: 30s
     volumes:
+
       - database:/var/lib/postgresql/data
+    restart: always
     networks:
       openimis-net:
         ipv4_address: 172.20.${IP_SUB:-20}.99
@@ -38,14 +40,15 @@ services:
       - DB_NAME=${DB_NAME}
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
+      - DB_ENGINE=${DB_ENGINE:-django.db.backends.postgresql}
       - SITE_ROOT=api
       - SITE_URL=${NEW_OPENIMIS_HOST}
       - CELERY_BROKER_URL=amqp://rabbitmq
       - PHOTO_ROOT_PATH=images/insurees
-      - DB_ENGINE=${DB_ENGINE:-django.db.backends.postgresql}
     depends_on:
       db:
         condition: service_healthy
+    restart: always
     networks:
       openimis-net:
          ipv4_address: 172.20.${IP_SUB:-20}.12
@@ -63,6 +66,7 @@ services:
       - PUBLIC_URL=/front
       - NEW_OPENIMIS_HOST=${NEW_OPENIMIS_HOST}
       - OPENIMIS_CONF_JSON=${OPENIMIS_FE_CONF_JSON}
+    restart: always
     networks:
       openimis-net:
         ipv4_address: 172.20.${IP_SUB:-20}.13
@@ -70,16 +74,16 @@ services:
     container_name: ${PROJECT_NAME:-openimis}-gateway
     build:
       context: https://github.com/openimis/openimis-gateway_dkr.git#${GW_BRANCH:-develop}
+    environment:
+      - NEW_OPENIMIS_HOST=${NEW_OPENIMIS_HOST}
+    #volumes:
+    #  - ./conf/gateway:/conf
     healthcheck:
       test: service nginx status || exit 1
       interval: 10s
       timeout: 3s
       retries: 5
     restart: always
-    environment:
-      - NEW_OPENIMIS_HOST=${NEW_OPENIMIS_HOST}
-    #volumes:
-    #  - ./conf/gateway:/conf
     networks:
       openimis-net:
         ipv4_address: 172.20.${IP_SUB:-20}.14
@@ -94,11 +98,11 @@ services:
     image: openimis/backend:${PROJECT_NAME:-local}
     command: worker
     restart: always
+    volumes:
+      - photos:/openimis-be/openIMIS/images/insurees
     depends_on:
       - backend
     environment: *backend-env
-    volumes:
-      - photos:/openimis-be/openIMIS/images/insurees
     networks:
       openimis-net:
          ipv4_address: 172.20.${IP_SUB:-20}.15
@@ -119,6 +123,7 @@ services:
       - ./conf/restapi:/app/config
       - ./logs:/app/log
       - photos:/app/photos
+    restart: always
     depends_on:
       db:
         condition: service_healthy
