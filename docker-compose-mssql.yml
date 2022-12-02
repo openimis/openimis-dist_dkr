@@ -23,6 +23,7 @@ services:
     volumes:
       - logs:/var/opt/mssql/log
       - database:/var/opt/mssql/data
+    restart: always
     networks:
       openimis-net:
         ipv4_address: 172.20.${IP_SUB:-20}.99
@@ -50,6 +51,7 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    restart: always
     networks:
       openimis-net:
          ipv4_address: 172.20.${IP_SUB:-20}.12
@@ -67,6 +69,7 @@ services:
       - PUBLIC_URL=/front
       - NEW_OPENIMIS_HOST=${NEW_OPENIMIS_HOST}
       - OPENIMIS_CONF_JSON=${OPENIMIS_FE_CONF_JSON}
+    restart: always
     networks:
       openimis-net:
         ipv4_address: 172.20.${IP_SUB:-20}.13
@@ -100,7 +103,7 @@ services:
     restart: always
     volumes:
       - photos:/openimis-be/openIMIS/images/insurees
-    depends_on: 
+    depends_on:
       - backend
     environment: *backend-env
     networks:
