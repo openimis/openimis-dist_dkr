@@ -27,6 +27,7 @@ services:
     networks:
       openimis-net:
         ipv4_address: 172.20.${IP_SUB:-20}.99
+
   backend:
     container_name: ${PROJECT_NAME:-openimis}-backend
     build:
@@ -44,10 +45,13 @@ services:
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
       - DB_ENGINE=${DB_ENGINE:-mssql}
-      - SITE_ROOT=api
+      - SITE_ROOT=${SITE_ROOT:-api}
       - SITE_URL=${NEW_OPENIMIS_HOST}
       - CELERY_BROKER_URL=amqp://rabbitmq
       - PHOTO_ROOT_PATH=images/insurees
+      - DJANGO_LOG_LEVEL=${DJANGO_LOG_LEVEL}
+      - DJANGO_LOG_HANDLER=${DJANGO_LOG_HANDLER}
+      - DJANGO_MIGRATE=${DJANGO_MIGRATE}
     depends_on:
       db:
         condition: service_healthy
@@ -65,7 +69,7 @@ services:
     command: serve -s build
     environment:
       - PORT=5000
-      - REACT_APP_API_URL=/api
+      - REACT_APP_API_URL=${SITE_ROOT:-api}
       - PUBLIC_URL=/front
       - NEW_OPENIMIS_HOST=${NEW_OPENIMIS_HOST}
       - OPENIMIS_CONF_JSON=${OPENIMIS_FE_CONF_JSON}
@@ -73,6 +77,7 @@ services:
     networks:
       openimis-net:
         ipv4_address: 172.20.${IP_SUB:-20}.13
+
   gateway:
     container_name: ${PROJECT_NAME:-openimis}-gateway
     build:
@@ -96,6 +101,7 @@ services:
     depends_on:
       - backend
       - frontend
+
   worker:
     container_name: ${PROJECT_NAME:-openimis}-worker
     image: openimis/backend:${PROJECT_NAME:-local}
@@ -109,6 +115,7 @@ services:
     networks:
       openimis-net:
          ipv4_address: 172.20.${IP_SUB:-20}.15
+
   rabbitmq:
     container_name: ${PROJECT_NAME:-openimis}-rabbitmq
     image: rabbitmq:3-management
@@ -116,6 +123,7 @@ services:
     networks:
       openimis-net:
          ipv4_address: 172.20.${IP_SUB:-20}.16
+
   restapi:
     container_name: ${PROJECT_NAME}-restapi
     build:
@@ -133,10 +141,12 @@ services:
     networks:
       openimis-net:
          ipv4_address: 172.20.${IP_SUB:-20}.17
+
 volumes:
   database:
   logs:
   photos:
+
 networks:
   openimis-net:
     name: ${PROJECT_NAME}-openimis-net
