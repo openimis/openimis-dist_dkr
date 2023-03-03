@@ -4,7 +4,7 @@ services:
   db:
     container_name: ${PROJECT_NAME:-openimis}-db
     build:
-      context: https://github.com/openimis/openimis-db_dkr.git#${DB_BRANCH:-develop} 
+      context: https://github.com/openimis/database_ms_sqlserver.git#${DB_BRANCH:-develop} 
       args:
         - ACCEPT_EULA=${ACCEPT_EULA}
         - SA_PASSWORD=${DB_PASSWORD}
@@ -26,8 +26,6 @@ services:
     restart: always
     networks:
       openimis-net:
-        ipv4_address: 172.20.${IP_SUB:-20}.99
-
   backend:
     container_name: ${PROJECT_NAME:-openimis}-backend
     build:
@@ -49,16 +47,15 @@ services:
       - SITE_URL=${NEW_OPENIMIS_HOST}
       - CELERY_BROKER_URL=amqp://rabbitmq
       - PHOTO_ROOT_PATH=images/insurees
-      - DJANGO_LOG_LEVEL=${DJANGO_LOG_LEVEL}
-      - DJANGO_LOG_HANDLER=${DJANGO_LOG_HANDLER}
-      - DJANGO_MIGRATE=${DJANGO_MIGRATE}
+        #   - DJANGO_LOG_LEVEL=${DJANGO_LOG_LEVEL:-DEBUG}
+        #- DJANGO_LOG_HANDLER=${DJANGO_LOG_HANDLER}
+        #- DJANGO_MIGRATE=${DJANGO_MIGRATE}
     depends_on:
       db:
         condition: service_healthy
     restart: always
     networks:
       openimis-net:
-         ipv4_address: 172.20.${IP_SUB:-20}.12
 
   frontend:
     container_name: ${PROJECT_NAME:-openimis}-frontend
@@ -66,24 +63,11 @@ services:
       context: https://github.com/openimis/openimis-fe_js.git#${FE_BRANCH:-develop}
       args:
          OPENIMIS_CONF_JSON: ${OPENIMIS_FE_CONF_JSON}
-    command: serve -s build
     environment:
-      - PORT=5000
       - REACT_APP_API_URL=${SITE_ROOT:-api}
-      - PUBLIC_URL=/front
+      - PUBLIC_URL=front
       - NEW_OPENIMIS_HOST=${NEW_OPENIMIS_HOST}
       - OPENIMIS_CONF_JSON=${OPENIMIS_FE_CONF_JSON}
-    restart: always
-    networks:
-      openimis-net:
-        ipv4_address: 172.20.${IP_SUB:-20}.13
-
-  gateway:
-    container_name: ${PROJECT_NAME:-openimis}-gateway
-    build:
-      context: https://github.com/openimis/openimis-gateway_dkr.git#${GW_BRANCH:-develop}
-    environment:
-      - NEW_OPENIMIS_HOST=${NEW_OPENIMIS_HOST}
     #volumes:
     #  - ./conf/gateway:/conf
     healthcheck:
@@ -94,13 +78,11 @@ services:
     restart: always
     networks:
       openimis-net:
-        ipv4_address: 172.20.${IP_SUB:-20}.14
     ports:
       - ${HTTP_PORT:-80}:80
       - ${HTTPS_PORT:-443}:443
     depends_on:
       - backend
-      - frontend
 
   worker:
     container_name: ${PROJECT_NAME:-openimis}-worker
@@ -114,7 +96,6 @@ services:
     environment: *backend-env
     networks:
       openimis-net:
-         ipv4_address: 172.20.${IP_SUB:-20}.15
 
   rabbitmq:
     container_name: ${PROJECT_NAME:-openimis}-rabbitmq
@@ -122,10 +103,9 @@ services:
     restart: always
     networks:
       openimis-net:
-         ipv4_address: 172.20.${IP_SUB:-20}.16
 
   restapi:
-    container_name: ${PROJECT_NAME}-restapi
+    container_name: ${PROJECT_NAME:-openimis}-restapi
     build:
       context:  https://github.com/openimis/rest_api_c-sharp.git#${RESTAPI_BRANCH:-develop}
       args:
@@ -140,8 +120,6 @@ services:
         condition: service_healthy
     networks:
       openimis-net:
-         ipv4_address: 172.20.${IP_SUB:-20}.17
-
 volumes:
   database:
   logs:
@@ -149,8 +127,4 @@ volumes:
 
 networks:
   openimis-net:
-    name: ${PROJECT_NAME}-openimis-net
-    ipam:
-      config:
-        - subnet: 172.20.${IP_SUB:-20}.0/24
-          ip_range: 172.20.${IP_SUB:-20}.0/24
+          name: ${PROJECT_NAME}-openimis-net
