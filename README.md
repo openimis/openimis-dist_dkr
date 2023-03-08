@@ -47,3 +47,14 @@ To (re-)start all docker containers: `docker-compose  start`
 # rebuild 
 To rebuild `docker-compose up -d  --build --force-recreate` 
 
+# create lets encrypt certs
+
+export NEW_OPENIMIS_HOST first
+
+
+## dry run 
+docker-compose run --rm --entrypoint "  certbot certonly --webroot -w /var/www/certbot  --staging  --register-unsafely-without-email  -d  ${NEW_OPENIMIS_HOST}    --rsa-key-size 2048     --agree-tos     --force-renewal" certbot
+
+## actual setup
+
+docker-compose run --rm --entrypoint "  certbot certonly --webroot -w /var/www/certbot    --register-unsafely-without-email  -d  ${NEW_OPENIMIS_HOST}    --rsa-key-size 2048     --agree-tos     --force-renewal" certbot
