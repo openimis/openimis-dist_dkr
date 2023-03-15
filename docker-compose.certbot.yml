@@ -1,5 +1,3 @@
-version: "2.4"
-
 services:
   db:
     container_name: ${PROJECT_NAME:-openimis}-db
@@ -14,7 +12,6 @@ services:
       - DB_NAME=${DB_NAME}
       - DB_USER=${DB_USER}
       - ACCEPT_EULA=${ACCEPT_EULA}
-      - SQL_SCRIPT_URL="https://pipelines.actions.githubusercontent.com/serviceHosts/3ea2b581-1457-4ae0-88fa-ad20ed7009a9/_apis/pipelines/1/runs/294/signedartifactscontent?artifactName=sql-files&urlExpires=2023-02-24T13%3A29%3A04.8136802Z&urlSigningMethod=HMACV2&urlSignature=hMEpOGema%2B9rNH54kRZV9ti0ue7XujvIOo0ElxJQ2L0%3D"
     healthcheck:
       test: "bash /app/healthcheck.sh"
       interval: 10s
@@ -34,7 +31,7 @@ services:
     #  - 1433:1433
   backend:
     container_name: ${PROJECT_NAME:-openimis}-api
-    image: ghcr.io/openimis/openimis-be:latest 
+    image: ghcr.io/openimis/openimis-be:${DB_BRANCH:-develop}
     command: start
     environment: &backend-env
       - DB_HOST=${DB_HOST}
@@ -43,6 +40,8 @@ services:
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
       - SITE_ROOT=api
+      - DEBUG=True
+      - DJANGO_LOG_LEVEL=DEBUG
       - SITE_URL=${NEW_OPENIMIS_HOST}
       - CELERY_BROKER_URL=amqp://rabbitmq
     depends_on:  
@@ -51,11 +50,11 @@ services:
     networks:
       openimis-net:
 
-  gateway:
+  frontend:
     container_name: ${PROJECT_NAME:-openimis}-frontend
-    image: ghcr.io/openimis/openimis-fe:unified-docekr
+    image: ghcr.io/openimis/openimis-fe:${FE_BRANCH:-develop}
     environment:
-      - REACT_APP_API_URL=/api
+      - REACT_APP_API_URL=api
       - NEW_OPENIMIS_HOST=${NEW_OPENIMIS_HOST}
       - OPENIMIS_CONF_JSON=${OPENIMIS_FE_CONF_JSON}
     networks:
@@ -65,18 +64,10 @@ services:
       - ${HTTPS_PORT:-443}:443
     depends_on:
       - backend
-    volumes:
-      - ./data/certbot/conf:/etc/letsencrypt
-      - ./data/certbot/www:/var/www/certbot
-  certbot:
-    image: certbot/certbot
-    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
-    volumes:
-      - ./data/certbot/conf:/etc/letsencrypt
-      - ./data/certbot/www:/var/www/certbot
+
   worker:
     container_name: ${PROJECT_NAME:-openimis}-worker
-    image: ghcr.io/openimis/openimis-be:latest
+    image: ghcr.io/openimis/openimis-be:${BE_BRANCH:-develop}
     command: worker
     restart: always
     depends_on: 
@@ -92,10 +83,7 @@ services:
       openimis-net:
   restapi:
     container_name: ${PROJECT_NAME:-openimis}-restapi
-    build:
-      context:  https://github.com/openimis/rest_api_c-sharp.git#${RESTAPI_BRANCH:-develop}
-      args:
-        BUILD-FLAVOUR: ${RESTAPI_BUILD_FLAVOUR:-Release}
+    image: ghcr.io/openimis/openimis-rest_api:${RESTAPI_BRANCH:-develop}
     volumes:
       - ./conf/restapi:/app/config
       - ./logs:/app/log

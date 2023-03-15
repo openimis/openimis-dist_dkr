@@ -1,5 +1,3 @@
-version: "2.4"
-
 services:
   db:
     container_name: ${PROJECT_NAME:-openimis}-db
@@ -20,21 +18,20 @@ services:
       timeout: 5s
       retries: 5
       start_period: 100s
-    volumes:
-      - logs:/var/opt/mssql/log
-      - database:/var/opt/mssql/data
-    restart: always
     networks:
       openimis-net:
-  backend:
-    container_name: ${PROJECT_NAME:-openimis}-backend
-    build:
-      context: https://github.com/openimis/openimis-be_py.git#${BE_BRANCH:-develop}
-      args:
-        OPENIMIS_CONF_JSON: ${OPENIMIS_BE_CONF_JSON}
-    image: openimis/backend:${PROJECT_NAME:-local}
     volumes:
-      - photos:/openimis-be/openIMIS/images/insurees
+      - database:/var/opt/mssql/data
+    ports:
+      - 1433:1433
+  ## WARNING:
+    ## exposing the database port outside the openimis-net network
+    ## may lead to security issue (depending on your network topology)
+    # ports:
+    #  - 1433:1433
+  backend:
+    container_name: ${PROJECT_NAME:-openimis}-api
+    image: ghcr.io/openimis/openimis-be:${DB_BRANCH:-develop}
     command: start
     environment: &backend-env
       - DB_HOST=${DB_HOST}
@@ -42,40 +39,24 @@ services:
       - DB_NAME=${DB_NAME}
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
-      - DB_ENGINE=${DB_ENGINE:-mssql}
-      - SITE_ROOT=${SITE_ROOT:-api}
+      - SITE_ROOT=api
+      - DEBUG=True
+      - DJANGO_LOG_LEVEL=DEBUG
       - SITE_URL=${NEW_OPENIMIS_HOST}
       - CELERY_BROKER_URL=amqp://rabbitmq
-      - PHOTO_ROOT_PATH=images/insurees
-        #   - DJANGO_LOG_LEVEL=${DJANGO_LOG_LEVEL:-DEBUG}
-        #- DJANGO_LOG_HANDLER=${DJANGO_LOG_HANDLER}
-        #- DJANGO_MIGRATE=${DJANGO_MIGRATE}
-    depends_on:
+    depends_on:  
       db:
         condition: service_healthy
-    restart: always
     networks:
       openimis-net:
 
   frontend:
     container_name: ${PROJECT_NAME:-openimis}-frontend
-    build:
-      context: https://github.com/openimis/openimis-fe_js.git#${FE_BRANCH:-develop}
-      args:
-         OPENIMIS_CONF_JSON: ${OPENIMIS_FE_CONF_JSON}
+    image: ghcr.io/openimis/openimis-fe:${FE_BRANCH:-develop}
     environment:
-      - REACT_APP_API_URL=${SITE_ROOT:-api}
-      - PUBLIC_URL=front
+      - REACT_APP_API_URL=api
       - NEW_OPENIMIS_HOST=${NEW_OPENIMIS_HOST}
       - OPENIMIS_CONF_JSON=${OPENIMIS_FE_CONF_JSON}
-    #volumes:
-    #  - ./conf/gateway:/conf
-    healthcheck:
-      test: service nginx status || exit 1
-      interval: 10s
-      timeout: 3s
-      retries: 5
-    restart: always
     networks:
       openimis-net:
     ports:
@@ -86,45 +67,33 @@ services:
 
   worker:
     container_name: ${PROJECT_NAME:-openimis}-worker
-    image: openimis/backend:${PROJECT_NAME:-local}
+    image: ghcr.io/openimis/openimis-be:${BE_BRANCH:-develop}
     command: worker
     restart: always
-    volumes:
-      - photos:/openimis-be/openIMIS/images/insurees
-    depends_on:
+    depends_on: 
       - backend
     environment: *backend-env
     networks:
       openimis-net:
-
   rabbitmq:
     container_name: ${PROJECT_NAME:-openimis}-rabbitmq
     image: rabbitmq:3-management
     restart: always
     networks:
       openimis-net:
-
   restapi:
     container_name: ${PROJECT_NAME:-openimis}-restapi
-    build:
-      context:  https://github.com/openimis/rest_api_c-sharp.git#${RESTAPI_BRANCH:-develop}
-      args:
-        BUILD-FLAVOUR: ${RESTAPI_BUILD_FLAVOUR:-Release}
+    image: ghcr.io/openimis/openimis-rest_api:${RESTAPI_BRANCH:-develop}
     volumes:
       - ./conf/restapi:/app/config
       - ./logs:/app/log
-      - photos:/app/photos
     restart: always
-    depends_on:
+    depends_on:  
       db:
         condition: service_healthy
     networks:
       openimis-net:
-volumes:
-  database:
-  logs:
-  photos:
-
 networks:
   openimis-net:
-          name: ${PROJECT_NAME}-openimis-net
+volumes:
+  database:
