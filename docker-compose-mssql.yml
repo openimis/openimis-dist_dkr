@@ -47,6 +47,8 @@ services:
     depends_on:  
       db:
         condition: service_healthy
+    volumes:
+      - photos:/openimis-be/openIMIS/images/insurees
     networks:
       openimis-net:
 
@@ -73,6 +75,8 @@ services:
     depends_on: 
       - backend
     environment: *backend-env
+    volumes:
+      - photos:/openimis-be/openIMIS/images/insurees
     networks:
       openimis-net:
   rabbitmq:
@@ -86,7 +90,8 @@ services:
     image: ghcr.io/openimis/openimis-rest_api:${RESTAPI_BRANCH:-develop}
     volumes:
       - ./conf/restapi:/app/config
-      - ./logs:/app/log
+      - logs:/app/log      
+      - photos:/app/photos
     restart: always
     depends_on:  
       db:
@@ -95,5 +100,8 @@ services:
       openimis-net:
 networks:
   openimis-net:
+      name: ${PROJECT_NAME}-openimis-net
 volumes:
   database:
+  logs:
+  photos:
