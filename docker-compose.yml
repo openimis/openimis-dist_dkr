@@ -11,6 +11,7 @@ services:
       - POSTGRES_PASSWORD=${DB_PASSWORD}
       - POSTGRES_DB=${DB_NAME}
       - POSTGRES_USER=${DB_USER}
+      - INIT_MODE=${INIT_MODE}
     healthcheck:
       test: pg_isready -U ${DB_USER} -d ${DB_NAME}
       interval: 10s
