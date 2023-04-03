@@ -22,10 +22,12 @@ services:
     restart: always
     networks:
       openimis-net:
-  backend:
+    backend:
     container_name: ${PROJECT_NAME:-openimis}-api
-    image: ghcr.io/openimis/openimis-be:${DB_BRANCH:-develop}
+    image: ghcr.io/openimis/openimis-be:${BE_BRANCH:-develop}
     command: start
+    volumes:
+      - photos:/openimis-be/openIMIS/images/insurees
     environment: &backend-env
       - DB_HOST=${DB_HOST}
       - DB_PORT=${DB_PORT}
@@ -43,7 +45,7 @@ services:
     networks:
       openimis-net:
 
-  frontend:
+  gateway:
     container_name: ${PROJECT_NAME:-openimis}-frontend
     image: ghcr.io/openimis/openimis-fe:${FE_BRANCH:-develop}
     environment:
@@ -57,12 +59,16 @@ services:
       - ${HTTPS_PORT:-443}:443
     depends_on:
       - backend
-
+    volumes:
+      - ./data/certbot/conf:/etc/letsencrypt
+      - ./data/certbot/www:/var/www/certbot
   worker:
-    container_name: ${PROJECT_NAME:-openimis}-worker
-    image: ghcr.io/openimis/openimis-be:${BE_BRANCH:-develop}
+    container_name: ${PROJECT_NAME:-openimis}-${BE_BRANCH:-develop}
+    image: ghcr.io/openimis/openimis-be:develop
     command: worker
     restart: always
+    volumes:
+      - photos:/openimis-be/openIMIS/images/insurees
     depends_on: 
       - backend
     environment: *backend-env
@@ -74,12 +80,24 @@ services:
     restart: always
     networks:
       openimis-net:
+    volumes:
+      - ./logs:/app/log
+      - ./photos:/app/photos
   restapi:
     container_name: ${PROJECT_NAME:-openimis}-restapi
     image: ghcr.io/openimis/openimis-rest_api:${RESTAPI_BRANCH:-develop}
+    environment:
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
     volumes:
-      - ./conf/restapi:/app/config
+      #- ./conf/restapi:/app/config
       - ./logs:/app/log
+      - photos:/app/photos
+      - ./Escape:/app/Escape
+      - ./FromPhone:/app/FromPhone
     restart: always
     depends_on:  
       db:
@@ -90,3 +108,4 @@ networks:
   openimis-net:
 volumes:
   database:
+  photos:
