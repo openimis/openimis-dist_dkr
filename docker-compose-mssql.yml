@@ -89,9 +89,6 @@ services:
     restart: always
     networks:
       openimis-net:
-    volumes:
-      - ./logs:/app/log
-      - ./photos:/app/photos
   restapi:
     container_name: ${PROJECT_NAME:-openimis}-restapi
     image: ghcr.io/openimis/openimis-rest_api:${RESTAPI_BRANCH:-develop}
