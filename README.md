@@ -24,30 +24,32 @@ In case of troubles, please consult/contact our service desk via our [ticketing 
  create the log folder ./logs¨
 
  to remove the restapi one will have to:
-   - uncomment the volume in the gateway config
+   - uncomment the volume in the fronend config
    - replace openimis.conf with openimis.conf.without_restapi
 
 ## configure the gateway (optionnal)
-if you want to change the gateway config, you can uncomment the volume in the docker-compose:gateway and then edit ./conf/gateway/openimis.json
+  
+   - uncomment the volume in the fronend config
+   - make modification in openimis.conf
+
 
 ## init database
 
-* build and start rest of the container (and backend) docker image:  `docker-compose  up -d` (`docker-compose -f docker-compose-mssql.yml up -d` for mssql database)
-  * note: if the db is a container, it can take 90 sec to start the first time
-  * note: at each start, openIMIS will apply the necessary database migrations to update the database scheme
-
-  Notes:
-    * same procedure (add-user.sh) must be followed to add external applications accesses
-    * in `/script`, there are also `remove-user.sh`and `update-user.sh`
+by default the database is initialised with demo data without any action
 
 # stop /start
+
 To stop all docker containers: `docker-compose  stop`
 To (re-)start all docker containers: `docker-compose  start` 
 
-# rebuild 
-To rebuild `docker-compose up -d  --build --force-recreate` 
+# pull new images
+
+To pull new images or images update `docker-compose pull` 
+
 
 # create lets encrypt certs
+
+use the certbot docker compose file
 
 export NEW_OPENIMIS_HOST first
 

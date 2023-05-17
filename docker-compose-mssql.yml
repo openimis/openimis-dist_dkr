@@ -52,7 +52,7 @@ services:
     networks:
       openimis-net:
 
-  gateway:
+  frontend:
     container_name: ${PROJECT_NAME:-openimis}-frontend
     image: ghcr.io/openimis/openimis-fe:${FE_TAG:-develop}
     restart: always
@@ -70,6 +70,8 @@ services:
     volumes:
       - ./data/certbot/conf:/etc/letsencrypt
       - ./data/certbot/www:/var/www/certbot
+      # uncomment to use custom openimis.conf
+      #- ./conf/nginx:/conf/
   worker:
     container_name: ${PROJECT_NAME:-openimis}-${BE_TAG:-develop}
     image: ghcr.io/openimis/openimis-be:develop
