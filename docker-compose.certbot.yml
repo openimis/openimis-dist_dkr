@@ -3,11 +3,7 @@ version: "2.4"
 services:
   db:
     container_name: ${PROJECT_NAME:-openimis}-db
-    build:
-      context: https://github.com/openimis/database_ms_sqlserver.git#${DB_BRANCH:-develop} 
-      args:
-        - ACCEPT_EULA=${ACCEPT_EULA}
-        - SA_PASSWORD=${DB_PASSWORD}
+    image: ghcr.io/openimis/openimis-pgsql:${DB_TAG:-latest}
     environment:
       - DB_USER_PASSWORD=${DB_PASSWORD}
       - SA_PASSWORD=${DB_PASSWORD}
@@ -33,7 +29,7 @@ services:
     #  - 1433:1433
   backend:
     container_name: ${PROJECT_NAME:-openimis}-api
-    image: ghcr.io/openimis/openimis-be:${BE_BRANCH:-develop}
+    image: ghcr.io/openimis/openimis-be:${BE_TAG:-develop}
     command: start
     volumes:
       - photos:/openimis-be/openIMIS/images/insurees
@@ -56,7 +52,7 @@ services:
 
   gateway:
     container_name: ${PROJECT_NAME:-openimis}-frontend
-    image: ghcr.io/openimis/openimis-fe:${FE_BRANCH:-develop}
+    image: ghcr.io/openimis/openimis-fe:${FE_TAG:-develop}
     environment:
       - REACT_APP_API_URL=api
       - NEW_OPENIMIS_HOST=${NEW_OPENIMIS_HOST}
@@ -79,7 +75,7 @@ services:
       - ./data/certbot/www:/var/www/certbot
 
   worker:
-    container_name: ${PROJECT_NAME:-openimis}-${BE_BRANCH:-develop}
+    container_name: ${PROJECT_NAME:-openimis}-${BE_TAG:-develop}
     image: ghcr.io/openimis/openimis-be:develop
     command: worker
     restart: always
@@ -98,7 +94,7 @@ services:
       openimis-net:
   restapi:
     container_name: ${PROJECT_NAME:-openimis}-restapi
-    image: ghcr.io/openimis/openimis-rest_api:${RESTAPI_BRANCH:-develop}
+    image: ghcr.io/openimis/openimis-rest_api:${RESTAPI_TAG:-develop}
     environment:
       - DB_HOST=${DB_HOST}
       - DB_PORT=${DB_PORT}
