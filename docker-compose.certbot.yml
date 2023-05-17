@@ -77,8 +77,8 @@ services:
       #- ./conf/nginx:/conf/
 
   worker:
-    container_name: ${PROJECT_NAME:-openimis}-${BE_TAG:-develop}
-    image: ghcr.io/openimis/openimis-be:develop
+    container_name: ${PROJECT_NAME:-openimis}-worker
+    image: ghcr.io/openimis/openimis-be:${BE_TAG:-develop}
     command: worker
     restart: always
     volumes:
