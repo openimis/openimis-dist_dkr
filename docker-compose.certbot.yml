@@ -5,24 +5,31 @@ services:
     container_name: ${PROJECT_NAME:-openimis}-db
     image: ghcr.io/openimis/openimis-pgsql:${DB_TAG:-latest}
     environment:
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
-      - POSTGRES_DB=${DB_NAME}
-      - POSTGRES_USER=${DB_USER}
+      - DB_USER_PASSWORD=${DB_PASSWORD}
+      - SA_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - ACCEPT_EULA=${ACCEPT_EULA}
     healthcheck:
-      test: pg_isready -U ${DB_USER} -d ${DB_NAME}
+      test: "bash /app/healthcheck.sh"
       interval: 10s
       timeout: 5s
       retries: 5
-      start_period: 30s
-    volumes:
-      - database:/var/lib/postgresql/data
-    restart: always
+      start_period: 100s
     networks:
       openimis-net:
+    volumes:
+      - database:/var/opt/mssql/data
+    ports:
+      - 1433:1433
+  ## WARNING:
+    ## exposing the database port outside the openimis-net network
+    ## may lead to security issue (depending on your network topology)
+    # ports:
+    #  - 1433:1433
   backend:
     container_name: ${PROJECT_NAME:-openimis}-api
     image: ghcr.io/openimis/openimis-be:${BE_TAG:-develop}
-    restart: always
     command: start
     volumes:
       - photos:/openimis-be/openIMIS/images/insurees
@@ -46,7 +53,6 @@ services:
   frontend:
     container_name: ${PROJECT_NAME:-openimis}-frontend
     image: ghcr.io/openimis/openimis-fe:${FE_TAG:-develop}
-    restart: always
     environment:
       - REACT_APP_API_URL=api
       - NEW_OPENIMIS_HOST=${NEW_OPENIMIS_HOST}
@@ -61,8 +67,15 @@ services:
     volumes:
       - ./data/certbot/conf:/etc/letsencrypt
       - ./data/certbot/www:/var/www/certbot
+  certbot:
+    image: certbot/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+    volumes:
+      - ./data/certbot/conf:/etc/letsencrypt
+      - ./data/certbot/www:/var/www/certbot
       # uncomment to use custom openimis.conf
       #- ./conf/nginx:/conf/
+
   worker:
     container_name: ${PROJECT_NAME:-openimis}-worker
     image: ghcr.io/openimis/openimis-be:${BE_TAG:-develop}
@@ -83,7 +96,7 @@ services:
       openimis-net:
   restapi:
     container_name: ${PROJECT_NAME:-openimis}-restapi
-    image: ghcr.io/openimis/openimis-rest_api:${RESTAPI_TAG:-latest}
+    image: ghcr.io/openimis/openimis-rest_api:${RESTAPI_TAG:-develop}
     environment:
       - DB_HOST=${DB_HOST}
       - DB_PORT=${DB_PORT}
