@@ -43,10 +43,12 @@ if you want to change the gateway config, you can uncomment the volume in the do
 ## OpenFN/Lightning setup 
 Lightning is not by default enabled in dockerized instance. To make it work it's required to: 
   * Copy .env.lightning to .env and make adjustments 
+  * Create `lightning_dev` database in db container 
   * Run container build `docker compose -f docker-compose.yml -f docker-compose.lightning.yml build lightning`
+  * Run migrations `docker compose -f docker-compose.yml -f docker-compose.lightning.yml run --rm lightning mix ecto.migrate`
   * Run imis demo setup `docker compose -f docker-compose.yml -f docker-compose.lightning.yml run --rm lightning ./imisSetup.sh`
   * Run service `docker compose -f docker-compose.yml -f docker-compose.lightning.yml up lightning`
-  
+
 # stop /start
 To stop all docker containers: `docker-compose  stop`
 To (re-)start all docker containers: `docker-compose  start` 
