@@ -1,0 +1,48 @@
+version: "2.4"
+
+x-lightning: &default-app
+  build:
+    dockerfile: Dockerfile-dev-
+    context: "https://github.com/openimis/openimis-lightning_dkr.git#develop"
+    args:
+      - "MIX_ENV=${MIX_ENV:-dev}"
+      - "NODE_ENV=${NODE_ENV:-development}"
+  ports:
+    - "4000:4000"
+  env_file:
+    - ".env.lightning"
+  restart: "${DOCKER_RESTART_POLICY:-unless-stopped}"
+  stop_grace_period: "3s"
+  tty: false
+  volumes:
+    - "${LIGHTNING_VOLUME:-./priv/static:/app/priv/static}"
+  networks:
+    openimis-net:
+      ipv4_address: 172.20.${IP_SUB:-20}.95
+
+
+
+services:
+  lightning:
+    <<: *default-app
+    deploy:
+      resources:
+        limits:
+          cpus: "${DOCKER_WEB_CPUS:-0}"
+          memory: "${DOCKER_WEB_MEMORY:-0}"
+    healthcheck:
+      test: "${DOCKER_WEB_HEALTHCHECK_TEST:-curl localhost:4000/health_check}"
+      interval: "60s"
+      timeout: "3s"
+      start_period: "5s"
+      retries: 3
+    depends_on:
+      - db
+
+networks:
+  openimis-net:
+    name: ${PROJECT_NAME:-openimis}-net
+    ipam:
+      config:
+        - subnet: 172.20.${IP_SUB:-20}.0/24
+          ip_range: 172.20.${IP_SUB:-20}.0/24
