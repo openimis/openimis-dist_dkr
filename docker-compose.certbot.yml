@@ -3,15 +3,13 @@ version: "2.4"
 services:
   db:
     container_name: ${PROJECT_NAME:-openimis}-db
-    image: ghcr.io/openimis/openimis-mssql:${DB_TAG:-latest}
-    restart: always
+    image: ghcr.io/openimis/openimis-pgsql:${DB_TAG:-latest}
     environment:
       - DB_USER_PASSWORD=${DB_PASSWORD}
       - SA_PASSWORD=${DB_PASSWORD}
       - DB_NAME=${DB_NAME}
       - DB_USER=${DB_USER}
       - ACCEPT_EULA=${ACCEPT_EULA}
-      - INIT_MODE=${INIT_MODE}
     healthcheck:
       test: "bash /app/healthcheck.sh"
       interval: 10s
@@ -32,7 +30,6 @@ services:
   backend:
     container_name: ${PROJECT_NAME:-openimis}-api
     image: ghcr.io/openimis/openimis-be:${BE_TAG:-develop}
-    restart: always
     command: start
     volumes:
       - photos:/openimis-be/openIMIS/images/insurees
@@ -56,7 +53,6 @@ services:
   frontend:
     container_name: ${PROJECT_NAME:-openimis}-frontend
     image: ghcr.io/openimis/openimis-fe:${FE_TAG:-develop}
-    restart: always
     environment:
       - REACT_APP_API_URL=api
       - NEW_OPENIMIS_HOST=${NEW_OPENIMIS_HOST}
@@ -71,8 +67,15 @@ services:
     volumes:
       - ./data/certbot/conf:/etc/letsencrypt
       - ./data/certbot/www:/var/www/certbot
+  certbot:
+    image: certbot/certbot
+    entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"
+    volumes:
+      - ./data/certbot/conf:/etc/letsencrypt
+      - ./data/certbot/www:/var/www/certbot
       # uncomment to use custom openimis.conf
       #- ./conf/nginx:/conf/
+
   worker:
     container_name: ${PROJECT_NAME:-openimis}-worker
     image: ghcr.io/openimis/openimis-be:${BE_TAG:-develop}
