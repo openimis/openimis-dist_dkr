@@ -4,9 +4,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile-openSearch-dev-
-    ports:
-      - "9200:9200"
-      - "9300:9300"
     env_file:
       - ".env.openSearch"
     environment:
@@ -14,7 +11,6 @@ services:
       - "cluster.name=${CLUSTER_NAME:-my_opensearch_cluster}"
       - "http.port=${HTTP_PORT:-9200}"
       - "plugins.security.ssl.http.enabled=${SLL_HTTP_ENABLED:-false}"
-      # Add any other necessary environment variables here
     volumes:
       - "opensearch-data1:/usr/share/opensearch/data"
     networks:
