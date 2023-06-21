@@ -1,0 +1,46 @@
+version: '2.4'
+services:
+  opensearch:
+    build:
+      context: .
+      dockerfile: Dockerfile-openSearch-dev-
+    env_file:
+      - ".env.openSearch"
+    environment:
+      - "discovery.type=${DISCOVERY_TYPE:-single-node}"
+      - "cluster.name=${CLUSTER_NAME:-my_opensearch_cluster}"
+      - "http.port=${HTTP_PORT:-9200}"
+      - "plugins.security.ssl.http.enabled=${SLL_HTTP_ENABLED:-false}"
+    volumes:
+      - "opensearch-data1:/usr/share/opensearch/data"
+    networks:
+      openimis-net:
+        ipv4_address: 172.20.${IP_SUB:-20}.96
+
+  opensearch-dashboards:
+    image: opensearchproject/opensearch-dashboards:latest
+    container_name: opensearch-dashboards
+    ports:
+      - "5601:5601"
+    expose:
+      - "5601"
+    environment:
+      - "OPENSEARCH_HOSTS=${OPENSEARCH_HOSTS:-http://opensearch:9200}"
+      - "ELASTICSEARCH_USERNAME=${ELASTICSEARCH_USERNAME:-admin}"
+      - "ELASTICSEARCH_PASSWORD=${ELASTICSEARCH_PASSWORD:-admin}"
+    volumes:
+      - "./config/kibana.yml:/usr/share/opensearch-dashboards/config/kibana.yml"
+    networks:
+      openimis-net:
+        ipv4_address: 172.20.${IP_SUB:-20}.97
+
+volumes:
+  opensearch-data1:
+
+networks:
+  openimis-net:
+    name: ${PROJECT_NAME:-openimis}-net
+    ipam:
+      config:
+        - subnet: 172.20.${IP_SUB:-20}.0/24
+          ip_range: 172.20.${IP_SUB:-20}.0/24

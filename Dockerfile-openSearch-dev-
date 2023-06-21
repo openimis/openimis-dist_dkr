@@ -1,0 +1,4 @@
+FROM opensearchproject/opensearch:latest
+
+# Set the ownership of the data directory
+RUN chown -R 1000:1000 /usr/share/opensearch/data

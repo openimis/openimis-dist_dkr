@@ -46,6 +46,12 @@ Lightning is not by default enabled in dockerized instance. To make it work it's
   * Run imis demo setup `docker compose -f docker-compose.yml -f docker-compose.lightning.yml run --rm lightning ./imisSetup.sh`
   * Run service `docker compose -f docker-compose.yml -f docker-compose.lightning.yml up lightning`
 
+## OpenSearch/OpenSearch Dashboards setup 
+Both OpenSearch and OpenSearch Dashboards are not by default enabled in dockerized instance. To make them work it's required to: 
+  * Copy `.env.openSearch.example` to `.env.openSearch` and make adjustments
+  * Run container build `docker compose -f docker-compose.yml -f docker-compose.openSearch.yml build opensearch opensearch-dashboards`
+  * Run service `docker compose -f docker-compose.yml -f docker-compose.openSearch.yml up opensearch opensearch-dashboards`
+
 # stop /start
 
 To stop all docker containers: `docker-compose  stop`
