@@ -49,8 +49,37 @@ Lightning is not by default enabled in dockerized instance. To make it work it's
 ## OpenSearch/OpenSearch Dashboards setup 
 Both OpenSearch and OpenSearch Dashboards are not by default enabled in dockerized instance. To make them work it's required to: 
   * Copy `.env.openSearch.example` to `.env.openSearch` and make adjustments
-  * Run container build `docker compose -f docker-compose.yml -f docker-compose.openSearch.yml build opensearch opensearch-dashboards`
-  * Run service `docker compose -f docker-compose.yml -f docker-compose.openSearch.yml up opensearch opensearch-dashboards`
+  * Run container build `docker compose -f docker-compose.yml -f docker-compose.openSearch.yml build opensearch opensearch-dashboards nginx`
+  * Run service `docker compose -f docker-compose.yml -f docker-compose.openSearch.yml up opensearch opensearch-dashboards nginx`
+This build provides also additional nginx proxy server in order to handle openSearch Dashboard application on frontend level. 
+
+How to run on dockerized instance (db, backend, frontend of openIMIS):
+   * add to env file value for `OPENSEARCH_BASIC_TOKEN` (based on admin and password credentials to openSearch)
+   * use in env variables file in openimis-dist_dkr such env variables `DOCKERFILE_NAME=Dockerfile-nginx-`, `NGINX_CONF_VOLUME=nginx.conf.template` 
+     to switch into dockerized context
+   * Use the following environment variables in the .env file in openimis-fe_js:
+   - `ENV OPENSEARCH_PROXY_ROOT="opensearch"`
+   - `ENV OPENSEARCH_PROXY_HOST="172.20.20.98"`
+   - `ENV PROXY_HOST="172.20.20.13"`
+   * run backend and frontend services.
+
+How to run on local development mode (only for development purposes): 
+   * Add the following value to the environment file in openimis-dist_dkr `OPENSEARCH_BASIC_TOKEN` (based on admin and password credentials to OpenSearch).
+   * Use the following environment variables in the file in openimis-dist_dkr:
+      - `DOCKERFILE_NAME=Dockerfile-nginx-dev-`
+      - `NGINX_CONF_VOLUME=nginx-dev.conf.template`
+      These variables are used to switch into the local context.
+   * Add the following section to the `docker-compose.openSearch.yml` file:
+      ```yaml
+      extra_hosts:
+      - ${FRONTEND_HOST:-host.docker.internal:host-gateway}
+     ```
+     This ensures proper communication between the dockerized openSearch Dashboard and frontend of the openIMIS app.
+   * Use the following environment variables in the .env file in openimis-fe_js:
+     - `ENV OPENSEARCH_PROXY_ROOT=""`
+     - `ENV PROXY_HOST="172.20.20.98"`
+   * Run the backend and frontend of the openIMIS app locally without using Docker (the openIMIS database can be Dockerized).
+   * Please note that this setup is for development purposes only. DO NOT use this context in a production environment.
 
 # stop /start
 

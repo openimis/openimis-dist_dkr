@@ -33,12 +33,13 @@ services:
       - DB_NAME=${DB_NAME}
       - DB_USER=${DB_USER}
       - DB_PASSWORD=${DB_PASSWORD}
+      - DB_ENGINE=${DB_ENGINE}
       - SITE_ROOT=api
       - DEBUG=True
       - DJANGO_LOG_LEVEL=DEBUG
       - SITE_URL=${NEW_OPENIMIS_HOST}
       - CELERY_BROKER_URL=amqp://rabbitmq
-    depends_on:  
+    depends_on:
       db:
         condition: service_healthy
     networks:
@@ -71,7 +72,7 @@ services:
     restart: always
     volumes:
       - photos:/openimis-be/openIMIS/images/insurees
-    depends_on: 
+    depends_on:
       - backend
     environment: *backend-env
     networks:
@@ -98,7 +99,7 @@ services:
       - ./Escape:/app/Escape
       - ./FromPhone:/app/FromPhone
     restart: always
-    depends_on:  
+    depends_on:
       db:
         condition: service_healthy
     networks:
