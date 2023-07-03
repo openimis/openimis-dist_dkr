@@ -1,0 +1,6 @@
+plugins.security.disabled: true
+opensearch_security.authcz.admin_dn:
+  - CN=admin,OU=Admin,O=Example Com\, Inc.,DC=example,DC=com
+
+opensearch_security.jwt.enabled: true
+opensearch_security.jwt.signature_key: your-signature-key
