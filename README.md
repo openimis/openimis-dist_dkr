@@ -60,7 +60,7 @@ How to run on dockerized instance (db, backend, frontend of openIMIS):
    * Use the following environment variables in the .env file in openimis-fe_js:
    - `ENV OPENSEARCH_PROXY_ROOT="opensearch"`
    - `ENV OPENSEARCH_PROXY_HOST="172.20.20.98"`
-   - `ENV PROXY_HOST="172.20.20.13"`
+   - `ENV PROXY_HOST="0.0.0.0"`
    * run backend and frontend services.
 
 How to run on local development mode (only for development purposes): 
