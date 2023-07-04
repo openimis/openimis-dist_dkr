@@ -75,6 +75,7 @@ How to run on local development mode (only for development purposes):
       - ${FRONTEND_HOST:-host.docker.internal:host-gateway}
      ```
      This ensures proper communication between the dockerized openSearch Dashboard and frontend of the openIMIS app.
+   * remove dependency to frontend on nginx service level in the file `docker-compose.openSearch.yml`. 
    * Use the following environment variables in the .env file in openimis-fe_js:
      - `ENV OPENSEARCH_PROXY_ROOT=""`
      - `ENV PROXY_HOST="172.20.20.98"`
