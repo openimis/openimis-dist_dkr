@@ -15,7 +15,6 @@ services:
       - "opensearch-data1:/usr/share/opensearch/data"
     networks:
       openimis-net:
-        ipv4_address: 172.20.${IP_SUB:-20}.96
 
   opensearch-dashboards:
     image: opensearchproject/opensearch-dashboards:latest
@@ -34,7 +33,6 @@ services:
       - "./opensearch-configuration/opensearch.yml:/usr/share/opensearch-dashboards/config/opensearch.yml"
     networks:
       openimis-net:
-        ipv4_address: 172.20.${IP_SUB:-20}.97
 
   nginx:
     build:
@@ -54,7 +52,6 @@ services:
       - ./data/certbot/www:/var/www/certbot
     depends_on:
       - opensearch
-      - frontend
     networks:
       openimis-net:
         ipv4_address: 172.20.${IP_SUB:-20}.98
