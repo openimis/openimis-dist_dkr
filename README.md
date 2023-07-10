@@ -53,13 +53,10 @@ Both OpenSearch and OpenSearch Dashboards are not by default enabled in dockeriz
   * Run service `docker compose -f docker-compose.yml -f docker-compose.openSearch.yml up opensearch opensearch-dashboards nginx`
 This build provides also additional nginx proxy server in order to handle openSearch Dashboard application on frontend level. 
 
-How to run on dockerized instance (db, backend, frontend of openIMIS):
-   * add to env file value for `OPENSEARCH_BASIC_TOKEN` (based on admin and password credentials to openSearch)
-   * use in env variables file in openimis-dist_dkr such env variables `DOCKERFILE_NAME=Dockerfile-nginx-`, `NGINX_CONF_VOLUME=nginx.conf.template` 
-     to switch into dockerized context
-   * Use the following environment variables in the .env file in openimis-fe_js:
-   - `ENV OPENSEARCH_PROXY_ROOT="opensearch"`
-   * run backend and frontend services.
+To run on a Dockerized instance (database, backend, and frontend of openIMIS), please follow the steps below:
+  * Add a value for the OPENSEARCH_BASIC_TOKEN in the environment (env) file. This should be based on the admin and password credentials for openSearch.
+  * In the .env file in openimis-fe_js, use the following environment variable: `ENV OPENSEARCH_PROXY_ROOT="opensearch"`.
+  * Run the backend and frontend services.
 
 # stop /start
 
