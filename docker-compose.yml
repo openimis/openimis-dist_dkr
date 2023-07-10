@@ -22,10 +22,6 @@ services:
       openimis-net:
   backend:
     container_name: ${PROJECT_NAME:-openimis}-api
-    build:
-      context: https://github.com/openimis/openimis-be_py.git#${BE_BRANCH:-coreMIS}
-      args:
-        OPENIMIS_CONF_JSON: ${OPENIMIS_BE_CONF_JSON}
     image: ghcr.io/openimis/openimis-be:${BE_TAG:-develop}
     restart: always
     command: start
@@ -51,8 +47,7 @@ services:
 
   frontend:
     container_name: ${PROJECT_NAME:-openimis}-frontend
-    build:
-      context: /home/user/frontend/openimis-fe_js
+    image: ghcr.io/openimis/openimis-fe:${FE_TAG:-develop}
     restart: always
     environment:
       - REACT_APP_API_URL=api
