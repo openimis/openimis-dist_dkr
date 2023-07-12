@@ -40,8 +40,3 @@ volumes:
 
 networks:
   openimis-net:
-    name: ${PROJECT_NAME:-openimis}-net
-    ipam:
-      config:
-        - subnet: 172.20.${IP_SUB:-20}.0/24
-          ip_range: 172.20.${IP_SUB:-20}.0/24
