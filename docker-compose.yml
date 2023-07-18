@@ -39,7 +39,7 @@ services:
       - DJANGO_LOG_LEVEL=DEBUG
       - SITE_URL=${NEW_OPENIMIS_HOST}
       - CELERY_BROKER_URL=amqp://rabbitmq
-    depends_on:  
+    depends_on:
       db:
         condition: service_healthy
     networks:
@@ -53,6 +53,7 @@ services:
       - REACT_APP_API_URL=api
       - NEW_OPENIMIS_HOST=${NEW_OPENIMIS_HOST}
       - OPENIMIS_CONF_JSON=${OPENIMIS_FE_CONF_JSON}
+      - OPENSEARCH_BASIC_TOKEN=${OPENSEARCH_BASIC_TOKEN}
     networks:
       openimis-net:
     ports:
@@ -72,7 +73,7 @@ services:
     restart: always
     volumes:
       - photos:/openimis-be/openIMIS/images/insurees
-    depends_on: 
+    depends_on:
       - backend
     environment: *backend-env
     networks:
@@ -99,7 +100,7 @@ services:
       - ./Escape:/app/Escape
       - ./FromPhone:/app/FromPhone
     restart: always
-    depends_on:  
+    depends_on:
       db:
         condition: service_healthy
     networks:
