@@ -35,7 +35,7 @@ In case of troubles, please consult/contact our service desk via our [ticketing 
 
 ## init database
 
-by default the database is initialised with demo data without any action
+Include the line INIT_MODE=demo in .env or uncomment it if .env.example copied to intiate the database with the DEMO dataset, it will create an empty openIMIS database otherwise
 
 ## OpenFN/Lightning setup 
 Lightning is not by default enabled in dockerized instance. To make it work it's required to: 
