@@ -1,29 +1,39 @@
-version: "2.4"
+version: "3"
 
 x-lightning: &default-app
   build:
     dockerfile: Dockerfile-dev-
     context: "https://github.com/openimis/openimis-lightning_dkr.git#develop"
+    target: "${MIX_ENV:-dev}"
     args:
       - "MIX_ENV=${MIX_ENV:-dev}"
       - "NODE_ENV=${NODE_ENV:-development}"
-  ports:
-    - "4000:4000"
+  depends_on:
+    - "postgres"
   env_file:
-    - ".env.lightning"
+    - ".env"
   restart: "${DOCKER_RESTART_POLICY:-unless-stopped}"
   stop_grace_period: "3s"
-  tty: false
+  tty: ${TTY:-false}
   volumes:
     - "${LIGHTNING_VOLUME:-./priv/static:/app/priv/static}"
-  networks:
-    openimis-net:
-      ipv4_address: 172.20.${IP_SUB:-20}.95
-
-
 
 services:
-  lightning:
+  postgres:
+    deploy:
+      resources:
+        limits:
+          cpus: "${DOCKER_POSTGRES_CPUS:-0}"
+          memory: "${DOCKER_POSTGRES_MEMORY:-0}"
+    env_file:
+      - ".env"
+    image: "postgres:14.2-alpine"
+    restart: "${DOCKER_RESTART_POLICY:-unless-stopped}"
+    stop_grace_period: "3s"
+    volumes:
+      - "postgres:/var/lib/postgresql/data"
+
+  web:
     <<: *default-app
     deploy:
       resources:
@@ -36,9 +46,12 @@ services:
       timeout: "3s"
       start_period: "5s"
       retries: 3
-    depends_on:
-      - db
+    ports:
+      - "${LIGHTNING_EXTERNAL_PORT:-127.0.0.1:4000}:${URL_PORT}"
+
+volumes:
+  postgres: {}
 
 networks:
   openimis-net:
-    name: ${PROJECT_NAME:-openimis}-net
+    name: ${PROJECT_NAME}-openimis-net
