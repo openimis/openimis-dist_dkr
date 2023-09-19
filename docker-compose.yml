@@ -86,27 +86,6 @@ services:
     restart: always
     networks:
       openimis-net:
-  restapi:
-    container_name: ${PROJECT_NAME:-openimis}-restapi
-    image: ghcr.io/openimis/openimis-rest_api:${RESTAPI_TAG:-latest}
-    environment:
-      - DB_HOST=${DB_HOST}
-      - DB_PORT=${DB_PORT}
-      - DB_NAME=${DB_NAME}
-      - DB_USER=${DB_USER}
-      - DB_PASSWORD=${DB_PASSWORD}
-    volumes:
-      #- ./conf/restapi:/app/config
-      - ./logs:/app/log
-      - photos:/app/photos
-      - ./Escape:/app/Escape
-      - ./FromPhone:/app/FromPhone
-    restart: always
-    depends_on:
-      db:
-        condition: service_healthy
-    networks:
-      openimis-net:
 networks:
   openimis-net:
 volumes:
