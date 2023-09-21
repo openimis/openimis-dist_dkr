@@ -15,7 +15,6 @@ services:
       - "opensearch-data1:/usr/share/opensearch/data"
     networks:
       openimis-net:
-
   opensearch-dashboards:
     image: opensearchproject/opensearch-dashboards:latest
     container_name: opensearch-dashboards
@@ -33,10 +32,11 @@ services:
       - "./opensearch-configuration/opensearch.yml:/usr/share/opensearch-dashboards/config/opensearch.yml"
     networks:
       openimis-net:
-
 volumes:
   opensearch-data1:
 
 
 networks:
   openimis-net:
+    name: ${PROJECT_NAME}-openimis-net
+    external: True

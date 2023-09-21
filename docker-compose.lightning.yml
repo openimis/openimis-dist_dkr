@@ -1,53 +1,52 @@
-version: "3"
+version: "3.7"
 
 x-lightning: &default-app
   build:
     dockerfile: Dockerfile-dev-
     context: "https://github.com/openimis/openimis-lightning_dkr.git#develop"
-    target: "${MIX_ENV:-dev}"
     args:
       - "MIX_ENV=${MIX_ENV:-dev}"
       - "NODE_ENV=${NODE_ENV:-development}"
+    target: "${MIX_ENV:-dev}"
   depends_on:
     - "postgres"
   env_file:
-    - ".env"
+    - .env
   restart: "${DOCKER_RESTART_POLICY:-unless-stopped}"
   stop_grace_period: "3s"
   tty: ${TTY:-false}
   volumes:
     - "${LIGHTNING_VOLUME:-./priv/static:/app/priv/static}"
 
-services:
-  postgres:
-    deploy:
-      resources:
-        limits:
-          cpus: "${DOCKER_POSTGRES_CPUS:-0}"
-          memory: "${DOCKER_POSTGRES_MEMORY:-0}"
-    env_file:
-      - ".env"
-    image: "postgres:14.2-alpine"
-    restart: "${DOCKER_RESTART_POLICY:-unless-stopped}"
-    stop_grace_period: "3s"
-    volumes:
-      - "postgres:/var/lib/postgresql/data"
 
-  web:
+services:
+
+  lightning-web:
     <<: *default-app
-    deploy:
-      resources:
-        limits:
-          cpus: "${DOCKER_WEB_CPUS:-0}"
-          memory: "${DOCKER_WEB_MEMORY:-0}"
+    container_name: ${PROJECT_NAME}-lightning
+    env_file:
+      - .env
     healthcheck:
       test: "${DOCKER_WEB_HEALTHCHECK_TEST:-curl localhost:4000/health_check}"
       interval: "60s"
       timeout: "3s"
       start_period: "5s"
       retries: 3
+    networks:
+      openimis-net:
     ports:
-      - "${LIGHTNING_EXTERNAL_PORT:-127.0.0.1:4000}:${URL_PORT}"
+            - ${LIGHTNING_EXTERNAL_PORT:-4000}:4000
+  postgres:
+    container_name: ${PROJECT_NAME}-lightning-db
+    env_file:
+      - .env
+    image: "postgres:14.2-alpine"
+    restart: "${DOCKER_RESTART_POLICY:-unless-stopped}"
+    stop_grace_period: "3s"
+    volumes:
+      - "postgres:/var/lib/postgresql/data"
+    networks:
+      openimis-net:
 
 volumes:
   postgres: {}
@@ -55,3 +54,4 @@ volumes:
 networks:
   openimis-net:
     name: ${PROJECT_NAME}-openimis-net
+    external: True
