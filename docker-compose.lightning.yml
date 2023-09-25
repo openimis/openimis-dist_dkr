@@ -22,6 +22,24 @@ x-lightning: &default-app
 
 
 services:
+  lightning_db:
+    container_name: ${PROJECT_NAME:-openimis}-lightning-db
+    image: "postgres:14.2-alpine"
+    build:
+      target: ${INIT_MODE:-base}
+    environment:
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PORT
+      - PGPORT=${POSTGRES_PORT}
+    volumes:
+      - lightning_database:/var/lib/postgresql/data
+    restart: always
+    networks:
+      openimis-net:
+    env_file:
+      - ".env.lightning"
   lightning:
     <<: *default-app
     deploy:
@@ -36,8 +54,11 @@ services:
       start_period: "5s"
       retries: 3
     depends_on:
-      - db
+      - lightning_db
 
 networks:
   openimis-net:
     name: ${PROJECT_NAME:-openimis}-net
+
+volumes:
+  lightning_database:
