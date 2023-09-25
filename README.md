@@ -49,8 +49,8 @@ Lightning is not by default enabled in dockerized instance. To make it work it's
 ## OpenSearch/OpenSearch Dashboards setup 
 Both OpenSearch and OpenSearch Dashboards are not by default enabled in dockerized instance. To make them work it's required to: 
   * Copy `.env.openSearch.example` to `.env.openSearch` and make adjustments
-  * Run container build `docker compose -f docker-compose.yml -f docker-compose.openSearch.yml build opensearch opensearch-dashboards nginx`
-  * Run service `docker compose -f docker-compose.yml -f docker-compose.openSearch.yml up opensearch opensearch-dashboards nginx`
+  * Run container build `docker compose -f docker-compose.yml -f docker-compose.openSearch.yml build opensearch opensearch-dashboards`
+  * Run service `docker compose -f docker-compose.yml -f docker-compose.openSearch.yml up opensearch opensearch-dashboards`
 This build provides also additional nginx proxy server in order to handle openSearch Dashboard application on frontend level. 
 
 To run on a Dockerized instance (database, backend, and frontend of openIMIS), please follow the steps below:
