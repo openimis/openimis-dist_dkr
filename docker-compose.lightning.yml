@@ -1,4 +1,4 @@
-version: "2.4"
+version: "3.7"
 
 x-lightning: &default-app
   build:
@@ -17,7 +17,7 @@ x-lightning: &default-app
   volumes:
     - "${LIGHTNING_VOLUME:-./priv/static:/app/priv/static}"
   networks:
-    openimis-net:
+    - openimis-net
 
 
 
@@ -37,7 +37,7 @@ services:
       - lightning_database:/var/lib/postgresql/data
     restart: always
     networks:
-      openimis-net:
+      - openimis-net
     env_file:
       - ".env.lightning"
   lightning:
@@ -56,9 +56,9 @@ services:
     depends_on:
       - lightning_db
 
+
 networks:
   openimis-net:
-    name: ${PROJECT_NAME:-openimis}-net
 
 volumes:
   lightning_database:
