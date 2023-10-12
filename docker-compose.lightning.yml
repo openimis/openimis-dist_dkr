@@ -1,6 +1,7 @@
 version: "3.7"
 
 x-lightning: &default-app
+  platform: linux/amd64
   build:
     dockerfile: Dockerfile-dev-
     context: "https://github.com/openimis/openimis-lightning_dkr.git#develop"
