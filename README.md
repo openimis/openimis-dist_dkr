@@ -42,15 +42,15 @@ Lightning is not by default enabled in dockerized instance. To make it work it's
   * Copy `.env.lightning.example` to `.env.lightning` and make adjustments 
   * Create `lightning_dev` database in db container 
   * Run container build `docker compose -f docker-compose.yml -f docker-compose.lightning.yml build lightning`
-  * Run migrations `docker compose -f docker-compose.yml -f docker-compose.lightning.yml run --rm lightning mix ecto.migrate`
-  * Run imis demo setup `docker compose -f docker-compose.yml -f docker-compose.lightning.yml run --rm lightning ./imisSetup.sh`
-  * Run service `docker compose -f docker-compose.yml -f docker-compose.lightning.yml up lightning`
+  * Run migrations `docker compose -f docker-compose.yml -f docker-compose.lightning.yml --env-file=.env.lightning run --rm lightning mix ecto.migrate`
+  * Run imis demo setup `docker compose -f docker-compose.yml -f docker-compose.lightning.yml --env-file=.env.lightning run --rm lightning ./imisSetup.sh`
+  * Run service `docker compose -f docker-compose.yml -f docker-compose.lightning.yml --env-file=.env.lightning up lightning`
 
 ## OpenSearch/OpenSearch Dashboards setup 
 Both OpenSearch and OpenSearch Dashboards are not by default enabled in dockerized instance. To make them work it's required to: 
   * Copy `.env.openSearch.example` to `.env.openSearch` and make adjustments
-  * Run container build `docker compose -f docker-compose.yml -f docker-compose.openSearch.yml build opensearch opensearch-dashboards nginx`
-  * Run service `docker compose -f docker-compose.yml -f docker-compose.openSearch.yml up opensearch opensearch-dashboards nginx`
+  * Run container build `docker compose -f docker-compose.yml -f docker-compose.openSearch.yml build opensearch opensearch-dashboards`
+  * Run service `docker compose -f docker-compose.yml -f docker-compose.openSearch.yml up opensearch opensearch-dashboards`
 This build provides also additional nginx proxy server in order to handle openSearch Dashboard application on frontend level. 
 
 To run on a Dockerized instance (database, backend, and frontend of openIMIS), please follow the steps below:
