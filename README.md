@@ -19,7 +19,7 @@ In case of troubles, please consult/contact our service desk via our [ticketing 
 
 * create a `.env` file, use .env.example as starting point
 
-## configure the restapi
+## Configure the restapi
  the rest api config files appsettings.json, appsettings.Production.json, appsetting.Developments.json must be created in the folder ./conf/restapi
  create the log folder ./logs¨
 
@@ -27,13 +27,13 @@ In case of troubles, please consult/contact our service desk via our [ticketing 
    - uncomment the volume in the fronend config
    - replace openimis.conf with openimis.conf.without_restapi
 
-## configure the gateway (optionnal)
+## Configure the gateway (optionnal)
   
    - uncomment the volume in the fronend config
    - make modification in openimis.conf
 
 
-## init database
+## Init database
 
 Include the line INIT_MODE=demo in .env or uncomment it if .env.example copied to intiate the database with the DEMO dataset, it will create an empty openIMIS database otherwise
 
@@ -58,26 +58,24 @@ To run on a Dockerized instance (database, backend, and frontend of openIMIS), p
   * In the .env file in openimis-fe_js, use the following environment variable: `ENV OPENSEARCH_PROXY_ROOT="opensearch"`.
   * Run the backend and frontend services.
 
-# stop /start
+# Stop/Start
 
 To stop all docker containers: `docker compose  stop`
 To (re-)start all docker containers: `docker compose  start` 
 
-# pull new images
+# Pull new images
 
 To pull new images or images update `docker compose pull` 
 
+# Create Let's Encrypt certificates
 
-# create lets encrypt certs
-
-use the certbot docker compose file
+Use the certbot docker compose file
 
 export NEW_OPENIMIS_HOST first
 
-
-## dry run 
+## Dry run 
 docker compose run --rm --entrypoint "  certbot certonly --webroot -w /var/www/certbot  --staging  --register-unsafely-without-email  -d  ${NEW_OPENIMIS_HOST}    --rsa-key-size 2048     --agree-tos     --force-renewal" certbot
 
-## actual setup
+## Actual setup
 
 docker compose run --rm --entrypoint "  certbot certonly --webroot -w /var/www/certbot    --register-unsafely-without-email  -d  ${NEW_OPENIMIS_HOST}    --rsa-key-size 2048     --agree-tos     --force-renewal" certbot
