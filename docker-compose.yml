@@ -1,7 +1,6 @@
 version: "3.7"
 x-api: &default-api
-  build:
-    context: https://github.com/openimis/openimis-be_py.git
+  image: ghcr.io/openimis/openimis-be:${BE_TAG:-develop}
   healthcheck:
     test: ['CMD', 'curl' ,"--fail" ,"--silent", "--write-out" ,"HTTP CODE : %{http_code}\n", '--output', '/dev/null', 'http://127.0.0.1:8000/${SITE_ROOT}/core/']
     interval: 20s
@@ -19,7 +18,6 @@ x-api: &default-api
     - CELERY_BROKER_URL=amqp://rabbitmq
     - DB_ENGINE=${DB_ENGINE}
     - DJANGO_LOG_LEVEL=DEBUG
-    - 
     - DEBUG=True
   depends_on:
     db:
@@ -50,7 +48,7 @@ services:
     volumes:
       - database:/var/lib/postgresql/data
     restart: always
-        networks:
+    networks:
       openimis-net:
   backend:
     <<: *default-api
@@ -66,8 +64,6 @@ services:
       - OPENIMIS_CONF_JSON=${OPENIMIS_FE_CONF_JSON}
       - FORCE_RELOAD=1
       - OPENSEARCH_BASIC_TOKEN=${OPENSEARCH_BASIC_TOKEN}
-    volumes:
-      - ./conf/nginx:/conf
     networks:
       openimis-net:
     ports:
@@ -80,7 +76,7 @@ services:
       - ./data/certbot/conf:/etc/letsencrypt
       - ./data/certbot/www:/var/www/certbot
       # uncomment to use custom openimis.conf
-      #- ./conf/nginx:/conf/
+      # - ./conf/nginx:/conf/
   worker:
     <<: *default-api
     container_name: ${PROJECT_NAME:-openimis}-worker
