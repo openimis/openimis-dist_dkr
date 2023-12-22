@@ -1,0 +1,25 @@
+server {
+    listen 80;
+    server_name 172.20.20.98;
+
+    location / {
+        auth_request /check_user/;
+        proxy_pass http://172.20.20.97:5601;
+        proxy_set_header Cookie $http_cookie;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header Authorization "$OPENSEARCH_BASIC_TOKEN";
+        proxy_set_header Content-Type "application/json";
+    }
+
+    location = /check_user/ {
+            internal;
+            proxy_pass_request_body off;
+            proxy_set_header Content-Length "";
+            proxy_set_header X-Original-URI $request_uri;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_pass http://frontend:80/api/core/users/current_user/;
+    }
+}

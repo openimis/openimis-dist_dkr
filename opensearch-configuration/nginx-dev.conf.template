@@ -1,0 +1,21 @@
+server {
+    server_name 172.20.20.98;
+    listen 80;
+
+    location /opensearch/ {
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header Cookie $http_cookie;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+
+        proxy_pass http://172.20.20.97:5601;
+        proxy_redirect off;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_read_timeout 180s;
+        proxy_send_timeout 180s;
+        auth_basic "Restricted Access";
+        proxy_set_header Authorization "$OPENSEARCH_BASIC_TOKEN";
+    }
+}

@@ -11,6 +11,7 @@ services:
       - DB_NAME=${DB_NAME}
       - DB_USER=${DB_USER}
       - ACCEPT_EULA=${ACCEPT_EULA}
+      - INIT_MODE=${INIT_MODE}
     healthcheck:
       test: "bash /app/healthcheck.sh"
       interval: 10s
