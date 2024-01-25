@@ -37,8 +37,9 @@ services:
 volumes:
   opensearch-data1:
 
-networks:
-  openimis-net:
-    name: "${PROJECT_NAME:-openimis}-net"
+# networks:
+#   openimis-net:
+#     name: "${PROJECT_NAME:-openimis}-net"
+#     external: true
 
 

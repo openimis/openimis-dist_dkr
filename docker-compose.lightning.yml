@@ -1,20 +1,20 @@
 version: "3.7"
 
 x-lightning: &default-app
-  build:
-    dockerfile: Dockerfile-dev-
-    context: "https://github.com/openimis/openimis-lightning_dkr.git#delcroip-patch-1"
-    target: "${MIX_ENV:-dev}"
-    args:
-      - "MIX_ENV=${MIX_ENV:-dev}"
-      - "NODE_ENV=${NODE_ENV:-development}"
+  image: ghcr.io/openimis/openimis-lightning_dkr:develop
+  # build:
+  #   dockerfile: Dockerfile-dev-
+  #   context: "https://github.com/openimis/openimis-lightning_dkr.git#delcroip-patch-1"
+  #   target: "${MIX_ENV:-dev}"
+  #   args:
+  #     - "MIX_ENV=${MIX_ENV:-dev}"
+  #     - "NODE_ENV=${NODE_ENV:-development}"
   depends_on:
     - "db"
   env_file:
     - ".env.lightning"
   restart: "${DOCKER_RESTART_POLICY:-unless-stopped}"
   stop_grace_period: "3s"
-  tty: ${TTY:-false}
   volumes:
     - "${LIGHTNING_VOLUME:-./priv/static:/app/priv/static}"
 
@@ -39,10 +39,6 @@ services:
 
 volumes:
   postgres: {}
-
-networks:
-  openimis-net:
-    name: "${PROJECT_NAME:-openimis}-net"
 
 
 
