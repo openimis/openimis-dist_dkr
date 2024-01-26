@@ -2,13 +2,14 @@ version: "3.7"
 
 x-lightning: &default-app
   image: ghcr.io/openimis/openimis-lightning_dkr:develop
-  # build:
-  #   dockerfile: Dockerfile-dev-
-  #   context: "https://github.com/openimis/openimis-lightning_dkr.git#delcroip-patch-1"
-  #   target: "${MIX_ENV:-dev}"
-  #   args:
-  #     - "MIX_ENV=${MIX_ENV:-dev}"
-  #     - "NODE_ENV=${NODE_ENV:-development}"
+  platform: linux/amd64
+  #build:
+    # dockerfile: Dockerfile-dev-
+    # context: "https://github.com/openimis/openimis-lightning_dkr.git#delcroip-patch-1"
+    # target: "${MIX_ENV:-dev}"
+    # args:
+    #   - "MIX_ENV=${MIX_ENV:-dev}"
+    #   - "NODE_ENV=${NODE_ENV:-development}"
   depends_on:
     - "db"
   env_file:
