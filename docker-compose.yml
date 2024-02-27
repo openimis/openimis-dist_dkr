@@ -1,4 +1,26 @@
 version: "3.7"
+x-api: &default-api
+  image: ghcr.io/openimis/openimis-be:${BE_TAG:-develop}
+  environment:
+    - DB_HOST=${DB_HOST}
+    - DB_PORT=${DB_PORT}
+    - DB_NAME=${DB_NAME}
+    - DB_USER=${DB_USER}
+    - DB_PASSWORD=${DB_PASSWORD}
+    - SITE_ROOT=api
+    - SITE_URL=${NEW_OPENIMIS_HOST}
+    - CELERY_BROKER_URL=amqp://rabbitmq
+    - DB_ENGINE=${DB_ENGINE}
+    - DJANGO_LOG_LEVEL=DEBUG
+    - DEBUG=True
+  volumes:
+    - photos:/openimis-be/openIMIS/images/insurees
+  depends_on:
+    db:
+      condition: service_healthy
+  networks:
+    openimis-net:
+  restart: always
 
 services:
   db:
@@ -20,30 +42,6 @@ services:
     volumes:
       - database:/var/lib/postgresql/data
     restart: always
-    networks:
-      openimis-net:
-  backend:
-    container_name: ${PROJECT_NAME:-openimis}-api
-    image: ghcr.io/openimis/openimis-be:${BE_TAG:-develop}
-    restart: always
-    command: start
-    volumes:
-      - photos:/openimis-be/openIMIS/images/insurees
-    environment: &backend-env
-      - DB_HOST=${DB_HOST}
-      - DB_PORT=${DB_PORT}
-      - DB_NAME=${DB_NAME}
-      - DB_USER=${DB_USER}
-      - DB_PASSWORD=${DB_PASSWORD}
-      - DB_ENGINE=${DB_ENGINE}
-      - SITE_ROOT=api
-      - DEBUG=True
-      - DJANGO_LOG_LEVEL=DEBUG
-      - SITE_URL=${NEW_OPENIMIS_HOST}
-      - CELERY_BROKER_URL=amqp://rabbitmq
-    depends_on:
-      db:
-        condition: service_healthy
     networks:
       openimis-net:
 
@@ -68,43 +66,19 @@ services:
       - ./data/certbot/www:/var/www/certbot
       # uncomment to use custom openimis.conf
       #- ./conf/nginx:/conf/
+  backend:
+    <<: *default-api
+    container_name: ${PROJECT_NAME:-openimis}-api
+    command: start      
+  
   worker:
+    <<: *default-api
     container_name: ${PROJECT_NAME:-openimis}-worker
-    image: ghcr.io/openimis/openimis-be:${BE_TAG:-develop}
     command: worker
-    restart: always
-    volumes:
-      - photos:/openimis-be/openIMIS/images/insurees
-    depends_on:
-      - backend
-    environment: *backend-env
-    networks:
-      openimis-net:
   rabbitmq:
     container_name: ${PROJECT_NAME:-openimis}-rabbitmq
     image: rabbitmq:3-management
     restart: always
-    networks:
-      openimis-net:
-  restapi:
-    container_name: ${PROJECT_NAME:-openimis}-restapi
-    image: ghcr.io/openimis/openimis-rest_api:${RESTAPI_TAG:-latest}
-    environment:
-      - DB_HOST=${DB_HOST}
-      - DB_PORT=${DB_PORT}
-      - DB_NAME=${DB_NAME}
-      - DB_USER=${DB_USER}
-      - DB_PASSWORD=${DB_PASSWORD}
-    volumes:
-      #- ./conf/restapi:/app/config
-      - ./logs:/app/log
-      - photos:/app/photos
-      - ./Escape:/app/Escape
-      - ./FromPhone:/app/FromPhone
-    restart: always
-    depends_on:
-      db:
-        condition: service_healthy
     networks:
       openimis-net:
 networks:
