@@ -1,4 +1,4 @@
-version: '2.4'
+version: '3.7'
 services:
   opensearch:
     build:
@@ -37,6 +37,9 @@ services:
 volumes:
   opensearch-data1:
 
+# networks:
+#   openimis-net:
+#     name: "${PROJECT_NAME:-openimis}-net"
+#     external: true
 
-networks:
-  openimis-net:
+
