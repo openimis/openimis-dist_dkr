@@ -1,89 +1,20 @@
-version: "3.7"
-x-api: &default-api
-  image: ghcr.io/openimis/openimis-be:${BE_TAG:-develop}
-  environment:
-    - DB_HOST=${DB_HOST}
-    - DB_PORT=${DB_PORT}
-    - DB_NAME=${DB_NAME}
-    - DB_USER=${DB_USER}
-    - DB_PASSWORD=${DB_PASSWORD}
-    - SITE_ROOT=api
-    - SITE_URL=${NEW_OPENIMIS_HOST}
-    - CELERY_BROKER_URL=amqp://rabbitmq
-    - DB_ENGINE=${DB_ENGINE}
-    - DJANGO_LOG_LEVEL=DEBUG
-    - DEBUG=True
-  volumes:
-    - photos:/openimis-be/openIMIS/images/insurees
-  depends_on:
-    db:
-      condition: service_healthy
-  networks:
-    openimis-net:
-  restart: always
+include:
+  - path: docker-compose-psql.yml
+    env_file: .env
+  - path: docker-compose-base.yml
+    env_file: .env
+  - path: docker-compose.openSearch.yml
+    env_file: 
+     - .env  
+     - .env.openSearch
+  - path: docker-compose.lightning.yml
+    env_file: 
+     - .env 
+     - .env.lightning
+#  - path: docker-compose.certbot.yml
 
-services:
-  db:
-    container_name: ${PROJECT_NAME:-openimis}-db
-    image: ghcr.io/openimis/openimis-pgsql:${DB_TAG:-latest}
-    build:
-      target: ${INIT_MODE:-base}
-    environment:
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
-      - POSTGRES_DB=${DB_NAME}
-      - POSTGRES_USER=${DB_USER}
-      - INIT_MODE=${INIT_MODE}
-    healthcheck:
-      test: pg_isready -U ${DB_USER} -d ${DB_NAME}
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 30s
-    volumes:
-      - database:/var/lib/postgresql/data
-    restart: always
-    networks:
-      openimis-net:
+      
+ 
 
-  frontend:
-    container_name: ${PROJECT_NAME:-openimis}-frontend
-    image: ghcr.io/openimis/openimis-fe:${FE_TAG:-develop}
-    restart: always
-    environment:
-      - REACT_APP_API_URL=api
-      - NEW_OPENIMIS_HOST=${NEW_OPENIMIS_HOST}
-      - OPENIMIS_CONF_JSON=${OPENIMIS_FE_CONF_JSON}
-      - OPENSEARCH_BASIC_TOKEN=${OPENSEARCH_BASIC_TOKEN}
-    networks:
-      openimis-net:
-    ports:
-      - ${HTTP_PORT:-80}:80
-      - ${HTTPS_PORT:-443}:443
-    depends_on:
-      - backend
-    volumes:
-      - ./data/certbot/conf:/etc/letsencrypt
-      - ./data/certbot/www:/var/www/certbot
-      # uncomment to use custom openimis.conf
-      #- ./conf/nginx:/conf/
-  backend:
-    <<: *default-api
-    container_name: ${PROJECT_NAME:-openimis}-api
-    command: start      
-  
-  worker:
-    <<: *default-api
-    container_name: ${PROJECT_NAME:-openimis}-worker
-    command: worker
-  rabbitmq:
-    container_name: ${PROJECT_NAME:-openimis}-rabbitmq
-    image: rabbitmq:3-management
-    restart: always
-    networks:
-      openimis-net:
-networks:
-  openimis-net:
-    name: "${PROJECT_NAME:-openimis}-net"
-volumes:
-  database:
-  photos:
+
+

@@ -1,0 +1,31 @@
+version: '3.7'
+services:
+  db:
+    container_name: ${PROJECT_NAME:-openimis}-db
+    image: ghcr.io/openimis/openimis-mssql:${DB_TAG:-latest}
+    restart: always
+    environment:
+      - DB_USER_PASSWORD=${DB_PASSWORD}
+      - SA_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+      - DB_USER=${DB_USER}
+      - ACCEPT_EULA=${ACCEPT_EULA}
+      - INIT_MODE=${INIT_MODE}
+    healthcheck:
+      test: "bash /app/healthcheck.sh"
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 100s
+    networks:
+      openimis-net:
+    volumes:
+      - database:/var/opt/mssql/data
+    ports:
+      - 1433:1433
+  ## WARNING:
+    ## exposing the database port outside the openimis-net network
+    ## may lead to security issue (depending on your network topology)
+    # ports:
+    #  - 1433:1433
+  
