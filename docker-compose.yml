@@ -20,6 +20,8 @@ services:
     volumes:
       - database:/var/lib/postgresql/data
     restart: always
+    ports:
+      - 5432:5432
     networks:
       openimis-net:
   backend:
