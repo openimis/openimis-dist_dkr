@@ -24,7 +24,7 @@ services:
       openimis-net:
   backend:
     container_name: ${PROJECT_NAME:-openimis}-api
-    image: ghcr.io/openimis/openimis-be:${BE_TAG:-develop}
+    image: ghcr.io/blsq/openimis-be:${BE_TAG:-develop}
     restart: always
     command: start
     volumes:
@@ -37,10 +37,12 @@ services:
       - DB_PASSWORD=${DB_PASSWORD}
       - DB_ENGINE=${DB_ENGINE}
       - SITE_ROOT=api
-      - DEBUG=True
+      - DEBUG=${DJANGO_DEBUG:-False}
       - DJANGO_LOG_LEVEL=DEBUG
       - SITE_URL=${NEW_OPENIMIS_HOST}
       - CELERY_BROKER_URL=amqp://rabbitmq
+      - INSUREE_NUMBER_LENGTH=${INSUREE_NUMBER_LENGTH}
+      - INSUREE_NUMBER_MODULE_ROOT=${INSUREE_NUMBER_MODULE_ROOT}
     depends_on:
       db:
         condition: service_healthy
@@ -49,7 +51,7 @@ services:
 
   frontend:
     container_name: ${PROJECT_NAME:-openimis}-frontend
-    image: ghcr.io/openimis/openimis-fe:${FE_TAG:-develop}
+    image: ghcr.io/blsq/openimis-fe:${FE_TAG:-develop}
     restart: always
     environment:
       - REACT_APP_API_URL=api
@@ -84,27 +86,6 @@ services:
     container_name: ${PROJECT_NAME:-openimis}-rabbitmq
     image: rabbitmq:3-management
     restart: always
-    networks:
-      openimis-net:
-  restapi:
-    container_name: ${PROJECT_NAME:-openimis}-restapi
-    image: ghcr.io/openimis/openimis-rest_api:${RESTAPI_TAG:-latest}
-    environment:
-      - DB_HOST=${DB_HOST}
-      - DB_PORT=${DB_PORT}
-      - DB_NAME=${DB_NAME}
-      - DB_USER=${DB_USER}
-      - DB_PASSWORD=${DB_PASSWORD}
-    volumes:
-      #- ./conf/restapi:/app/config
-      - ./logs:/app/log
-      - photos:/app/photos
-      - ./Escape:/app/Escape
-      - ./FromPhone:/app/FromPhone
-    restart: always
-    depends_on:
-      db:
-        condition: service_healthy
     networks:
       openimis-net:
 networks:
