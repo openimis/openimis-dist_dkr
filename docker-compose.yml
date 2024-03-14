@@ -30,7 +30,7 @@ services:
     restart: always
     command: start
     volumes:
-      - photos:/openimis-be/openIMIS/images/insurees
+      - photos:/openimis-be/openIMIS/images
     environment: &backend-env
       - DB_HOST=${DB_HOST}
       - DB_PORT=${DB_PORT}
@@ -45,6 +45,7 @@ services:
       - CELERY_BROKER_URL=amqp://rabbitmq
       - INSUREE_NUMBER_LENGTH=${INSUREE_NUMBER_LENGTH}
       - INSUREE_NUMBER_MODULE_ROOT=${INSUREE_NUMBER_MODULE_ROOT}
+      - PHOTO_ROOT_PATH=/openimis-be/openIMIS/images
     depends_on:
       db:
         condition: service_healthy
@@ -78,7 +79,7 @@ services:
     command: worker
     restart: always
     volumes:
-      - photos:/openimis-be/openIMIS/images/insurees
+      - photos:/openimis-be/openIMIS/images
     depends_on:
       - backend
     environment: *backend-env
