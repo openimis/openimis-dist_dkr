@@ -1,4 +1,4 @@
-version: "3.7"
+#version: "3.7"
 x-api: &default-api
   image: ghcr.io/openimis/openimis-be:${BE_TAG:-develop}
   environment:
@@ -8,11 +8,10 @@ x-api: &default-api
     - DB_USER=${DB_USER}
     - DB_PASSWORD=${DB_PASSWORD}
     - SITE_ROOT=api
-    - SITE_URL=${NEW_OPENIMIS_HOST}
+    - SITE_URL=${DOMAIN}
     - CELERY_BROKER_URL=amqp://rabbitmq
     - DB_ENGINE=${DB_ENGINE}
-    - DJANGO_LOG_LEVEL=DEBUG
-    - DEBUG=True
+    - MODE=${MODE:-Prod}
   volumes:
     - photos:/openimis-be/openIMIS/images/insurees
   depends_on:
@@ -29,7 +28,7 @@ services:
     restart: always
     environment:
       - REACT_APP_API_URL=api
-      - NEW_OPENIMIS_HOST=${NEW_OPENIMIS_HOST}
+      - NEW_OPENIMIS_HOST=${DOMAIN}
       - OPENIMIS_CONF_JSON=${OPENIMIS_FE_CONF_JSON}
       - OPENSEARCH_BASIC_TOKEN=${OPENSEARCH_BASIC_TOKEN}
     networks:

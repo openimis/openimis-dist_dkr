@@ -27,8 +27,8 @@ set -e
 docker compose  run --rm  web mix ecto.migrate
 docker compose  run --rm web mix run imisSetupScripts/imisSetup.exs
 #TODO init opensearch dashboard with API/ manage command
-echo "connect to https://{NEW_OPENIMIS_HOST}"
-echo "then go to https://{NEW_OPENIMIS_HOST}/opensearch"
+echo "connect to https://{DOMAIN}"
+echo "then go to https://{DOMAIN}/opensearch"
 echo "then go in manage / saved object / import to import the openSearch dashboard"
 touch '.init.lock' 
 fi

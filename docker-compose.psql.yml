@@ -1,10 +1,8 @@
-version: '3.7'
+#version: '3.7'
 services:
   db:
     container_name: ${PROJECT_NAME:-openimis}-db
     image: ghcr.io/openimis/openimis-pgsql:${DB_TAG:-latest}
-    build:
-      target: ${INIT_MODE:-base}
     environment:
       - POSTGRES_PASSWORD=${DB_PASSWORD}
       - POSTGRES_DB=${DB_NAME}

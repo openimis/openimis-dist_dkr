@@ -1,7 +1,7 @@
 include:
-  - path: docker-compose-psql.yml
+  - path: docker-compose.psql.yml
     env_file: .env
-  - path: docker-compose-base.yml
+  - path: docker-compose.base.yml
     env_file: .env
   - path: docker-compose.openSearch.yml
     env_file: 
