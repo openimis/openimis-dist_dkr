@@ -1,5 +1,4 @@
-version: "3.7"
-
+#version: "3.7"
 x-lightning: &default-app
   image: ghcr.io/openimis/openimis-lightning_dkr:develop
   platform: linux/amd64
