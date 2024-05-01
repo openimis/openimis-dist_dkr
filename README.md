@@ -1,44 +1,44 @@
 # openIMIS dockerized
 
- This repository provides a dockerized openIMIS (all components) as a quick setup for development, testing or demoing.
+ This repository provides a dockerized openIMIS (all components) as a quick setup , testing or demoing.
  
 
  Please look for further instructions on the openIMIS Wiki: https://openimis.atlassian.net/wiki/spaces/OP/pages/963182705/MO1.1+Install+the+modular+openIMIS+using+Docker
 
  
- The docker compose currently contains the openIMIS database, backend + worker, frontend, restapi and gateway components.
+ The docker-compose currently contains the openIMIS database, backend + worker, frontend, and third parties components (lightning, opensearch, rabitMQ ... ).
+
  
 
 In case of troubles, please consult/contact our service desk via our [ticketing site](https://openimis.atlassian.net/servicedesk/customer).
 
-#Prerequisit
+# Prerequisit
 - Docker installed
 
 
+# fast lane
+
+ You can use the script `deploy_openimis.sh`to initialize all components
+
 # First startup
 
-* create a `.env` file, use .env.example as starting point
+* create a `.env` file, use `.env.example` as starting point (respectivement for `.env.lightning`, `.env.openSearch`)
+* chose database vendor: the default is psql but you can edit the docker-compose.yml and change `docker-compose-psql.yml` to  `docker-compose-mssql.yml`
 
-## Configure the restapi
- the rest api config files appsettings.json, appsettings.Production.json, appsetting.Developments.json must be created in the folder ./conf/restapi
- create the log folder ./logs¨
-
- to remove the restapi one will have to:
-   - uncomment the volume in the fronend config
-   - replace openimis.conf with openimis.conf.without_restapi
 
 ## Configure the gateway (optionnal)
   
-   - uncomment the volume in the fronend config
-   - make modification in openimis.conf
+* uncomment the volume in the frontend config
+* make modification in openimis.conf
 
 
-## Init database
+## main database initialisation
 
-Include the line INIT_MODE=demo in .env or uncomment it if .env.example copied to intiate the database with the DEMO dataset, it will create an empty openIMIS database otherwise
+Include the line INIT_MODE=demo in .env or uncomment it in case it has been copied from .env.example copied to intiate the database with the DEMO dataset, it will create an empty openIMIS database otherwise
 
-## OpenFN/Lightning setup 
-Lightning is not by default enabled in dockerized instance. To make it work it's required to: 
+
+## OpenFN/Lightning setup ( manage social protection workflow/import )
+
   * Copy `.env.lightning.example` to `.env.lightning` and make adjustments 
   * Create `lightning_dev` database in db container 
   * Run container build `docker compose -f docker-compose.lightning.yml --env-file .env.lightning --env-file .env build`
@@ -71,11 +71,15 @@ To pull new images or images update `docker compose pull`
 
 Use the certbot docker compose file
 
-export NEW_OPENIMIS_HOST first
+export DOMAIN first
 
 ## Dry run 
 docker compose run --rm --entrypoint "  certbot certonly --webroot -w /var/www/certbot  --staging  --register-unsafely-without-email  -d  ${NEW_OPENIMIS_HOST}    --rsa-key-size 2048     --agree-tos     --force-renewal" certbot
 
-## Actual setup
+## dry run 
+docker-compose run --rm --entrypoint "  certbot certonly --webroot -w /var/www/certbot  --staging  --register-unsafely-without-email  -d  ${DOMAIN}    --rsa-key-size 2048     --agree-tos     --force-renewal" certbot
 
-docker compose run --rm --entrypoint "  certbot certonly --webroot -w /var/www/certbot    --register-unsafely-without-email  -d  ${NEW_OPENIMIS_HOST}    --rsa-key-size 2048     --agree-tos     --force-renewal" certbot
+## actual setup
+
+docker-compose run --rm --entrypoint "  certbot certonly --webroot -w /var/www/certbot    --register-unsafely-without-email  -d  ${DOMAIN}    --rsa-key-size 2048     --agree-tos     --force-renewal" certbot
+
