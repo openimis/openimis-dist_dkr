@@ -7,6 +7,7 @@
 
  
  The docker-compose currently contains the openIMIS database, backend + worker, frontend, and third parties components (lightning, opensearch, rabitMQ ... ).
+
  
 
 In case of troubles, please consult/contact our service desk via our [ticketing site](https://openimis.atlassian.net/servicedesk/customer).
@@ -25,7 +26,7 @@ In case of troubles, please consult/contact our service desk via our [ticketing 
 * chose database vendor: the default is psql but you can edit the docker-compose.yml and change `docker-compose-psql.yml` to  `docker-compose-mssql.yml`
 
 
-## configure the gateway (optionnal)
+## Configure the gateway (optionnal)
   
 * uncomment the volume in the frontend config
 * make modification in openimis.conf
@@ -35,19 +36,20 @@ In case of troubles, please consult/contact our service desk via our [ticketing 
 
 Include the line INIT_MODE=demo in .env or uncomment it in case it has been copied from .env.example copied to intiate the database with the DEMO dataset, it will create an empty openIMIS database otherwise
 
+
 ## OpenFN/Lightning setup ( manage social protection workflow/import )
 
   * Copy `.env.lightning.example` to `.env.lightning` and make adjustments 
   * Create `lightning_dev` database in db container 
-  * Run container build `docker compose -f docker-compose.yml -f docker-compose.lightning.yml build lightning`
+  * Run container build `docker compose -f docker-compose.lightning.yml --env-file .env.lightning --env-file .env build`
   * Run migrations `docker compose -f docker-compose.yml -f docker-compose.lightning.yml run --rm lightning mix ecto.migrate`
   * Run imis demo setup `docker compose -f docker-compose.yml -f docker-compose.lightning.yml run --rm lightning ./imisSetup.sh`
-  * Run service `docker compose -f docker-compose.yml -f docker-compose.lightning.yml up lightning`
+  * Run service `docker compose -f docker compose.yml -f docker compose.lightning.yml up lightning`
 
 ## OpenSearch/OpenSearch Dashboards setup 
 Both OpenSearch and OpenSearch Dashboards are not by default enabled in dockerized instance. To make them work it's required to: 
   * Copy `.env.openSearch.example` to `.env.openSearch` and make adjustments
-  * Run container build `docker compose -f docker-compose.yml -f docker-compose.openSearch.yml build opensearch opensearch-dashboards nginx`
+  * Run container build `ddocker compose -f docker-compose.openSearch.yml --env-file .env.openSearch --env-file .env build`
   * Run service `docker compose -f docker-compose.yml -f docker-compose.openSearch.yml up opensearch opensearch-dashboards nginx`
 This build provides also additional nginx proxy server in order to handle openSearch Dashboard application on frontend level. 
 
@@ -56,22 +58,23 @@ To run on a Dockerized instance (database, backend, and frontend of openIMIS), p
   * In the .env file in openimis-fe_js, use the following environment variable: `ENV OPENSEARCH_PROXY_ROOT="opensearch"`.
   * Run the backend and frontend services.
 
-# stop /start
+# Stop/Start
 
-To stop all docker containers: `docker-compose  stop`
-To (re-)start all docker containers: `docker-compose  start` 
+To stop all docker containers: `docker compose  stop`
+To (re-)start all docker containers: `docker compose  start` 
 
-# pull new images
+# Pull new images
 
-To pull new images or images update `docker-compose pull` 
+To pull new images or images update `docker compose pull` 
 
+# Create Let's Encrypt certificates
 
-# create lets encrypt certs
-
-use the certbot docker compose file
+Use the certbot docker compose file
 
 export DOMAIN first
 
+## Dry run 
+docker compose run --rm --entrypoint "  certbot certonly --webroot -w /var/www/certbot  --staging  --register-unsafely-without-email  -d  ${NEW_OPENIMIS_HOST}    --rsa-key-size 2048     --agree-tos     --force-renewal" certbot
 
 ## dry run 
 docker-compose run --rm --entrypoint "  certbot certonly --webroot -w /var/www/certbot  --staging  --register-unsafely-without-email  -d  ${DOMAIN}    --rsa-key-size 2048     --agree-tos     --force-renewal" certbot
@@ -79,3 +82,4 @@ docker-compose run --rm --entrypoint "  certbot certonly --webroot -w /var/www/c
 ## actual setup
 
 docker-compose run --rm --entrypoint "  certbot certonly --webroot -w /var/www/certbot    --register-unsafely-without-email  -d  ${DOMAIN}    --rsa-key-size 2048     --agree-tos     --force-renewal" certbot
+
