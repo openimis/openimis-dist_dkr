@@ -37,8 +37,6 @@ services:
       openimis-net:
     ports:
       - "${LIGHTNING_EXTERNAL_PORT:-127.0.0.1:4000}:${URL_PORT}"
-    networks:
-      openimis-net:
 
 volumes:
   postgres: {}
