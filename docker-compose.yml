@@ -1,5 +1,5 @@
 include:
-  - path: docker-compose.psql.yml
+  - path: docker-compose.${DB_DEFAULT:-postgresql}.yml
     env_file: .env
   - path: docker-compose.base.yml
     env_file: .env

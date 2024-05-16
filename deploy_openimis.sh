@@ -26,10 +26,10 @@ docker compose  run -e  PGPASSWORD=${POSTGRES_PASSWORD} --rm db createdb -h db -
 set -e
 docker compose  run --rm  web mix ecto.migrate
 docker compose  run --rm web mix run imisSetupScripts/imisSetup.exs
-#TODO init opensearch dashboard with API/ manage command
+#TODO init OpenSearch dashboard with API/ manage command
 echo "connect to https://{DOMAIN}"
 echo "then go to https://{DOMAIN}/opensearch"
-echo "then go in manage / saved object / import to import the openSearch dashboard"
+echo "then go in manage / saved object / import to import the OpenSearch dashboard"
 touch '.init.lock' 
 fi
 docker compose up -d

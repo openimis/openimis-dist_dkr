@@ -1,81 +1,80 @@
 # openIMIS dockerized
 
- This repository provides a dockerized openIMIS (all components) as a quick setup , testing or demoing.
+ This repository provides a Docker package for openIMIS that includes all components to quickly setup, test and demo the solution.
  
 
  Please look for further instructions on the openIMIS Wiki: https://openimis.atlassian.net/wiki/spaces/OP/pages/963182705/MO1.1+Install+the+modular+openIMIS+using+Docker
 
  
- The docker-compose currently contains the openIMIS database, backend + worker, frontend, and third parties components (lightning, opensearch, rabitMQ ... ).
+ The openIMIS docker compose currently includes the database, backend and worker, frontend, and third parties components (Lightning, OpenSearch, RabbitMQ, etc.).
  
 
-In case of troubles, please consult/contact our service desk via our [ticketing site](https://openimis.atlassian.net/servicedesk/customer).
+In case of troubles, please contact our service desk via our [ticketing platform](https://openimis.atlassian.net/servicedesk/customer).
 
-# Prerequisit
-- Docker installed
+## Prerequisite
 
+* Docker installed
 
-# fast lane
+## Fast lane
 
- You can use the script `deploy_openimis.sh`to initialize all components
+You can use the script `deploy_openimis.sh` to initialise all components (uses PostgreSQL DB).
 
-# First startup
+## First startup
 
-* create a `.env` file, use `.env.example` as starting point (respectivement for `.env.lightning`, `.env.openSearch`)
-* chose database vendor: the default is psql but you can edit the docker-compose.yml and change `docker-compose-psql.yml` to  `docker-compose-mssql.yml`
+* Copy `.env.example` to `.env` and make the necessary adjustments.
+* Choose a database default system to use. The default is PostgreSQL (`DB_DEFAULT=postgresql`, `DB_PORT=5432`), but you can also use MSSQL (`DB_DEFAULT=mssql`, `DB_PORT=1433`, `ACCEPT_EULA=Y`). 
+* Uncomment the line `DEMO_DATASET=true` in `.env` to initialise the database with the DEMO dataset. If you leave it commented, an empty openIMIS database will be created.
 
+## OpenFN/Lightning setup 
 
-## configure the gateway (optionnal)
-  
-* uncomment the volume in the frontend config
-* make modification in openimis.conf
+If the implementation involves managing the social protection workflow/import, then OpenFN/Lightning must be set up with the following steps:
 
-
-## main database initialisation
-
-Include the line INIT_MODE=demo in .env or uncomment it in case it has been copied from .env.example copied to intiate the database with the DEMO dataset, it will create an empty openIMIS database otherwise
-
-## OpenFN/Lightning setup ( manage social protection workflow/import )
-
-  * Copy `.env.lightning.example` to `.env.lightning` and make adjustments 
-  * Create `lightning_dev` database in db container 
-  * Run container build `docker compose -f docker-compose.yml -f docker-compose.lightning.yml build lightning`
-  * Run migrations `docker compose -f docker-compose.yml -f docker-compose.lightning.yml run --rm lightning mix ecto.migrate`
-  * Run imis demo setup `docker compose -f docker-compose.yml -f docker-compose.lightning.yml run --rm lightning ./imisSetup.sh`
-  * Run service `docker compose -f docker-compose.yml -f docker-compose.lightning.yml up lightning`
+* Copy `.env.lightning.example` to `.env.lightning` and make the necessary adjustments.
+* Create the `lightning_dev` database in the database container.
+* Build the container: `docker compose -f docker-compose.yml -f docker-compose.lightning.yml build lightning`.
+* Run migrations: `docker compose -f docker-compose.yml -f docker-compose.lightning.yml run --rm lightning mix ecto.migrate`.
+* Set up the IMIS demo: `docker compose -f docker-compose.yml -f docker-compose.lightning.yml run --rm lightning ./imisSetup.sh`.
+* Start the service: `docker compose -f docker-compose.yml -f docker-compose.lightning.yml up lightning`.
 
 ## OpenSearch/OpenSearch Dashboards setup 
-Both OpenSearch and OpenSearch Dashboards are not by default enabled in dockerized instance. To make them work it's required to: 
+
+Both OpenSearch and OpenSearch Dashboards are not by default enabled in dockerized instance. To make them work, it's required to: 
+
   * Copy `.env.openSearch.example` to `.env.openSearch` and make adjustments
   * Run container build `docker compose -f docker-compose.yml -f docker-compose.openSearch.yml build opensearch opensearch-dashboards nginx`
   * Run service `docker compose -f docker-compose.yml -f docker-compose.openSearch.yml up opensearch opensearch-dashboards nginx`
-This build provides also additional nginx proxy server in order to handle openSearch Dashboard application on frontend level. 
 
-To run on a Dockerized instance (database, backend, and frontend of openIMIS), please follow the steps below:
-  * Add a value for the OPENSEARCH_BASIC_TOKEN in the environment (env) file. This should be based on the admin and password credentials for openSearch.
-  * In the .env file in openimis-fe_js, use the following environment variable: `ENV OPENSEARCH_PROXY_ROOT="opensearch"`.
+This build provides also additional nginx proxy server in order to handle OpenSearch Dashboard application on frontend level. 
+
+To run on a dockerized instance of openIMIS (database, backend, and frontend), including OpenSearch, please follow the steps below:
+
+  * Add a value for the OPENSEARCH_BASIC_TOKEN in the environment (`.env`) file. This should be based on the admin and password credentials for OpenSearch.
+  * In the `.env` file in openimis-fe_js, use the following environment variable: `ENV OPENSEARCH_PROXY_ROOT="opensearch"`.
   * Run the backend and frontend services.
 
-# stop /start
+## Run openIMIS with Docker
 
-To stop all docker containers: `docker-compose  stop`
-To (re-)start all docker containers: `docker-compose  start` 
+You can run the docker compose commands from within `openimis-dist_dkr` folder.
 
-# pull new images
+### Pull new images
 
 To pull new images or images update `docker-compose pull` 
 
+### Start / Stop
 
-# create lets encrypt certs
+* To start or restart all docker containers: `docker-compose start` 
+* To stop all docker containers: `docker-compose stop`
 
-use the certbot docker compose file
+## Create LetsEncrypt certificates
 
-export DOMAIN first
+Use the certbot docker compose file. 
 
+`export DOMAIN [domain_name]`
 
-## dry run 
-docker-compose run --rm --entrypoint "  certbot certonly --webroot -w /var/www/certbot  --staging  --register-unsafely-without-email  -d  ${DOMAIN}    --rsa-key-size 2048     --agree-tos     --force-renewal" certbot
+### Dry run 
 
-## actual setup
+`docker-compose run --rm --entrypoint "  certbot certonly --webroot -w /var/www/certbot  --staging  --register-unsafely-without-email  -d  ${DOMAIN}    --rsa-key-size 2048     --agree-tos     --force-renewal" certbot`
 
-docker-compose run --rm --entrypoint "  certbot certonly --webroot -w /var/www/certbot    --register-unsafely-without-email  -d  ${DOMAIN}    --rsa-key-size 2048     --agree-tos     --force-renewal" certbot
+### Actual setup
+
+`docker-compose run --rm --entrypoint "  certbot certonly --webroot -w /var/www/certbot    --register-unsafely-without-email  -d  ${DOMAIN}    --rsa-key-size 2048     --agree-tos     --force-renewal" certbot`
