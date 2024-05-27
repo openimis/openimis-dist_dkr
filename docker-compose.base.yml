@@ -2,6 +2,7 @@
 x-api: &default-api
   image: ghcr.io/openimis/openimis-be:${BE_TAG:-develop}
   environment:
+    - DB_DEFAULT=${DB_DEFAULT:-postgresql}
     - DB_HOST=${DB_HOST}
     - DB_PORT=${DB_PORT}
     - DB_NAME=${DB_NAME}
@@ -10,7 +11,6 @@ x-api: &default-api
     - SITE_ROOT=api
     - SITE_URL=${DOMAIN}
     - CELERY_BROKER_URL=amqp://rabbitmq
-    - DB_ENGINE=${DB_ENGINE}
     - MODE=${MODE:-Prod}
   volumes:
     - photos:/openimis-be/openIMIS/images/insurees
@@ -41,7 +41,7 @@ services:
     volumes:
       - ./data/certbot/conf:/etc/letsencrypt
       - ./data/certbot/www:/var/www/certbot
-      # uncomment to use custom openimis.conf
+      # comment the following line if you are using your own gateway
       - ./conf/nginx:/conf/
   backend:
     <<: *default-api
