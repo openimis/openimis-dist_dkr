@@ -2,3 +2,4 @@
 openimis_env/*
 data/*
 openimis-dist_dkr.code-workspace
+node_modules/
