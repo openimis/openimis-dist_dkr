@@ -64,7 +64,6 @@ jobs:
           record: true
           parallel: true
           wait-on: 'http://localhost/front/'
-          config-file: cypress/ci-config.js
         env:
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
