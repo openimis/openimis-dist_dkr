@@ -56,8 +56,6 @@ jobs:
           done
           echo "Database is ready"
           docker compose run -e  PGPASSWORD=${POSTGRES_PASSWORD} --rm db createdb -h db -U ${POSTGRES_USER}  ${POSTGRES_DB}
-          docker compose run --rm  web mix ecto.migrate
-          docker compose run --rm web mix run imisSetupScripts/imisSetup.exs
           docker compose up -d
 
       - name: Cypress run
@@ -70,3 +68,4 @@ jobs:
         env:
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
