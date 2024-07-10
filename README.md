@@ -78,3 +78,31 @@ Use the certbot docker compose file.
 ### Actual setup
 
 `docker-compose run --rm --entrypoint "  certbot certonly --webroot -w /var/www/certbot    --register-unsafely-without-email  -d  ${DOMAIN}    --rsa-key-size 2048     --agree-tos     --force-renewal" certbot`
+
+
+## Run integration tests
+
+Integration tests live in the `/cypress` folder of this repo.
+
+### Requirements
+
+Ensure npm is installed, then install the required dependencies:
+
+`npm install`
+
+### Run e2e tests against local docker containers
+
+Make sure all expected containers are running: `docker ps`;
+if not, start them with `docker compose start`. Then run tests:
+
+Headless: `npx cypress run`
+Headed: `npx cypress open` or `npm run cy:open`
+
+### Run e2e tests against any local or remote url
+
+This can be useful for local development or verifying a staging deployment,
+for example, if the target host is localhost:3000,
+pass it into the corresponding test command with `-- --config "baseUrl=http://localhost:3000"`:
+
+Headless: `npx cypress run -- --config "baseUrl=http://localhost:3000"`
+Headed: `npx cypress open -- --config "baseUrl=http://localhost:3000"`

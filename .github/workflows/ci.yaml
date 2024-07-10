@@ -1,4 +1,4 @@
-name: Sonar CI pipeline
+name: CI pipeline
 on:
   push:
     branches:
@@ -8,12 +8,17 @@ on:
       - 'feature/**'
   pull_request:
     types: [opened, synchronize, reopened]
+  workflow_dispatch:
+    inputs:
+      comment:
+        description: "Purpose of the manual run:"
+        required: false
 jobs:
   sonarcloud:
     name: SonarCloud
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 0
       - name: SonarCloud Scan
@@ -21,3 +26,38 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+  test:
+    name: Cypress
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup environment
+        run: |
+          cp .env.example .env
+          echo 'DEMO_DATASET=true' >> .env
+          cp .env.lightning.example .env.lightning
+          docker compose  up -d db
+          source .env
+          source .env.lightning
+          echo "Waiting for database to be healthy..."
+          until [ "`docker inspect -f {{.State.Health.Status}} ${PROJECT_NAME:-openimis}-db`" == "healthy" ]; do
+            sleep 2;
+          done
+          echo "Database is ready"
+          docker compose run -e  PGPASSWORD=${POSTGRES_PASSWORD} --rm db createdb -h db -U ${POSTGRES_USER}  ${POSTGRES_DB}
+          docker compose up -d
+
+      - name: Cypress run
+        uses: cypress-io/github-action@v6
+        with:
+          record: true
+          parallel: true
+          wait-on: 'http://localhost/front/'
+        env:
+          CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
