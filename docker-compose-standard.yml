@@ -69,11 +69,10 @@ services:
     depends_on:
       - backend
     volumes:
-      #- ./data/certbot/conf:/etc/letsencrypt
-      #- ./data/certbot/www:/var/www/certbot
-      - ./data/ssl:/etc/ssl/msppas.ne
+      - ./data/certbot/conf:/etc/letsencrypt
+      - ./data/certbot/www:/var/www/certbot
       # uncomment to use custom openimis.conf
-      - ./conf/nginx:/conf/
+      #- ./conf/nginx:/conf/
   worker:
     container_name: ${PROJECT_NAME:-openimis}-worker
     image: ghcr.io/blsq/openimis-be:${BE_TAG:-develop}
