@@ -11,6 +11,10 @@ include:
     env_file: 
      - .env 
      - .env.lightning
+  - path: docker-compose.cache.yml
+    env_file: 
+     - .env
+     - .env.redis
 #  - path: docker-compose.certbot.yml
 
       
