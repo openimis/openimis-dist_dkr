@@ -1,0 +1,19 @@
+services:
+  redis:
+    container_name: ${PROJECT_NAME:-openimis}-redis
+    image: redis:latest
+    restart: always
+    ports:
+      - "6379:6379"
+    command: redis-server /usr/local/etc/redis/redis.conf --requirepass ${REDIS_PASSWORD}
+    volumes:
+      - ./dаta/redis/database:/data
+      - ./data/redis.conf:/usr/local/etc/redis/redis.conf
+    env_file:
+      - ".env.redis"
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+      - REDIS_PORT=6379
+      - REDIS_DATABASES=1
+    networks:
+      openimis-net:
