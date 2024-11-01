@@ -1,20 +1,20 @@
 include:
-  - path: docker-compose.${DB_DEFAULT:-postgresql}.yml
+  - path: compose.${DB_DEFAULT:-postgresql}.yml
     env_file: .env
-  - path: docker-compose.base.yml
+  - path: compose.base.yml
     env_file: 
     - .env
     - .env.redis
     - .env.openSearch
-  - path: docker-compose.openSearch.yml
+  - path: compose.openSearch.yml
     env_file: 
      - .env  
      - .env.openSearch
-  - path: docker-compose.cache.yml
+  - path: compose.cache.yml
     env_file: 
      - .env
      - .env.redis
-#  - path: docker-compose.certbot.yml
+#  - path: compose.certbot.yml
 
       
  
