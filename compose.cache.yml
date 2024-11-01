@@ -17,5 +17,5 @@ services:
       - REDIS_DATABASES=1
     networks:
       openimis-net:
-  volumes:
-    redis-database:
+volumes:
+  redis-database:
