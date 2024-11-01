@@ -1,6 +1,4 @@
-#version: "3.7"
 services:
-
   certbot:
     image: certbot/certbot
     entrypoint: "/bin/sh -c 'trap exit TERM; while :; do certbot renew; sleep 12h & wait $${!}; done;'"

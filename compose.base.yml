@@ -1,4 +1,3 @@
-#version: "3.7"
 x-api: &default-api
   image: ghcr.io/openimis/openimis-be:${BE_TAG:-develop}
   environment:
@@ -30,7 +29,6 @@ x-api: &default-api
 
 services:
   frontend:
-    container_name: ${PROJECT_NAME:-openimis}-frontend
     image: ghcr.io/openimis/openimis-fe:${FE_TAG:-develop}
     restart: always
     environment:
@@ -52,15 +50,14 @@ services:
       - ./conf/nginx:/conf/
   backend:
     <<: *default-api
-    container_name: ${PROJECT_NAME:-openimis}-api
     command: start      
-  
   worker:
     <<: *default-api
-    container_name: ${PROJECT_NAME:-openimis}-worker
     command: worker
+    deploy:
+      mode: replicated
+      replicas: ${WORKER_REPLICAS:-3}
   rabbitmq:
-    container_name: ${PROJECT_NAME:-openimis}-rabbitmq
     image: rabbitmq:3-management
     restart: always
     networks:

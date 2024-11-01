@@ -1,7 +1,5 @@
-#version: '3.7'
 services:
   db:
-    container_name: ${PROJECT_NAME:-openimis}-db
     image: ghcr.io/openimis/openimis-mssql:${DB_TAG:-latest}
     restart: always
     environment:

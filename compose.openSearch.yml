@@ -1,4 +1,3 @@
-#version: '3.7'
 services:
 
   opensearch:
@@ -25,7 +24,6 @@ services:
 
   opensearch-dashboards:
     image: opensearchproject/opensearch-dashboards:2.9.0
-    container_name: ${PROJECT_NAME:-openimis}-opensearch-dashboards
     environment:
       - OPENSEARCH_HOSTS=${OPENSEARCH_HOSTS:-http://opensearch:9200}
       - "DISABLE_SECURITY_DASHBOARDS_PLUGIN=true"
