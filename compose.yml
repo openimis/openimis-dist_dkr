@@ -2,15 +2,14 @@ include:
   - path: docker-compose.${DB_DEFAULT:-postgresql}.yml
     env_file: .env
   - path: docker-compose.base.yml
-    env_file: .env
+    env_file: 
+    - .env
+    - .env.redis
+    - .env.openSearch
   - path: docker-compose.openSearch.yml
     env_file: 
      - .env  
      - .env.openSearch
-  - path: docker-compose.lightning.yml
-    env_file: 
-     - .env 
-     - .env.lightning
   - path: docker-compose.cache.yml
     env_file: 
      - .env

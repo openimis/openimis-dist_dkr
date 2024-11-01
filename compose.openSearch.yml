@@ -1,9 +1,8 @@
 #version: '3.7'
 services:
+
   opensearch:
-    build:
-      context: .
-      dockerfile: ./opensearch-configuration/Dockerfile-openSearch-dev-
+    image: opensearchproject/opensearch:latest
     env_file:
       - ".env.openSearch"
     environment:
@@ -12,6 +11,12 @@ services:
       - "http.port=${OPEN_SEARCH_HTTP_PORT:-9200}"
       - "plugins.security.ssl.http.enabled=${SLL_HTTP_ENABLED:-false}"
       - "plugins.security.disabled=true"
+      - "OPENSEARCH_INITIAL_ADMIN_PASSWORD=${OPENSEARCH_PASSWORD}"
+    options: >-
+      --health-cmd "curl -f -u admin:${OPENSEARCH_INITIAL_ADMIN_PASSWORD} http://localhost:9200/_cluster/health || exit 1"
+      --health-interval 10s
+      --health-timeout 5s
+      --health-retries 10
     volumes:
       - "opensearch-data1:/usr/share/opensearch/data"
     networks:

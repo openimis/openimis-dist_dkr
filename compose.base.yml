@@ -12,7 +12,13 @@ x-api: &default-api
     - SITE_URL=${DOMAIN}
     - CELERY_BROKER_URL=amqp://rabbitmq
     - MODE=${MODE:-Prod}
-    - CSRF_TRUSTED_ORIGINS=https://${DOMAIN}
+    - HOSTS=${HOSTS}
+    - CACHE_BACKEND=${CACHE_BACKEND}
+    - CACHE_URL=${CACHE_URL}
+    - CACHE_OPTIONS=${CACHE_OPTIONS}
+    - OPENSEARCH_ADMIN=${OPENSEARCH_ADMIN}
+    - OPENSEARCH_PASSWORD=${OPENSEARCH_PASSWORD}
+    - OPENSEARCH_HOSTS=${OPENSEARCH_HOSTS}
   volumes:
     - photos:/openimis-be/openIMIS/images/insurees
   depends_on:
