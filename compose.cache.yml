@@ -7,8 +7,8 @@ services:
       - "6379:6379"
     command: redis-server /usr/local/etc/redis/redis.conf --requirepass ${REDIS_PASSWORD}
     volumes:
-      - ./dаta/redis/database:/data
-      - ./data/redis.conf:/usr/local/etc/redis/redis.conf
+      - redis-database:/data
+      - ./conf/redis/redis.conf:/usr/local/etc/redis/redis.conf
     env_file:
       - ".env.redis"
     environment:
@@ -17,3 +17,5 @@ services:
       - REDIS_DATABASES=1
     networks:
       openimis-net:
+  volumes:
+    redis-database:
