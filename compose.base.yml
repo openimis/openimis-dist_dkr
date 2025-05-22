@@ -1,5 +1,7 @@
 x-api: &default-api
-  image: ghcr.io/openimis/openimis-be:${BE_TAG:-develop}
+  build:
+    context: /home/user/openIMIS-24-10/docker/openimis-be_py
+    dockerfile: Dockerfile
   environment:
     - DB_DEFAULT=${DB_DEFAULT:-postgresql}
     - DB_HOST=${DB_HOST}
@@ -63,7 +65,11 @@ services:
 
   backend:
     <<: *default-api
-    command: start      
+    command: start
+    environment:
+      - FIXTURE_INIT=true
+    volumes:
+      - ./initialization:/openimis-be/initialization 
   worker:
     <<: *default-api
     command: worker

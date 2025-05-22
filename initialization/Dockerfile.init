@@ -1,0 +1,9 @@
+FROM alpine:3.18
+
+RUN apk add --no-cache git
+
+WORKDIR /init
+
+RUN git clone --depth 1 https://github.com/openimis/solutions.git
+
+CMD ["ls", "/init/solutions"]
