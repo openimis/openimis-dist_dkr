@@ -70,7 +70,7 @@ services:
     restart: always
     depends_on:
       migrations:
-        condition: service_completed_successfully   
+        condition: service_completed_successfully
   worker:
     <<: *default-api
     command: worker
@@ -81,6 +81,16 @@ services:
     deploy:
       mode: replicated
       replicas: ${WORKER_REPLICAS:-3}
+  opensearch-init:
+    <<: *default-api
+    entrypoint: ["/entrypoint-init-opensearch.sh"]
+    command: []
+    depends_on:
+      - db
+      - backend
+      - opensearch
+    volumes:
+      - ./entrypoint-init-opensearch.sh:/entrypoint-init-opensearch.sh:ro
   rabbitmq:
     image: rabbitmq:3-management
     restart: always
