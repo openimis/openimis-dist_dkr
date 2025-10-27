@@ -1,0 +1,108 @@
+name: "Bug Report"
+description: "File a bug report for an issue in an OpenIMIS module or component."
+title: "[BUG] <Brief description of the issue>"
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for reporting an issue! Please provide as much detail as possible to help us reproduce and fix it. If this is security-related, use our [security reporting process](https://openimis.org/security) instead.
+
+  - type: textarea
+    id: module-info
+    attributes:
+      label: "Affected Module/Component"
+      description: "Which OpenIMIS module or repo is this in? (e.g., openimis-be-claim_py, openimis-fe-payer_js)"
+      placeholder: "e.g., Backend: openimis-be_py (claims module); Frontend: openimis-fe_js"
+      value: ""
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: "Describe the Bug"
+      description: "A clear and concise description of what the bug is."
+      placeholder: "e.g., When submitting a claim, the system crashes with a Django traceback."
+      value: ""
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps-to-reproduce
+    attributes:
+      label: "Steps to Reproduce"
+      description: "List the steps to trigger the bug. Include code snippets, API calls, or UI interactions if relevant."
+      placeholder: |
+        1. Go to the Claims module in the payer UI.
+        2. Enter sample data (e.g., policy ID: 123).
+        3. Click 'Submit'.
+        4. Observe error.
+      render: bash
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: "Expected Behavior"
+      description: "A clear description of what should happen instead."
+      placeholder: "e.g., Claim should be submitted successfully and redirect to dashboard."
+      value: ""
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual-behavior
+    attributes:
+      label: "Actual Behavior"
+      description: "What actually happens? Include error messages, screenshots, or logs if available."
+      placeholder: "e.g., 500 Internal Server Error: 'KeyError: policy_id' in Django logs."
+      value: ""
+    validations:
+      required: true
+
+  - type: dropdown
+    id: environment
+    attributes:
+      label: "Environment"
+      description: "Where did this occur? Select all that apply."
+      multiple: true
+      options:
+        - "Local Development (Docker-compose)"
+        - "Production Deployment"
+        - "Backend (Python/Django)"
+        - "Frontend (JavaScript)"
+        - "Database (PostgreSQL)"
+        - "Database (MSSQL)"
+        - "Other (specify in description)"
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: "Version Information"
+      description: "OpenIMIS version, branch, and relevant deps (e.g., from openimis.json or requirements.txt)."
+      placeholder: "e.g., openIMIS 1.5.0, branch: develop, Django 4.2"
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: "Additional Context"
+      description: "Logs, screenshots, or other info. Attach files if needed."
+      placeholder: "e.g., Attach traceback.txt or screenshot.png"
+      value: ""
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: i-agree
+    attributes:
+      label: "Code of Conduct"
+      description: "By submitting this issue, you agree to follow our [Code of Conduct](https://openimis.org/code-of-conduct)."
+      options:
+        - label: "I agree to follow this project's Code of Conduct"
+          required: true
