@@ -1,4 +1,5 @@
 name: CI pipeline
+
 on:
   push:
     branches:
@@ -13,6 +14,18 @@ on:
       comment:
         description: "Purpose of the manual run:"
         required: false
+        type: string
+      be_tag:
+        description: "Backend tag/branch (BE_TAG)"
+        required: false
+        type: string
+        default: develop
+      fe_tag:
+        description: "Frontend tag/branch (FE_TAG)"
+        required: false
+        type: string
+        default: develop
+
 jobs:
   sonarcloud:
     name: SonarCloud
@@ -26,6 +39,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+
   test:
     name: Cypress
     runs-on: ubuntu-latest
@@ -40,20 +54,26 @@ jobs:
           cp .env.example .env
           sed -i.bak '/^DEMO_DATASET=/d;/^BE_TAG=/d;/^FE_TAG=/d;/^SECRET_KEY=/d' .env
           rm -f .env.bak
+
           echo 'SECRET_KEY=cypressci' >> .env
           echo 'DEMO_DATASET=true' >> .env
           echo 'DB_TAG=25.04' >> .env
-          echo 'BE_TAG=develop' >> .env
-          echo 'FE_TAG=develop' >> .env
+
+          # Use workflow_dispatch inputs if provided, otherwise default to 'develop'
+          BE_TAG="${{ inputs.be_tag || 'develop' }}"
+          FE_TAG="${{ inputs.fe_tag || 'develop' }}"
+
+          echo "BE_TAG=$BE_TAG" >> .env
+          echo "FE_TAG=$FE_TAG" >> .env
+
           echo 'DOMAIN=localhost' >> .env
           echo 'HOSTS=localhost' >> .env
-          cp .env.openSearch.example .env.openSearch
 
+          cp .env.openSearch.example .env.openSearch
           docker compose up -d
 
           echo "Waiting for 'Starting Django...' in backend logs..."
           BACKEND_CONTAINER=$(docker compose ps -q backend)
-
           for i in {1..30}; do
             if docker logs $BACKEND_CONTAINER 2>&1 | grep -q "Starting Django..."; then
               echo "Server is ready"
@@ -63,7 +83,6 @@ jobs:
             docker logs --tail 50 $BACKEND_CONTAINER || true
             sleep 10
           done
-
           echo "Server did not start in 5 minutes"
           docker logs $BACKEND_CONTAINER || true
           exit 1
