@@ -29,7 +29,7 @@ x-api: &default-api
 
 services:
   frontend:
-    image: ghcr.io/openimis/openimis-fe:${FE_TAG:-develop}
+    image: ghcr.io/openimis/openimis-fe:${FE_TAG:-vite}
     restart: always
     environment:
       - REACT_APP_API_URL=api
