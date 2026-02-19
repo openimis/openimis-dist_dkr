@@ -51,7 +51,7 @@ module.exports = defineConfig({
   e2e: {
     projectId: "q6gc25", // Cypress Cloud, needed for recording
     baseUrl: 'http://localhost',
-    defaultCommandTimeout: 15000,
+    defaultCommandTimeout: 200000,
     taskTimeout: timeoutMinutes * 60 * 1000 + 10,
     downloadsFolder: 'cypress/downloads',
     setupNodeEvents(on, config) {

@@ -685,3 +685,27 @@ Cypress.Commands.add('getItemCount', (itemName) => {
       return parseInt(match?.[1], 10);
     });
 });
+
+
+import { 
+  fillFamilyForm, 
+  fillInsureeForm, 
+  clickCreateInsuree,
+  clickSave,
+  goToFamiliesPage,
+  goToFamilyForm,
+  goToInsureesPage,
+  verifyFamilyExists,
+  verifyInsureeExists
+} from '../e2e/insuree.cy';
+
+Cypress.Commands.add('fillFamilyForm', fillFamilyForm);
+Cypress.Commands.add('fillInsureeForm', fillInsureeForm);
+Cypress.Commands.add('clickCreateInsuree', clickCreateInsuree);
+Cypress.Commands.add('clickSave', clickSave);
+Cypress.Commands.add('goToFamiliesPage', goToFamiliesPage);
+Cypress.Commands.add('goToFamilyForm', goToFamilyForm);
+Cypress.Commands.add('goToInsureesPage', goToInsureesPage);
+Cypress.Commands.add('verifyFamilyExists', verifyFamilyExists);
+Cypress.Commands.add('verifyInsureeExists', verifyInsureeExists);
+
