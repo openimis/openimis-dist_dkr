@@ -7,7 +7,22 @@ export function goToInsureesPage() {
   cy.get('[href="/front/insuree/insurees"]').click();
 }
 
-export function goToFamilyForm() {
+export function fillHeadInsureeChfId(familyChfId) {
+  cy.get('[data-cy="head-insuree-chf-id-filter"]')
+    .find('input')
+    .first()
+    .clear()
+    .type(familyChfId)
+    .blur();
+}
+
+export function goToFamilyForm(familyChfId) {
+  if (!!familyChfId) {
+    cy.goToFamiliesPage();
+    cy.verifyFamilyExists({ chfId: familyChfId });
+    cy.selectSearcherRow(familyChfId);
+    return;
+  }
   cy.get('[data-cy="InsureeMainMenu"]').click();
   cy.get('[href="/front/insuree/family"]').click();
 }
@@ -25,6 +40,28 @@ export function clickSave() {
   cy.get("button[data-cy='save-button']").click();
 }
 
+export function addExistingInsureeIntoFamily(insureeChfId, familyChfId) {
+  cy.goToFamilyForm(familyChfId);
+  cy.get('[data-cy="family-add-existing-insuree-button"]').click();
+  cy.get('[data-cy="insuree-chf-id-picker"] input').clear().type(insureeChfId)
+  cy.get('td')
+    .find('div')
+    .filter((index, div) => {
+      const input = div.querySelector('input[type="text"]');
+      return input && input.value.includes(insureeChfId);
+    })
+    .first()
+    .rightclick();
+
+  cy.get('[data-cy="change-insuree-family-dialog-cancel-policies-button"]').click();
+}
+
+export function removeExistingInsureeFromFamily(insureeChfId, familyChfId) {
+  cy.goToFamilyForm(familyChfId);
+  cy.get('[data-cy="family-insuree-seacher-open-button"]').click();
+  cy.get('[data-cy="family-insurees-search-chfId"] input').clear().type(insureeChfId)
+  cy.get('[data-cy="family-remove-insuree-button"]').click();
+}
 // =====================================================
 // 🔹 FORM HELPERS (DYNAMIQUES)
 // =====================================================
@@ -41,9 +78,9 @@ export function fillInsureeForm({
   education = '2',
   typeOfId = 'D'
 } = {}) {
-  cy.get('[data-cy="insuree-chf-id"] input').clear().type(chfId);
-  cy.get('[data-cy="insuree-other-names"] input').clear().type(firstName);
-  cy.get('[data-cy="insuree-last-name"] input').clear().type(lastName);
+  cy.get('[data-cy="insuree-chf-id-input"] input').clear().type(chfId);
+  cy.get('[data-cy="insuree-other-names-input"] input').clear().type(firstName);
+  cy.get('[data-cy="insuree-last-name-input"] input').clear().type(lastName);
 
   // Date of Birth
   cy.get('button[type="button"] > svg[data-testid="CalendarIcon"]')
@@ -53,20 +90,20 @@ export function fillInsureeForm({
   cy.get('[data-cy="insuree-dob-day"]').contains(dobDay).click();
 
   // Gender
-  cy.get('[data-cy="insuree-gender"]').click();
+  cy.get('[data-cy="insuree-gender-picker"]').click();
   cy.get(`[data-value='\"${gender}\"']`).click();
 
   // Contacts
-  cy.get('[data-cy="insuree-phone"] input').clear().type(phone);
-  cy.get('[data-cy="insuree-email"] input').clear().type(email);
-  cy.get('[data-cy="insuree-passport"] input').clear().type(passport);
+  cy.get('[data-cy="insuree-phone-input"] input').clear().type(phone);
+  cy.get('[data-cy="insuree-email-input"] input').clear().type(email);
+  cy.get('[data-cy="insuree-passport-input"] input').clear().type(passport);
 
   // Pickers
-  cy.get('[data-cy="insuree-profession"]').click();
+  cy.get('[data-cy="insuree-profession-picker"]').click();
   cy.get(`[data-value="${profession}"]`).click();
-  cy.get('[data-cy="insuree-education"]').click();
+  cy.get('[data-cy="insuree-education-picker"]').click();
   cy.get(`[data-value="${education}"]`).click();
-  cy.get('[data-cy="insuree-type-of-id"]').click();
+  cy.get('[data-cy="insuree-type-of-id-picker"]').click();
   cy.get(`[data-value='\"${typeOfId}\"']`).click();
 }
 
@@ -87,20 +124,30 @@ export function fillFamilyForm({
     .find('[role="option"]').first().click();
 
   // Family Type
-  cy.get('[data-cy="family-type"]').click();
+  cy.get('[data-cy="family-type-picker"]').click();
   cy.get(`[data-value='\"${familyType}\"']`).click();
 
   // Confirmation Type
-  cy.get('[data-cy="family-confirmation-type"]').click();
+  cy.get('[data-cy="family-confirmation-type-picker"]').click();
   cy.get('[role="option"]').eq(confirmationTypeIndex).click();
 
   // Confirmation No
-  cy.get('[data-cy="family-confirmation-no"] input').clear().type(confirmationNo);
+  cy.get('[data-cy="family-confirmation-no-input"] input').clear().type(confirmationNo);
 
   // Address
-  cy.get('[data-cy="family-address"]').find('textarea').first()
+  cy.get('[data-cy="family-address-textarea"]').find('textarea').first()
     .clear()
     .type(address);
+}
+
+export function goToFamilyOverview(family) {
+  cy.goToFamiliesPage();
+  cy.verifyFamilyExists(family);
+  cy.selectSearcherRow(family.lastName);
+}
+
+export function selectSearcherRow(data) {
+  cy.contains(data).parents('tr, div').first().dblclick();
 }
 
 // =====================================================
@@ -108,15 +155,15 @@ export function fillFamilyForm({
 // =====================================================
 export function verifyInsureeExists({
   chfId = '692651197',
-  firstName = 'Paul',
+  firstName = 'Paul', //This field removes the second character from the string entered by Cypress.
   lastName = 'Sandjong',
   phone = '602000000'
 } = {}) {
   goToInsureesPage();
 
-  cy.get('[data-cy="insuree-chf-id"] input').clear().type(chfId);
+  cy.get('[data-cy="insuree-chf-id-filter"] input').clear().type(chfId);
   cy.scrollTo('right');
-  cy.get('[data-cy="searcher-refresh"]').click();
+  cy.get('[data-cy="searcher-refresh"]').click({ force: true });
 
   cy.contains(lastName);
   cy.contains(chfId);
@@ -124,22 +171,18 @@ export function verifyInsureeExists({
 }
 
 export function verifyFamilyExists({
-  confirmationNo = 'CONF-001',
   lastName = 'Chineze',
-  firstName = 'Sylvie',
+  firstName = 'Sylvie', //This field removes the second character from the string entered by Cypress.
   chfId = '697547030',
   phone = '602000000'
 } = {}) {
   goToFamiliesPage();
 
-  cy.get('[data-cy="head-insuree-chf-id"]')
-    .find('input')
-    .first()
-    .clear()
-    .type(chfId);
+  fillHeadInsureeChfId(chfId);
 
   cy.scrollTo('right');
-  cy.get('[data-cy="searcher-refresh"]').click();
+  cy.get('[data-cy="searcher-refresh"]').scrollIntoView();
+  cy.get('[data-cy="searcher-refresh"]').click({ force: true });
 
   cy.contains(lastName);
   cy.contains(chfId);
@@ -195,7 +238,7 @@ describe('Full Family & Insuree Workflow', () => {
 
     // ------------------ MODIFY INSUREE ------------------
     verifyInsureeExists({ chfId: '692651197' });
-    cy.contains('Sandjong').parents('tr, div').first().dblclick();
+    cy.selectSearcherRow('Sandjong');
 
     cy.get('button[type="button"] > svg[data-testid="CalendarIcon"]')
       .first()
@@ -206,22 +249,27 @@ describe('Full Family & Insuree Workflow', () => {
 
     // ------------------ MODIFY FAMILY ------------------
     cy.verifyFamilyExists({ chfId: '697547030' });
-    cy.contains('697547030').parents('tr, div').first().dblclick();
+    cy.selectSearcherRow('Chineze');
 
-    cy.get('[data-cy="family-confirmation-no"] input').clear().type('CONF-002');
+    cy.get('[data-cy="family-confirmation-no-input"] input').clear().type('CONF-002');
     clickSave();
 
-    // ------------------ DELETE FAMILY ------------------
-    cy.verifyFamilyExists({ chfId: '697547030' });
-    cy.wait(1000);
-    cy.get('[data-cy="delete-family-button"]').first().click();
-    cy.get('[data-cy="dialog-confirm-button"]').click();
+    // ------------------ ADD EXISTING INSUREE INTO FAMILY ------------------
+    cy.addExistingInsureeIntoFamily('692651197', '697547030');
+
+    // ------------------ REMOVE EXISTING INSUREE FROM FAMILY ------------------
+    cy.removeExistingInsureeFromFamily('692651197', '697547030');
 
     // ------------------ DELETE INSUREE ------------------
     verifyInsureeExists({ chfId: '692651197' });
-    cy.wait(1000);
-    cy.get('[data-cy="delete-insuree-button"]').first().click();
-    cy.get('[data-cy="dialog-confirm-button"]').click();
+    cy.get('[data-cy="delete-insuree-button"]').first().click({force: true});
+    cy.get('[data-cy="dialog-confirm-button"]').click({ force: true });
+
+    // ------------------ DELETE FAMILY ------------------
+    cy.verifyFamilyExists({ chfId: '697547030' });
+    cy.get('[data-cy="delete-family-button"]').first().click({ force: true });
+    cy.get('[data-cy="delete-family-and-insurees-button"]').click({ force: true });
+
   });
 });
 
