@@ -9,3 +9,5 @@ node_modules/
 cypress/screenshots/
 cypress/downloads/
 cypress/fixtures/tmp_individuals.csv
+yarn.lock
+package-lock.json
