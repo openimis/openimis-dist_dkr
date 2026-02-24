@@ -697,7 +697,6 @@ import {
   goToInsureesPage,
   verifyFamilyExists,
   verifyInsureeExists,
-  goToFamilyOverview,
   selectSearcherRow,
   addExistingInsureeIntoFamily
 } from '../e2e/insuree.cy';
@@ -711,6 +710,5 @@ Cypress.Commands.add('goToFamilyForm', goToFamilyForm);
 Cypress.Commands.add('goToInsureesPage', goToInsureesPage);
 Cypress.Commands.add('verifyFamilyExists', verifyFamilyExists);
 Cypress.Commands.add('verifyInsureeExists', verifyInsureeExists);
-Cypress.Commands.add('goToFamilyOverview', goToFamilyOverview);
 Cypress.Commands.add('selectSearcherRow', selectSearcherRow);
 Cypress.Commands.add('addExistingInsureeIntoFamily', addExistingInsureeIntoFamily);
