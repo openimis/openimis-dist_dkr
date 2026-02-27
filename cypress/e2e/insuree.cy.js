@@ -1,228 +1,217 @@
-// =====================================================
-// 🔹 CONSTANTS / TEST DATA
-// =====================================================
-export const insureeHead = {
-  chfId: '697547030',
-  firstName: 'Sylvie',
-  lastName: 'Chineze',
-  gender: 'F',
-  phone: '602111111',
-  email: 'sylvie@example.com',
-  passport: 'AB7654321',
-  profession: '2',
-  education: '2',
-  typeOfId: 'D',
-  dobDay: '15'
+// Test data
+
+export const insurees = {
+  head: {
+    chfId: '697547030',
+    givenNames: 'Sylvie',
+    lastName: 'Chineze',
+    gender: 'Female',
+    phone: '602111111',
+    email: 'sylvie@example.com',
+    passport: 'AB7654321',
+    maritalStatus: 'Married',
+    profession: 'Employee',
+    education: 'University',
+    typeOfId: 'Passport',
+    dobDay: '15'
+  },
+  member: {
+    chfId: '692651197',
+    givenNames: 'Paul',
+    lastName: 'Sandjong',
+    gender: 'Male',
+    phone: '602000000',
+    email: 'paul@example.com',
+    passport: 'AB1234567',
+    maritalStatus: 'Married',
+    profession: 'Employee',
+    education: 'University',
+    typeOfId: 'Passport',
+    dobDay: '18'
+  }
 };
 
-export const insureeMember = {
-  chfId: '692651197',
-  firstName: 'Paul',
-  lastName: 'Sandjong',
-  gender: 'M',
-  phone: '602000000',
-  email: 'paul@example.com',
-  passport: 'AB1234567',
-  profession: '2',
-  education: '2',
-  typeOfId: 'D',
-  dobDay: '18'
-};
-
-export const family = {
-  location: 'R1D1M1V1',
-  familyType: 'H',
+export const familyData = {
+  location: 'R1D1M1V1 Rachla',
+  familyType: 'Household',
   confirmationNo: 'CONF-001',
+  confirmationType: 'Municipality',
   address: 'Douala, Cameroun'
 };
 
-// =====================================================
-// 🔹 NAVIGATION HELPERS
-// =====================================================
-export function goToInsureesPage() {
-  cy.get('[data-cy="InsureeMainMenu"]').click();
-  cy.get('[href="/front/insuree/insurees"]').click();
-}
 
-export function goToFamiliesPage() {
-  cy.get('[data-cy="InsureeMainMenu"]').click();
-  cy.get('[href="/front/insuree/families"]').click();
-}
+// Generic helpers
+const goToSubMenu = (menu, submenu) => {
+  cy.contains(menu).click();
+  cy.contains('a', submenu).click();
+};
 
-export function goToFamilyForm(familyChfId) {
-  if (familyChfId) {
-    goToFamiliesPage();
-    verifyFamilyExists({ chfId: familyChfId });
-    selectSearcherRow(familyChfId);
-    return;
+// Insuree actions
+const Insuree = {
+  goToList: () => goToSubMenu('Insurees and Policies', 'Insurees'),
+
+  goToForm: (insuree) => {
+    Insuree.goToList();
+
+    if (insuree?.chfId) {
+      cy.enterMuiInput('Insurance No.', insuree.chfId, "input");
+      cy.scrollTo('right');
+      cy.contains('button', 'Search').click();
+      cy.openRow(insuree.chfId);
+    } else {
+      cy.get('[aria-label="Create new Insuree"]').click();
+    }
+  },
+
+  fillForm: (insuree) => {
+    cy.enterMuiInput('Insurance No.', insuree.chfId, "input");
+    cy.enterMuiInput('Last Name', insuree.lastName);
+    cy.enterMuiInput('Given Names', insuree.givenNames);
+    cy.enterMuiInput('Phone', insuree.phone);
+    cy.enterMuiInput('Email', insuree.email);
+
+    cy.chooseMuiDatePicker('Birth Date', insuree.dobDay);
+    
+    cy.chooseMuiSelect('Profession', insuree.profession);
+    cy.chooseMuiSelect('Education', insuree.education);
+    cy.chooseMuiSelect('Id Type', insuree.typeOfId);
+    cy.chooseMuiSelect('Marital Status', insuree.maritalStatus);
+    cy.chooseMuiSelect('Gender', insuree.gender);
+  },
+
+  verifyExists: (insuree) => {
+    Insuree.goToList();
+    cy.enterMuiInput('Insurance No.', insuree.chfId, "input");
+    cy.scrollTo('right');
+    cy.contains('button', 'Search').click();
+    cy.contains(insuree.givenNames);
+    cy.contains(insuree.chfId);
+  },
+
+  delete: (insuree) => {
+    Insuree.goToList();
+    cy.enterMuiInput('Insurance No.', insuree.chfId, "input");
+    cy.contains('button', 'Search').click();
+    cy.scrollTo('right');
+    cy.contains('tr', insuree.chfId)
+      .within(() => {
+        cy.contains('button', 'Delete').click();
+      });
+    cy.contains('button', 'OK').click();
   }
-  cy.get('[data-cy="InsureeMainMenu"]').click();
-  cy.get('[href="/front/insuree/family"]').click();
-}
+};
 
-// =====================================================
-// 🔹 FORM HELPERS
-// =====================================================
-export function fillInsureeForm(insuree) {
-  cy.get('[data-cy="insuree-chf-id-input"] input').clear().type(insuree.chfId);
-  cy.get('[data-cy="insuree-other-names-input"] input').clear().type(insuree.firstName);
-  cy.get('[data-cy="insuree-last-name-input"] input').clear().type(insuree.lastName);
 
-  // Date of Birth
-  cy.get('button[type="button"] > svg[data-testid="CalendarIcon"]')
-    .first()
-    .parent()
-    .click();
-  cy.get('[data-cy="insuree-dob-day"]').contains(insuree.dobDay).click();
+// Family actions
+const Family = {
+  goToList: () => goToSubMenu('Insurees and Policies', 'Families/Group'),
 
-  // Gender
-  cy.get('[data-cy="insuree-gender-picker"]').click();
-  cy.get(`[data-value='\"${insuree.gender}\"']`).click();
+  goToForm: (head) => {
+    Family.goToList();
 
-  // Contacts
-  cy.get('[data-cy="insuree-phone-input"] input').clear().type(insuree.phone);
-  cy.get('[data-cy="insuree-email-input"] input').clear().type(insuree.email);
-  cy.get('[data-cy="insuree-passport-input"] input').clear().type(insuree.passport);
+    if (head?.chfId) {
+      cy.enterMuiInput('Head Ins. No.', head.chfId, "input");
+      cy.scrollTo('right');
+      cy.contains('button', 'Search').click({force: true});
+      cy.openRow(head.chfId);
+    } else {
+      cy.get('[aria-label="Create new Family"]')
+      .find('button')
+      .click({force: true});
+    }
+  },
 
-  // Pickers
-  cy.get('[data-cy="insuree-profession-picker"]').click();
-  cy.get(`[data-value="${insuree.profession}"]`).click();
-  cy.get('[data-cy="insuree-education-picker"]').click();
-  cy.get(`[data-value="${insuree.education}"]`).click();
-  cy.get('[data-cy="insuree-type-of-id-picker"]').click();
-  cy.get(`[data-value='\"${insuree.typeOfId}\"']`).click();
-}
+  fillForm: (data) => {
+    cy.chooseMuiSelect('Village', data.location);
+    cy.chooseMuiSelect('Family Type', data.familyType);
+    cy.chooseMuiSelect('Confirmation Type', data.confirmationType);
+    cy.enterMuiInput('Confirmation No.', data.confirmationNo);
+    cy.enterMuiInput('Address details', data.address, 'textarea');
+  },
 
-export function fillFamilyForm(familyData) {
-  cy.get('[data-cy="location-V-picker"] input').first().click().type(familyData.location);
-  cy.get('[role="listbox"]').should('be.visible').find('[role="option"]').first().click();
+  verifyExists: (head) => {
+    Family.goToList();
+    cy.enterMuiInput('Head Ins. No.', head.chfId, "input");
+    cy.scrollTo('right');
+    cy.contains('button', 'Search').click({force: true});
+    cy.contains(head.lastName);
+    cy.contains(head.givenNames);
+    cy.contains(head.chfId);
+  },
 
-  cy.get('[data-cy="family-type-picker"]').click();
-  cy.get(`[data-value='\"${familyData.familyType}\"']`).click();
+  addMember: (head, member) => {
+    Family.goToForm(head);
+    cy.contains('button', 'Add existing').click()
+    cy.contains('label', 'Insurance No.').type(member.chfId)
+    cy.openRow(member.chfId)
 
-  cy.get('[data-cy="family-confirmation-type-picker"]').click();
-  cy.get('[role="option"]').eq(0).click(); // confirmation type index
+    cy.contains('button', 'Move and cancel policies').click();
+  },
 
-  cy.get('[data-cy="family-confirmation-no-input"] input').clear().type(familyData.confirmationNo);
+  removeMember: (head, member) => {
+    Family.goToForm(head);
+    cy.contains('tr', member.chfId)
+      .within(() => {
+        cy.contains('button', 'Remove').click();
+      });
+    cy.contains('button', 'Remove and cancel policies').click();
+  },
 
-  cy.get('[data-cy="family-address-textarea"] textarea').clear().type(familyData.address);
-}
+  delete: (head) => {
+    Family.goToList();
+    cy.enterMuiInput('Head Ins. No.', head.chfId, "input");
+    cy.contains('button', 'Search').click();
+    cy.scrollTo('right');
+    cy.contains('tr', head.chfId)
+      .within(() => {
+        cy.contains('button', 'Delete').click();
+      });
+    cy.contains('button', 'Delete family and members').click();
+  }
+};
 
-// =====================================================
-// 🔹 ACTION HELPERS
-// =====================================================
-export function clickCreateInsuree() {
-  cy.get('[data-cy="create-insuree-button"]').click();
-}
+// Tests
+describe.only('Family & Insuree Workflow', () => {
 
-export function clickSave() {
-  cy.get("button[data-cy='save-button']").click();
-}
-
-export function addExistingInsureeIntoFamily(member, head) {
-  goToFamilyForm(head.chfId);
-  cy.get('[data-cy="family-add-existing-insuree-button"]').click();
-  cy.get('[data-cy="insuree-chf-id-picker"] input').clear().type(member.chfId);
-  
-  cy.get('td div').filter((index, div) => {
-    const input = div.querySelector('input[type="text"]');
-    return input && input.value.includes(member.chfId);
-  }).first().rightclick();
-
-  cy.get('[data-cy="change-insuree-family-dialog-cancel-policies-button"]').click();
-}
-
-export function removeExistingInsureeFromFamily(member, head) {
-  goToFamilyForm(head.chfId);
-  cy.get('[data-cy="family-insuree-seacher-open-button"]').click();
-  cy.get('[data-cy="family-insurees-search-chfId"] input').clear().type(member.chfId);
-  cy.get('[data-cy="family-remove-insuree-button"]').first().click();
-  cy.get('[data-cy="remove-insuree-from-family-cancel-policies-btn"]').click();
-}
-
-export function selectSearcherRow(data) {
-  cy.contains(data).parents('tr, div').first().dblclick();
-}
-
-// =====================================================
-// 🔹 ASSERTION HELPERS
-// =====================================================
-export function verifyInsureeExists(insuree) {
-  goToInsureesPage();
-  cy.get('[data-cy="insuree-chf-id-filter"] input').clear().type(insuree.chfId);
-  cy.scrollTo('right');
-  cy.get('[data-cy="searcher-refresh"]').click({ force: true });
-  cy.contains(insuree.lastName);
-  cy.contains(insuree.chfId);
-  cy.contains(insuree.phone);
-}
-
-export function verifyFamilyExists(head) {
-  goToFamiliesPage();
-  cy.get('[data-cy="head-insuree-chf-id-filter"] input').first().clear().type(head.chfId);
-  cy.scrollTo('right');
-  cy.get('[data-cy="searcher-refresh"]').scrollIntoView().click({ force: true });
-  cy.contains(head.lastName);
-  cy.contains(head.chfId);
-  cy.contains(head.phone);
-}
-
-// =====================================================
-// 🔹 TEST CASE
-// =====================================================
-describe('Full Family & Insuree Workflow', () => {
-  it('Should run the full flow using variables', () => {
-    // ------------------ LOGIN ------------------
+  it('should execute complete flow cleanly', () => {
     cy.login();
 
-    // ------------------ CREATE INSUREE MEMBER ------------------
-    cy.goToInsureesPage();
-    clickCreateInsuree();
-    fillInsureeForm(insureeMember);
-    clickSave();
-    verifyInsureeExists(insureeMember);
+    // Create insuree
+    Insuree.goToForm();
+    Insuree.fillForm(insurees.member);
+    cy.save();
+    Insuree.verifyExists(insurees.member);
 
-    // ------------------ CREATE FAMILY WITH HEAD INSUREE ------------------
-    goToFamilyForm();
-    fillFamilyForm(family);
-    fillInsureeForm(insureeHead); // chef de famille
-    clickSave();
-    verifyFamilyExists({ ...insureeHead, confirmationNo: family.confirmationNo });
+    // Create family with head
+    Family.goToForm();
+    Family.fillForm(familyData);
+    Insuree.fillForm(insurees.head);
+    cy.save();
+    Family.verifyExists(insurees.head);
 
-    // ------------------ MODIFY INSUREE MEMBER ------------------
-    verifyInsureeExists(insureeMember);
-    selectSearcherRow(insureeMember.lastName);
+    // Modify member DOB
+    Insuree.verifyExists(insurees.member);
+    cy.openRow(insurees.member.chfId);
 
-    cy.get('button[type="button"] > svg[data-testid="CalendarIcon"]')
-      .first()
-      .parent()
-      .click();
-    cy.get('[data-cy="insuree-dob-day"]').contains(insureeMember.dobDay).click();
-    clickSave();
+    cy.chooseMuiDatePicker('Birth Date', insurees.member.dobDay);
 
-    // ------------------ MODIFY FAMILY ------------------
-    verifyFamilyExists(insureeHead);
-    selectSearcherRow(insureeHead.lastName);
+    cy.save();
 
-    cy.get('[data-cy="family-confirmation-no-input"] input')
-      .clear()
-      .type('CONF-002');
-    clickSave();
+    // Modify family
+    Family.verifyExists(insurees.head);
+    cy.openRow(insurees.head.chfId);
 
-    // ------------------ ADD MEMBER TO FAMILY ------------------
-    addExistingInsureeIntoFamily(insureeMember, insureeHead);
+    cy.enterMuiInput('Confirmation No.', 'CONF-002');
 
-    // ------------------ REMOVE MEMBER FROM FAMILY ------------------
-    removeExistingInsureeFromFamily(insureeMember, insureeHead);
+    cy.save();
 
-    // ------------------ DELETE INSUREE MEMBER ------------------
-    verifyInsureeExists(insureeMember);
-    cy.get('[data-cy="delete-insuree-button"]').first().click({ force: true });
-    cy.get('[data-cy="dialog-confirm-button"]').click({ force: true });
+    // Add / Remove member
+    Family.addMember(insurees.head, insurees.member);
+    Family.removeMember(insurees.head, insurees.member);
 
-    // ------------------ DELETE FAMILY ------------------
-    verifyFamilyExists(insureeHead);
-    cy.get('[data-cy="delete-family-button"]').first().click({ force: true });
-    cy.get('[data-cy="delete-family-and-insurees-button"]').click({ force: true });
-  });
+    // Cleanup
+    Insuree.delete(insurees.member);
+    Family.delete(insurees.head);
+   });
+
 });

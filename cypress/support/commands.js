@@ -9,7 +9,7 @@ const getTodayFormatted = () => {
 Cypress.Commands.add('login', () => {
   cy.visit('/front');
   cy.fixture('cred').then((cred) => {
-    cy.get('input[type="text"]').type(cred.username)
+    cy.get('input[type="text"]', { timeout: 200000 }).type(cred.username) // helping timeout when initializing takes too long
     cy.get('input[type="password"]').type(cred.password)
     cy.get('button[type="submit"]').click()
     cy.contains('Welcome Admin Admin!')
@@ -611,12 +611,61 @@ Cypress.Commands.add('enterMuiInput', (label, value, inputTag='input') => {
 Cypress.Commands.add('chooseMuiSelect', (label, value) => {
   cy.contains('label', label)
     .siblings('.MuiInputBase-root')
-    .find('[role="button"]')
-    .click()
+    .click(); 
 
-  cy.contains('[role="listbox"] li', value).as('option')
-  cy.get('@option').click()
+  cy.get('body')
+    .contains('li[role="option"]', value, { timeout: 10000 })
+    .should('be.visible')
+    .click({ force: true });
 })
+
+Cypress.Commands.add('chooseMuiAutocomplete', (label, value) => {
+  cy.contains('label', label)
+    .siblings('.MuiInputBase-root')
+    .find('input')
+    .click();
+
+  cy.contains('[role="menu"] li, [role="presentation"] li', value).click({force: true});
+})
+
+Cypress.Commands.add('chooseMuiDatePicker', (label, day, month, year) => {
+  cy.contains('label', label)
+    .siblings('.MuiPickersInputBase-root')
+    .find('button')
+    .first()
+    .click();
+
+  cy.get('body')
+    if (year) {
+      cy.get('[aria-label="calendar view is open, switch to year view"]')
+      .should('be.visible')
+      .click();
+      cy.get('.MuiYearCalendar-button')
+      .contains(year)
+      .click();
+      cy.get('[aria-label="year view is open, switch to calendar view"]')
+      .should('be.visible')
+      .click();
+    }
+    if (month) {
+      cy.get('[aria-label="year view is open, switch to calendar view"]')
+      .should('be.visible')
+      .click();
+      cy.get('.MuiYearCalendar-button')
+      .contains(month)
+      .click();
+    }
+    cy.get('[role="gridcell"]')
+    .contains(day)
+    .should('be.visible')
+    .click();
+})
+
+Cypress.Commands.add('save', () => cy.get('[aria-label="Save changes"]').click());
+
+Cypress.Commands.add('openRow', (value) => {
+  cy.contains(value).parents('tr').first().dblclick({force: true});
+});
 
 Cypress.Commands.add('assertMuiInput', (label, value, inputTag='input') => {
   cy.contains('label', label)
@@ -641,15 +690,6 @@ Cypress.Commands.add('assertMuiSelectValue', (label, value) => {
   cy.contains('label', label)
     .siblings('.MuiInputBase-root')
     .contains(value)
-})
-
-Cypress.Commands.add('chooseMuiAutocomplete', (label, value) => {
-  cy.contains('label', label)
-    .siblings('.MuiInputBase-root')
-    .find('input')
-    .click()
-
-  cy.contains('[role="menu"] li, [role="presentation"] li', value).click();
 })
 
 Cypress.Commands.add('setModuleConfig', (moduleName, configFixtureFile) => {
@@ -685,30 +725,3 @@ Cypress.Commands.add('getItemCount', (itemName) => {
       return parseInt(match?.[1], 10);
     });
 });
-
-
-import { 
-  fillFamilyForm, 
-  fillInsureeForm, 
-  clickCreateInsuree,
-  clickSave,
-  goToFamiliesPage,
-  goToFamilyForm,
-  goToInsureesPage,
-  verifyFamilyExists,
-  verifyInsureeExists,
-  selectSearcherRow,
-  addExistingInsureeIntoFamily
-} from '../e2e/insuree.cy';
-
-Cypress.Commands.add('fillFamilyForm', fillFamilyForm);
-Cypress.Commands.add('fillInsureeForm', fillInsureeForm);
-Cypress.Commands.add('clickCreateInsuree', clickCreateInsuree);
-Cypress.Commands.add('clickSave', clickSave);
-Cypress.Commands.add('goToFamiliesPage', goToFamiliesPage);
-Cypress.Commands.add('goToFamilyForm', goToFamilyForm);
-Cypress.Commands.add('goToInsureesPage', goToInsureesPage);
-Cypress.Commands.add('verifyFamilyExists', verifyFamilyExists);
-Cypress.Commands.add('verifyInsureeExists', verifyInsureeExists);
-Cypress.Commands.add('selectSearcherRow', selectSearcherRow);
-Cypress.Commands.add('addExistingInsureeIntoFamily', addExistingInsureeIntoFamily);
