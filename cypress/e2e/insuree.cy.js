@@ -1,5 +1,4 @@
 // Test data
-
 export const insurees = {
   head: {
     chfId: '697547030',

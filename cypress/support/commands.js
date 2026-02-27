@@ -661,7 +661,13 @@ Cypress.Commands.add('chooseMuiDatePicker', (label, day, month, year) => {
     .click();
 })
 
-Cypress.Commands.add('save', () => cy.get('[aria-label="Save changes"]').click());
+Cypress.Commands.add('save', () => {
+  cy.get('[aria-label="Save changes"]')
+    .find('button')
+    .should('be.visible')
+    .and('not.be.disabled')
+    .click();
+});
 
 Cypress.Commands.add('openRow', (value) => {
   cy.contains(value).parents('tr').first().dblclick({force: true});
