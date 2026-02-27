@@ -600,7 +600,7 @@ Cypress.Commands.add('enrollGroupBeneficiariesIntoProgram', (
 
 
 Cypress.Commands.add('enterMuiInput', (label, value, inputTag='input') => {
-  cy.contains('label', label)
+  cy.contains('label', label, { matchCase: false })
     .siblings('.MuiInputBase-root')
     .find(inputTag)
     .first()
@@ -609,7 +609,7 @@ Cypress.Commands.add('enterMuiInput', (label, value, inputTag='input') => {
 })
 
 Cypress.Commands.add('chooseMuiSelect', (label, value) => {
-  cy.contains('label', label)
+  cy.contains('label', label, { matchCase: false })
     .siblings('.MuiInputBase-root')
     .click(); 
 
@@ -620,16 +620,23 @@ Cypress.Commands.add('chooseMuiSelect', (label, value) => {
 })
 
 Cypress.Commands.add('chooseMuiAutocomplete', (label, value) => {
-  cy.contains('label', label)
+  // ------------------ FOCUS THE AUTOCOMPLETE FIELD ------------------
+  cy.contains('label', label, { matchCase: false })
     .siblings('.MuiInputBase-root')
     .find('input')
-    .click();
+    .click()
+    .clear()
+    .type(value, { delay: 50 });
 
-  cy.contains('[role="menu"] li, [role="presentation"] li', value).click({force: true});
-})
+  // ------------------ CLICK ON THE OPTION ------------------
+  cy.get('body')
+    .contains('li[role="option"], li[role="presentation"], [role="menu"] li', value, { timeout: 10000 })
+    .should('be.visible')
+    .click();
+});
 
 Cypress.Commands.add('chooseMuiDatePicker', (label, day, month, year) => {
-  cy.contains('label', label)
+  cy.contains('label', label, { matchCase: false })
     .siblings('.MuiPickersInputBase-root')
     .find('button')
     .first()
@@ -670,7 +677,7 @@ Cypress.Commands.add('save', () => {
 });
 
 Cypress.Commands.add('openRow', (value) => {
-  cy.contains(value).parents('tr').first().dblclick({force: true});
+  cy.contains(value, { matchCase: false }).parents('tr').first().dblclick({force: true});
 });
 
 Cypress.Commands.add('assertMuiInput', (label, value, inputTag='input') => {
@@ -680,6 +687,11 @@ Cypress.Commands.add('assertMuiInput', (label, value, inputTag='input') => {
     .should('be.visible')
     .and('have.value', value);
 })
+
+Cypress.Commands.add('goToSubMenu', (menu, submenu) => {
+  cy.contains(menu).click();
+  cy.contains('a', submenu).click();
+});
 
 Cypress.Commands.add('assertMuiInputDisabled', (label, value=null, inputTag='input') => {
   const input = cy.contains('label', label)
