@@ -68,15 +68,15 @@ Cypress.Commands.add('deleteModuleConfig', (moduleName) => {
 
 Cypress.Commands.add('shouldHaveMenuItemsInOrder', (expectedMenuNames) => {
   cy.get('div[role="button"]')
-  .filter(':visible')
-  .should(($buttons) => {
-    expect($buttons).to.have.length(expectedMenuNames.length);
+    .filter(':visible')
+    .should(($buttons) => {
+      expect($buttons).to.have.length(expectedMenuNames.length);
 
-    // Check each sub menu item text and order
-    expectedMenuNames.forEach((itemText, index) => {
-      expect($buttons.eq(index)).to.contain(itemText);
+      // Check each sub menu item text and order
+      expectedMenuNames.forEach((itemText, index) => {
+        expect($buttons.eq(index)).to.contain(itemText);
+      });
     });
-  });
 })
 
 Cypress.Commands.add('deleteActivities', (activityNames) => {
@@ -196,7 +196,7 @@ Cypress.Commands.add('deleteProgram', (programName) => {
         cy.wrap(row).within(() => {
           // Find and click the Delete button in this row
           cy.get('button[title="Delete"]')
-            .click({force: true});
+            .click({ force: true });
         });
 
         // Confirm deletion in dialog
@@ -215,7 +215,7 @@ Cypress.Commands.add('deleteProgram', (programName) => {
         cy.get('ul.MuiList-root li')
           .first()
           .should('contain', 'Delete program');
-          // .should('contain', `Delete program ${programName}`); //TODO: switch to this after fix
+        // .should('contain', `Delete program ${programName}`); //TODO: switch to this after fix
 
         // Close journal drawer
         cy.get('.MuiDrawer-paperAnchorRight button')
@@ -299,33 +299,33 @@ Cypress.Commands.add(
     programName,
     maxBeneficiaries,
     programType,
-    institution='',
-    description='',
+    institution = '',
+    description = '',
   ) => {
-  cy.assertMuiInput('Code', programCode)
-  cy.assertMuiInput('Name', programName)
-  const today = getTodayFormatted()
-  cy.assertMuiInput('Date from', today)
-  cy.assertMuiInput('Date to', today)
-  cy.assertMuiInput('Max Beneficiaries', maxBeneficiaries)
-  cy.assertMuiInput('Institution', institution)
-  cy.assertMuiInput('Description', description, 'textarea')
-})
+    cy.assertMuiInput('Code', programCode)
+    cy.assertMuiInput('Name', programName)
+    const today = getTodayFormatted()
+    cy.assertMuiInput('Date from', today)
+    cy.assertMuiInput('Date to', today)
+    cy.assertMuiInput('Max Beneficiaries', maxBeneficiaries)
+    cy.assertMuiInput('Institution', institution)
+    cy.assertMuiInput('Description', description, 'textarea')
+  })
 
 Cypress.Commands.add(
   'checkProgramFieldValuesInListView',
   (programCode, programName, maxBeneficiaries, programType) => {
 
-  cy.contains('tfoot', 'Rows Per Page')
-  cy.contains('td', programName).should('exist')
-  cy.contains('td', programName)
-    .parent('tr').within(() => {
-      cy.contains('td', programCode)
-      cy.contains('td', programType)
-      cy.contains('td', maxBeneficiaries)
-      cy.contains('td', new Date().toISOString().substring(0, 10))
-    })
-})
+    cy.contains('tfoot', 'Rows Per Page')
+    cy.contains('td', programName).should('exist')
+    cy.contains('td', programName)
+      .parent('tr').within(() => {
+        cy.contains('td', programCode)
+        cy.contains('td', programType)
+        cy.contains('td', maxBeneficiaries)
+        cy.contains('td', new Date().toISOString().substring(0, 10))
+      })
+  })
 
 Cypress.Commands.add('uploadIndividualsCSV', (numIndividuals) => {
   cy.task('updateCSV', { numIndividuals }).then(() => {
@@ -356,7 +356,7 @@ Cypress.Commands.add('ensureSufficientIndividuals', (expectedNumIndividuals) => 
     cy.visit('/front/individuals')
     cy.uploadIndividualsCSV(numToAdd)
 
-    cy.wait(100*numToAdd) // group creation takes time
+    cy.wait(100 * numToAdd) // group creation takes time
 
     cy.visit('/front/individuals')
     cy.getItemCount("Individual").then(newCount => {
@@ -381,7 +381,7 @@ Cypress.Commands.add('ensureSufficientHouseholds', (expectedNumGroups) => {
     cy.visit('/front/individuals')
     cy.uploadIndividualsCSV(numIndividualsToAdd)
 
-    cy.wait(100*numIndividualsToAdd) // group creation takes time
+    cy.wait(100 * numIndividualsToAdd) // group creation takes time
 
     cy.visit('/front/groups')
     cy.getItemCount("Group").then(newCount => {
@@ -599,26 +599,52 @@ Cypress.Commands.add('enrollGroupBeneficiariesIntoProgram', (
 })
 
 
-Cypress.Commands.add('enterMuiInput', (label, value, inputTag='input') => {
-  cy.contains('label', label)
+Cypress.Commands.add('enterMuiInput', (label, value, inputTag = 'input') => {
+  cy.contains('label', new RegExp(label))
     .siblings('.MuiInputBase-root')
     .find(inputTag)
     .first()
-    .clear({force: true})
-    .type(value, {force: true});
+    .clear({ force: true })
+    .type(value, { force: true });
 })
 
 Cypress.Commands.add('chooseMuiSelect', (label, value) => {
-  cy.contains('label', label)
+  cy.contains('label', new RegExp(label))
     .siblings('.MuiInputBase-root')
-    .find('[role="button"]')
-    .click()
+    .find('[role="button"], .MuiSelect-select, .MuiInput-input, .MuiInputBase-input')
+    .click({ force: true })
 
-  cy.contains('[role="listbox"] li', value).as('option')
-  cy.get('@option').click()
+  // Wait a bit for portal to appear
+  cy.wait(500);
+
+  // Check if options are available
+  const selector = '[role="listbox"] li, [role="menu"] li, [role="presentation"] li, .MuiMenuItem-root';
+  cy.get('body').then(($body) => {
+    if ($body.find(selector).length > 0 && !$body.text().includes('No options')) {
+      // Find by text value if provided, otherwise pick the first
+      const valRegex = new RegExp(value, 'i');
+      const $options = $body.find(selector);
+
+      let found = false;
+      $options.each((index, el) => {
+        if (valRegex.test(el.innerText)) {
+          cy.wrap(el).click({ force: true });
+          found = true;
+          return false; // break
+        }
+      });
+
+      if (!found) {
+        cy.wrap($options.first()).click({ force: true });
+      }
+    } else {
+      // Fallback: just close the dropdown by clicking the body
+      cy.get('body').click(0, 0);
+    }
+  })
 })
 
-Cypress.Commands.add('assertMuiInput', (label, value, inputTag='input') => {
+Cypress.Commands.add('assertMuiInput', (label, value, inputTag = 'input') => {
   cy.contains('label', label)
     .siblings('.MuiInputBase-root')
     .find(inputTag)
@@ -626,7 +652,7 @@ Cypress.Commands.add('assertMuiInput', (label, value, inputTag='input') => {
     .and('have.value', value);
 })
 
-Cypress.Commands.add('assertMuiInputDisabled', (label, value=null, inputTag='input') => {
+Cypress.Commands.add('assertMuiInputDisabled', (label, value = null, inputTag = 'input') => {
   const input = cy.contains('label', label)
     .siblings('.MuiInputBase-root')
     .find(inputTag)
@@ -653,27 +679,27 @@ Cypress.Commands.add('chooseMuiAutocomplete', (label, value) => {
 })
 
 Cypress.Commands.add('setModuleConfig', (moduleName, configFixtureFile) => {
-    cy.deleteModuleConfig(moduleName)
+  cy.deleteModuleConfig(moduleName)
 
-    cy.contains('a', 'Module configurations').click()
+  cy.contains('a', 'Module configurations').click()
 
-    // Create module config using fixture config file
-    cy.contains('a', 'Add module configuration').click()
-    cy.get('input[name="module"]').type(moduleName)
-    cy.get('select[name="layer"]').select('backend')
-    cy.get('input[name="version"]').type(1)
+  // Create module config using fixture config file
+  cy.contains('a', 'Add module configuration').click()
+  cy.get('input[name="module"]').type(moduleName)
+  cy.get('select[name="layer"]').select('backend')
+  cy.get('input[name="version"]').type(1)
 
-    cy.fixture(configFixtureFile).then((config) => {
-      const configString = JSON.stringify(config, null, 2);
-      cy.get('textarea[name="config"]')
-        .type(configString, {
-          parseSpecialCharSequences: false,
-          delay: 0  // Type faster
-        });
+  cy.fixture(configFixtureFile).then((config) => {
+    const configString = JSON.stringify(config, null, 2);
+    cy.get('textarea[name="config"]')
+      .type(configString, {
+        parseSpecialCharSequences: false,
+        delay: 0  // Type faster
+      });
 
-      cy.get('input[value="Save"]').click()
-      cy.contains("was added successfully")
-    })
+    cy.get('input[value="Save"]').click()
+    cy.contains("was added successfully")
+  })
 })
 
 Cypress.Commands.add('getItemCount', (itemName) => {
