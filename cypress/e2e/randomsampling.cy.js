@@ -20,12 +20,6 @@ describe('Random Sampling Module', () => {
         cy.contains('Claims').click();
         cy.contains('Reviews').click();
 
-        // 2. Reviews page opens. Click on "Claim Sample" button.
-        // Technical prerequisite: filter to ensure there are claims and a Task Group can be selected
-        // cy.enterMuiInput('Health Facility', 'UPHOS001');
-        // cy.contains('button', /SEARCH/i).click();
-        // cy.wait(500);
-
         cy.contains(/CLAIM SAMPLE/i).click();
 
         // 3. A popup appears. Enter sample percentage and select a task group from the dropdown.

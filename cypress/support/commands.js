@@ -599,6 +599,8 @@ Cypress.Commands.add('enrollGroupBeneficiariesIntoProgram', (
 })
 
 
+// Custom command to enter text into a Material UI (MUI) input field.
+// Uses a regex for the label to be more resilient to exact text matches (e.g. case sensitivity).
 Cypress.Commands.add('enterMuiInput', (label, value, inputTag = 'input') => {
   cy.contains('label', new RegExp(label))
     .siblings('.MuiInputBase-root')
@@ -608,7 +610,10 @@ Cypress.Commands.add('enterMuiInput', (label, value, inputTag = 'input') => {
     .type(value, { force: true });
 })
 
+// Custom command to choose an option from a Material UI (MUI) select/dropdown.
+// Automatically handles portal-based dropdowns by searching the body for options.
 Cypress.Commands.add('chooseMuiSelect', (label, value) => {
+  // Find the label using regex and click the associated input/button
   cy.contains('label', new RegExp(label))
     .siblings('.MuiInputBase-root')
     .find('[role="button"], .MuiSelect-select, .MuiInput-input, .MuiInputBase-input')
@@ -617,11 +622,11 @@ Cypress.Commands.add('chooseMuiSelect', (label, value) => {
   // Wait a bit for portal to appear
   cy.wait(500);
 
-  // Check if options are available
+  // Check if options are available in common MUI portal locations
   const selector = '[role="listbox"] li, [role="menu"] li, [role="presentation"] li, .MuiMenuItem-root';
   cy.get('body').then(($body) => {
     if ($body.find(selector).length > 0 && !$body.text().includes('No options')) {
-      // Find by text value if provided, otherwise pick the first
+      // Find the specific option by text regex
       const valRegex = new RegExp(value, 'i');
       const $options = $body.find(selector);
 
@@ -634,11 +639,12 @@ Cypress.Commands.add('chooseMuiSelect', (label, value) => {
         }
       });
 
+      // Fallback: if specific value not found, pick the first available option
       if (!found) {
         cy.wrap($options.first()).click({ force: true });
       }
     } else {
-      // Fallback: just close the dropdown by clicking the body
+      // Fallback: just close the dropdown by clicking the body if no options found
       cy.get('body').click(0, 0);
     }
   })
