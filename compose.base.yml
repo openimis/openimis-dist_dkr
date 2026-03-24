@@ -95,6 +95,17 @@ services:
     deploy:
       mode: replicated
       replicas: ${WORKER_REPLICAS:-8}   # you can keep 3 or increase – cheap & resilien
+  rabbitmq:
+    image: rabbitmq:3-management
+    restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "rabbitmq-diagnostics -q ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    networks:
+      openimis-net:
 networks:
   # proxy:
   #   external: true
