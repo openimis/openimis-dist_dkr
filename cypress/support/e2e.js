@@ -1,3 +1,4 @@
+import 'cypress-file-upload';
 import './commands'
 
 before(() => {
@@ -11,4 +12,3 @@ before(() => {
 after(() => {
   cy.task('removeSetupFile')
 })
-
