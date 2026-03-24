@@ -82,7 +82,7 @@ services:
     command: worker --concurrency=${CELERY_CONCURRENCY:-4} --max-tasks-per-child=${CELERY_MAX_TASK_PER_CHILD:-50} --loglevel=INFO
     restart: always
     healthcheck:
-      test: ["CMD-SHELL", "celery -A openIMIS inspect ping --destination celery@$$HOSTNAME || exit 1"]
+      test: ["CMD-SHELL", "celery -A openIMIS inspect ping --timeout=10 --destination celery@$$HOSTNAME || exit 1"]
       interval: 25s
       timeout: 12s
       retries: 4
@@ -94,7 +94,7 @@ services:
         condition: service_healthy
     deploy:
       mode: replicated
-      replicas: ${WORKER_REPLICAS:-8}   # you can keep 3 or increase – cheap & resilien
+      replicas: ${WORKER_REPLICAS:-3}   # default 3; increase via WORKER_REPLICAS if needed
   rabbitmq:
     image: rabbitmq:3-management
     restart: always
