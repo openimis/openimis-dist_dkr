@@ -1,0 +1,183 @@
+{
+  "menuLeft": true,
+  "menus": [
+    {
+      "position": 1,
+      "id": "SocialProtectionMainMenu",
+      "name": "Social Protection",
+      "icon": "HowToReg",
+      "description": "Social Protection",
+      "submenus": [
+        {
+          "position": 3,
+          "id": "individual.api_imports",
+          "icon": "Sync"
+        },
+        {
+          "position": 4,
+          "id": "socialProtection.benefitPlans",
+          "icon": "Assignment"
+        },
+        {
+          "position": 1,
+          "id": "individual.individuals"
+        },
+        {
+          "position": 2,
+          "id": "individual.groups"
+        }
+      ]
+    },
+    {
+      "position": 3,
+      "id": "PaymentManagement",
+      "name": "Payments",
+      "icon": "Payment",
+      "description": "PayrollNameMenu",
+      "submenus": [
+        {
+          "position": 1,
+          "id": "legalAndFinance.invoices"
+        },
+        {
+          "position": 2,
+          "id": "legalAndFinance.bills"
+        },
+        {
+          "position": 3,
+          "id": "legalAndFinance.paymentPlans"
+        },
+        {
+          "position": 4,
+          "id": "legalAndFinance.paymentCycles"
+        },
+        {
+          "position": 5,
+          "id": "legalAndFinance.paymentPoint"
+        },
+        {
+          "position": 6,
+          "id": "legalAndFinance.payrolls",
+          "icon": "AttachMoney"
+        },
+        {
+          "position": 7,
+          "id": "legalAndFinance.payrollsPending"
+        },
+        {
+          "position": 8,
+          "id": "legalAndFinance.payrollsApproved"
+        },
+        {
+          "position": 9,
+          "id": "legalAndFinance.payrollsReconciled"
+        }
+      ]
+    },
+    {
+      "position": 2,
+      "id": "OpenSearchReportsMenu",
+      "name": "Dashboard",
+      "icon": "Dashboard",
+      "description": "Main dashboard",
+      "submenus": [
+        {
+          "position": 1,
+          "id": "openSearch.individualReports"
+        },
+        {
+          "position": 2,
+          "id": "openSearch.groupReports"
+        },
+        {
+          "position": 3,
+          "id": "openSearch.beneficiaryReports"
+        },
+        {
+          "position": 4,
+          "id": "openSearch.dataUpdatesReports"
+        },
+        {
+          "position": 5,
+          "id": "openSearch.grievanceReports"
+        },
+        {
+          "position": 6,
+          "id": "openSearch.invoiceReports"
+        },
+        {
+          "position": 7,
+          "id": "openSearch.paymentReports"
+        },
+        {
+          "position": 8,
+          "id": "openSearch.openSearchConfig"
+        }
+      ]
+    },
+    {
+      "position": 4,
+      "id": "GrievanceMainMenu",
+      "name": "Grievance",
+      "icon": "Feedback",
+      "description": "Grievance panel",
+      "submenus": [
+        {
+          "position": 1,
+          "id": "grievance.add",
+          "icon": "ReportProblem"
+        },
+        {
+          "position": 2,
+          "id": "grievance.grievances"
+        }
+      ]
+    },
+    {
+         "position": 5,
+         "id": "TasksMainMenu",
+         "name":"Tasks Management",
+         "icon":"Assignment",
+         "description":"TaksMainMenu",
+         "submenus":[
+            {
+               "position":1,
+               "id":"task.allTasks"
+            },
+            {
+               "position":11,
+               "id":"admin.taskExecutionerGroups"
+            }
+         ]
+      },
+      {
+         "position":6,
+         "id": "AdministrationMainMenu",
+         "name":"Administration",
+         "icon":"Person",
+         "description":"Administration",
+         "submenus":[
+            {
+               "position":2,
+               "id":"admin.roleManagement"
+            },
+            {
+               "position":1,
+               "id":"admin.users"
+            },
+            {
+               "position":3,
+               "id": "admin.locations"
+            },
+            {
+               "position":4,
+               "id": "profile.myProfile"
+            },
+            {
+               "position":5,
+               "id":"profile.changePassword"
+            }
+         ]
+      }
+  ]
+}

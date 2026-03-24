@@ -9,7 +9,7 @@ services:
       - redis-database:/data
       - ./conf/redis/redis.conf:/usr/local/etc/redis/redis.conf
     env_file:
-      - ".env.cache"
+      - ".env"
     environment:
       - REDIS_PASSWORD=${REDIS_PASSWORD}
       - REDIS_PORT=6379

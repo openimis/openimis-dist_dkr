@@ -1,0 +1,101 @@
+first_name,last_name,dob,group_code,recipient_info,individual_role,location_name,location_code,able_bodied,educated_level,number_of_children
+Michael,Lloyd,1980-01-20,QMLJIL,1,HEAD,,,True,primary,5
+Joshua,Moore,1956-06-04,QMLJIL,0,SON,,,True,primary,4
+Kevin,Wolf,1964-06-19,QMLJIL,0,NOT RELATED,,,False,none,2
+Melinda,Smith,1957-10-24,QMLJIL,0,FATHER,,,False,tertiary,2
+Julie,Mullins,2005-11-22,QMLJIL,0,DAUGHTER,,,False,secondary,7
+Richard,Wright,1975-12-12,RQAEII,1,HEAD,Holobo,R1D2M1V1,True,none,10
+Mark,Chambers,1938-12-23,RQAEII,0,FATHER,Holobo,R1D2M1V1,True,secondary,7
+John,Quinn,1962-11-23,RQAEII,0,MOTHER,Holobo,R1D2M1V1,True,tertiary,7
+Christy,Richardson,1982-04-01,RQAEII,0,GRANDMOTHER,Holobo,R1D2M1V1,True,none,0
+Derrick,Perry,1956-04-30,RQAEII,0,OTHER RELATIVE,Holobo,R1D2M1V1,False,primary,0
+Desiree,Smith,1954-01-22,TGOXBP,1,HEAD,,,True,tertiary,2
+Nicholas,Adams,1962-03-22,TGOXBP,0,BROTHER,,,True,secondary,10
+Jesse,Moore,1982-06-19,TGOXBP,0,DAUGHTER,,,True,secondary,6
+Kristen,Hubbard,2008-11-07,TGOXBP,0,DAUGHTER,,,False,primary,4
+Charles,Hamilton,1957-09-17,TGOXBP,0,SON,,,True,primary,0
+Angela,Drake,1978-11-29,DVMLGT,1,HEAD,Jamula,R1D1M2V1,True,secondary,7
+Mathew,Powell,1944-07-06,DVMLGT,0,DAUGHTER,Jamula,R1D1M2V1,False,secondary,6
+Renee,Sosa,1983-07-04,DVMLGT,0,FATHER,Jamula,R1D1M2V1,True,primary,7
+Robert,Mitchell,1970-03-17,DVMLGT,0,GRANDSON,Jamula,R1D1M2V1,False,secondary,1
+Vincent,Rogers,1941-06-20,DVMLGT,0,OTHER RELATIVE,Jamula,R1D1M2V1,False,none,4
+John,Ramirez,1963-11-10,DXVAJU,1,HEAD,Jobla,R1D1M4V1,True,primary,6
+Karen,Thomas,1934-11-19,DXVAJU,0,GRANDMOTHER,Jobla,R1D1M4V1,False,secondary,5
+Maria,Palmer,2001-11-14,DXVAJU,0,SON,Jobla,R1D1M4V1,False,tertiary,8
+Michael,Richardson,1948-05-07,DXVAJU,0,GRANDDAUGHTER,Jobla,R1D1M4V1,False,tertiary,4
+Danielle,Clarke,1997-11-09,DXVAJU,0,SON,Jobla,R1D1M4V1,True,secondary,9
+Daniel,Myers,1970-07-21,WRAZDJ,1,HEAD,,,True,none,7
+Lisa,Baker,1944-09-19,WRAZDJ,0,GRANDDAUGHTER,,,False,primary,8
+William,Richmond,1969-05-11,WRAZDJ,0,SISTER,,,True,primary,8
+Melinda,Johnson,1954-08-16,WRAZDJ,0,SPOUSE,,,False,tertiary,4
+Jennifer,Savage,1950-12-06,WRAZDJ,0,NOT RELATED,,,False,none,7
+Jacob,Love,1975-10-22,OSVBUM,1,HEAD,,,False,none,9
+John,Perkins,1937-12-18,OSVBUM,0,BROTHER,,,True,primary,6
+Robert,Shea,1957-09-26,OSVBUM,0,SON,,,True,primary,10
+Kenneth,Hoover,1982-11-27,OSVBUM,0,BROTHER,,,True,primary,9
+Mark,Smith,1958-01-06,OSVBUM,0,MOTHER,,,True,tertiary,9
+Tommy,Sosa,1983-02-09,DHLIGY,1,HEAD,Jamula,R1D1M2V1,False,tertiary,2
+Leah,Shaw,1969-05-06,DHLIGY,0,MOTHER,Jamula,R1D1M2V1,True,secondary,3
+Shawn,Nguyen,1976-07-13,DHLIGY,0,GRANDFATHER,Jamula,R1D1M2V1,False,primary,1
+Taylor,Brown,2008-01-06,DHLIGY,0,FATHER,Jamula,R1D1M2V1,True,tertiary,0
+Ashley,Davis,1989-05-25,DHLIGY,0,NOT RELATED,Jamula,R1D1M2V1,False,tertiary,2
+Amanda,Woods,2007-05-26,AJGTZR,1,HEAD,Raberjab,R1D2M1V3,False,tertiary,8
+Elizabeth,Cantu,1945-01-16,AJGTZR,0,NOT RELATED,Raberjab,R1D2M1V3,False,none,7
+Joan,Russell,1990-04-27,AJGTZR,0,SPOUSE,Raberjab,R1D2M1V3,False,tertiary,10
+Kathleen,Crawford,1970-06-17,AJGTZR,0,GRANDDAUGHTER,Raberjab,R1D2M1V3,True,none,0
+Lisa,Bryan,1964-10-11,AJGTZR,0,SPOUSE,Raberjab,R1D2M1V3,False,tertiary,1
+Margaret,Mendez,1957-08-25,RBFPGX,1,HEAD,,,True,none,10
+Adam,Curtis,1972-10-19,RBFPGX,0,MOTHER,,,False,none,3
+Fernando,Murphy,1997-10-29,RBFPGX,0,GRANDFATHER,,,True,primary,4
+Brenda,King,1935-12-13,RBFPGX,0,BROTHER,,,False,primary,8
+Ronald,Miller,1969-02-05,RBFPGX,0,SPOUSE,,,False,tertiary,5
+Kelly,Manning,1951-01-30,NHWJIJ,1,HEAD,,,True,none,10
+Andrea,Garcia,1961-11-08,NHWJIJ,0,MOTHER,,,False,tertiary,3
+Elijah,Tanner,2000-01-08,NHWJIJ,0,GRANDFATHER,,,True,primary,10
+Dawn,Torres,1957-07-12,NHWJIJ,0,BROTHER,,,True,secondary,8
+Kevin,Hurst,1951-09-23,NHWJIJ,0,GRANDMOTHER,,,False,secondary,1
+Kristy,Saunders,1992-09-27,DUCLZG,1,HEAD,Holobo,R1D2M1V1,True,primary,4
+Beth,White,1944-03-18,DUCLZG,0,GRANDDAUGHTER,Holobo,R1D2M1V1,True,primary,8
+Angela,Wang,1983-02-24,DUCLZG,0,SON,Holobo,R1D2M1V1,True,secondary,6
+Christopher,Smith,1957-06-25,DUCLZG,0,NOT RELATED,Holobo,R1D2M1V1,True,primary,10
+Ryan,Lynn,1949-04-02,DUCLZG,0,GRANDMOTHER,Holobo,R1D2M1V1,True,tertiary,4
+Jacob,Martinez,1960-05-10,FYKIWT,1,HEAD,Agdo,R1D1M1V3,False,none,1
+Tiffany,Stephens,1957-08-27,FYKIWT,0,GRANDSON,Agdo,R1D1M1V3,False,tertiary,7
+David,Wilkins,1972-04-08,FYKIWT,0,NOT RELATED,Agdo,R1D1M1V3,False,primary,2
+Patricia,Cross,1950-02-24,FYKIWT,0,DAUGHTER,Agdo,R1D1M1V3,True,none,4
+Aaron,Stein,1989-01-18,FYKIWT,0,GRANDMOTHER,Agdo,R1D1M1V3,True,none,2
+Christine,Taylor,1988-02-27,LEJBFC,1,HEAD,Rachla,R1D1M1V1,True,tertiary,4
+Karen,Nicholson,1953-04-05,LEJBFC,0,MOTHER,Rachla,R1D1M1V1,False,none,3
+Peter,Nelson,1993-11-07,LEJBFC,0,FATHER,Rachla,R1D1M1V1,False,tertiary,1
+Daniel,Pugh,2003-08-06,LEJBFC,0,SISTER,Rachla,R1D1M1V1,False,primary,2
+Stephanie,Martinez,1943-06-30,LEJBFC,0,SON,Rachla,R1D1M1V1,True,secondary,3
+Kyle,Bailey,1945-05-24,DZCMJV,1,HEAD,,,False,tertiary,1
+Laurie,Dixon,1956-02-04,DZCMJV,0,DAUGHTER,,,False,none,0
+Thomas,Campos,1970-10-10,DZCMJV,0,BROTHER,,,False,tertiary,6
+Lauren,Faulkner,1987-03-31,DZCMJV,0,DAUGHTER,,,True,tertiary,7
+Lawrence,Reyes,1964-12-15,DZCMJV,0,SON,,,False,tertiary,4
+Fred,Hughes,2004-03-06,FCDMDQ,1,HEAD,Jobla,R1D1M4V1,True,primary,9
+Kyle,Thompson,1995-10-24,FCDMDQ,0,MOTHER,Jobla,R1D1M4V1,False,primary,6
+Michael,Frank,2004-12-25,FCDMDQ,0,BROTHER,Jobla,R1D1M4V1,True,tertiary,5
+Annette,Simpson,1994-06-15,FCDMDQ,0,SPOUSE,Jobla,R1D1M4V1,True,tertiary,0
+Aaron,Bowers,1935-03-31,FCDMDQ,0,GRANDDAUGHTER,Jobla,R1D1M4V1,True,secondary,4
+Roy,Hayden,1988-05-15,TBGDCO,1,HEAD,,,True,primary,0
+Bryan,Hamilton,1983-09-23,TBGDCO,0,MOTHER,,,True,tertiary,2
+Audrey,Shepherd,2009-01-23,TBGDCO,0,MOTHER,,,False,none,3
+Thomas,Norris,1972-05-11,TBGDCO,0,MOTHER,,,True,none,4
+Sara,Lewis,1983-07-19,TBGDCO,0,GRANDSON,,,False,secondary,3
+Edward,Mcdaniel,1958-01-18,NUEPCE,1,HEAD,,,False,none,9
+Brandy,Jones,1951-03-28,NUEPCE,0,FATHER,,,False,tertiary,4
+Andrew,Rowland,1958-11-23,NUEPCE,0,FATHER,,,True,none,4
+Natalie,Rodriguez,1943-04-21,NUEPCE,0,GRANDFATHER,,,False,secondary,8
+Maria,Smith,1966-03-18,NUEPCE,0,GRANDFATHER,,,True,none,3
+Steven,Preston,1958-01-03,OWENHJ,1,HEAD,,,True,none,5
+Teresa,Anderson,1939-03-19,OWENHJ,0,GRANDDAUGHTER,,,True,primary,0
+Emily,Jones,1985-07-18,OWENHJ,0,GRANDDAUGHTER,,,True,secondary,7
+Ricky,Gray,2009-08-18,OWENHJ,0,SON,,,True,none,4
+Heather,Rodriguez,1954-08-13,OWENHJ,0,GRANDMOTHER,,,False,tertiary,5
+Brittany,Lawrence,1968-10-14,CNCODP,1,HEAD,,,False,none,3
+Carla,Jones,2002-11-30,CNCODP,0,NOT RELATED,,,False,none,2
+William,Barnes,1981-09-23,CNCODP,0,NOT RELATED,,,True,primary,1
+Jason,Clark,1971-01-14,CNCODP,0,SISTER,,,True,primary,0
+Brad,King,1968-07-21,CNCODP,0,GRANDMOTHER,,,False,tertiary,0
