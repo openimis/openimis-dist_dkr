@@ -7,7 +7,7 @@ services:
       - POSTGRES_USER=${DB_USER}
       - DEMO_DATASET=${DEMO_DATASET}
       - DB_ENGINE=django.db.backends.postgresql
-    shm_size: 1g
+    shm_size: 2g
     healthcheck:
       test: pg_isready -U ${DB_USER} -d ${DB_NAME}
       interval: 10s
