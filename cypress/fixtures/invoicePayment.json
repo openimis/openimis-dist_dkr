@@ -1,0 +1,43 @@
+{
+    "payment": {
+        "reconciliationStatus": "Reconciliated",
+        "status": "Accepted",
+        "reference": "ref001",
+        "payerName": "Joseph",
+        "code": "INV0010",
+        "label": "INV",
+        "codeThirdparty": "SP01",
+        "receiptNumber": "677763166",
+        "fees": 12345,
+        "amountReceived": 5000,
+        "paymentOrigin": "epargne",
+        "paymentDate": {
+            "day": 19,
+            "month": 3,
+            "year": 2026
+        }
+    },
+    "family": {
+        "location": "R1D1M1V1 Rachla",
+        "head": {
+            "givenNames": "Antoine",
+            "lastName": "Robert",
+            "gender": "Male",
+            "chfId": "777746566",
+            "dob": {
+                "day": 19,
+                "month": 12,
+                "year": 2025
+            }
+        }
+    },
+    "policy": {
+        "product": {
+            "code": "FCUL0001",
+            "name": "Fixed Cycle Cover Ultha"
+        },
+        "officer": {
+            "code": "E00007 Johnson James"
+        }
+    }
+}

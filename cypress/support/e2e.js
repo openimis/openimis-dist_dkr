@@ -12,4 +12,3 @@ before(() => {
 after(() => {
   cy.task('removeSetupFile')
 })
-

@@ -7,5 +7,8 @@ data/*
 openimis-dist_dkr.code-workspace
 node_modules/
 cypress/screenshots/
+.DS_Store
+./.DS_Store
+yarn.lock
 cypress/downloads/
 cypress/fixtures/tmp_individuals.csv
