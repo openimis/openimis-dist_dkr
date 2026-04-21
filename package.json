@@ -4,8 +4,6 @@
     "cypress-file-upload": "^5.0.8"
   },
   "scripts": {
-    "cy open": "cypress open",
-    "cy run": "cypress run",
     "cy:open": "cypress open",
     "cy:run": "cypress run"
   }
