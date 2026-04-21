@@ -34,12 +34,16 @@ export class InvoicePage {
     }
 
     goToForm(headChfId) {
+        this.goToInvoicePayments(headChfId);
+        cy.get(SELECTORS.addIcon).click({ force: true });
+    }
+
+    goToInvoicePayments(headChfId){
         this.goToList();
         this.searchByCode(headChfId);
         this.openRow(headChfId);
         cy.get('input[value="Family"]').should('be.visible');
         this.openPaymentsTab();
-        cy.get(SELECTORS.addIcon).click({ force: true });
     }
 
     openRow(code) {
@@ -78,11 +82,7 @@ export class InvoicePage {
     }
 
     searchPayment(headChfId, paymentCode) {
-        this.goToList();
-        this.searchByCode(headChfId);
-        this.openRow(headChfId);
-        cy.get('input[value="Family"]').should('be.visible');
-        this.openPaymentsTab();
+        this.goToInvoicePayments(headChfId)
 
         cy.contains('Search Criteria')
             .closest('.MuiPaper-root')
