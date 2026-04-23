@@ -1,0 +1,32 @@
+{
+    "service": {
+        "code": "CP021",
+        "name": "Doliprane",
+        "packageType": "Flat fee bundle",
+        "type": "Curative",
+        "category": "Delivery",
+        "level": "Simple Service",
+        "careType": "In - Patient",
+        "frequency": "2",
+        "subServices": [
+            {
+                "name": "M4 OBG Mursupialisation",
+                "qty": "2"
+            },
+            {
+                "name": "M3 OBG Colpotomy",
+                "qty": "1"
+            }
+        ],
+        "subItems": [
+            {
+                "name": "0001 ACETYLSALICYLIC ACID (ASPIRIN)  TABS 300MG",
+                "qty": "3"
+            },
+            {
+                "name": "0003 AIRWAY GUEDEL RUBBER CHILD SIZE 67 MM",
+                "qty": "1"
+            }
+        ]
+    }
+}
