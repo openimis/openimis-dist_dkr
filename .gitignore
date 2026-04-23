@@ -11,3 +11,4 @@ cypress/downloads/
 cypress/fixtures/tmp_individuals.csv
 .DS_Store
 ./*.DS_Store
+./.DS_Store
