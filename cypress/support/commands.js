@@ -6,6 +6,18 @@ const getTodayFormatted = () => {
   return `${day}-${month}-${year}`;
 };
 
+const SELECTORS = {
+  listbox: '[role="listbox"]',
+  option: '[role="option"]',
+  dialog: '[role="dialog"]',
+  addIcon: 'button.MuiFab-primary',
+  deleteBtn: 'button[title="Delete"]',
+  editBtn: '[aria-label="Edit"]',
+  saveButton: '[title="Save changes"] button',
+  table: 'table',
+  deleteServiceBtn: 'button[title="Delete service"]'
+};
+
 Cypress.Commands.add('login', () => {
   cy.visit('/front');
 
@@ -79,15 +91,15 @@ Cypress.Commands.add('deleteModuleConfig', (moduleName) => {
 
 Cypress.Commands.add('shouldHaveMenuItemsInOrder', (expectedMenuNames) => {
   cy.get('div[role="button"]')
-  .filter(':visible')
-  .should(($buttons) => {
-    expect($buttons).to.have.length(expectedMenuNames.length);
+    .filter(':visible')
+    .should(($buttons) => {
+      expect($buttons).to.have.length(expectedMenuNames.length);
 
-    // Check each sub menu item text and order
-    expectedMenuNames.forEach((itemText, index) => {
-      expect($buttons.eq(index)).to.contain(itemText);
+      // Check each sub menu item text and order
+      expectedMenuNames.forEach((itemText, index) => {
+        expect($buttons.eq(index)).to.contain(itemText);
+      });
     });
-  });
 })
 
 Cypress.Commands.add('deleteActivities', (activityNames) => {
@@ -207,7 +219,7 @@ Cypress.Commands.add('deleteProgram', (programName) => {
         cy.wrap(row).within(() => {
           // Find and click the Delete button in this row
           cy.get('button[title="Delete"]')
-            .click({force: true});
+            .click({ force: true });
         });
 
         // Confirm deletion in dialog
@@ -226,7 +238,7 @@ Cypress.Commands.add('deleteProgram', (programName) => {
         cy.get('ul.MuiList-root li')
           .first()
           .should('contain', 'Delete program');
-          // .should('contain', `Delete program ${programName}`); //TODO: switch to this after fix
+        // .should('contain', `Delete program ${programName}`); //TODO: switch to this after fix
 
         // Close journal drawer
         cy.get('.MuiDrawer-paperAnchorRight button')
@@ -314,33 +326,33 @@ Cypress.Commands.add(
     programName,
     maxBeneficiaries,
     programType,
-    institution='',
-    description='',
+    institution = '',
+    description = '',
   ) => {
-  cy.assertMuiInput('Code', programCode)
-  cy.assertMuiInput('Name', programName)
-  const today = getTodayFormatted()
-  cy.assertMuiInput('Date from', today)
-  cy.assertMuiInput('Date to', today)
-  cy.assertMuiInput('Max Beneficiaries', maxBeneficiaries)
-  cy.assertMuiInput('Institution', institution)
-  cy.assertMuiInput('Description', description, 'textarea')
-})
+    cy.assertMuiInput('Code', programCode)
+    cy.assertMuiInput('Name', programName)
+    const today = getTodayFormatted()
+    cy.assertMuiInput('Date from', today)
+    cy.assertMuiInput('Date to', today)
+    cy.assertMuiInput('Max Beneficiaries', maxBeneficiaries)
+    cy.assertMuiInput('Institution', institution)
+    cy.assertMuiInput('Description', description, 'textarea')
+  })
 
 Cypress.Commands.add(
   'checkProgramFieldValuesInListView',
   (programCode, programName, maxBeneficiaries, programType) => {
 
-  cy.contains('tfoot', 'Rows Per Page')
-  cy.contains('td', programName).should('exist')
-  cy.contains('td', programName)
-    .parent('tr').within(() => {
-      cy.contains('td', programCode)
-      cy.contains('td', programType)
-      cy.contains('td', maxBeneficiaries)
-      cy.contains('td', new Date().toISOString().substring(0, 10))
-    })
-})
+    cy.contains('tfoot', 'Rows Per Page')
+    cy.contains('td', programName).should('exist')
+    cy.contains('td', programName)
+      .parent('tr').within(() => {
+        cy.contains('td', programCode)
+        cy.contains('td', programType)
+        cy.contains('td', maxBeneficiaries)
+        cy.contains('td', new Date().toISOString().substring(0, 10))
+      })
+  })
 
 Cypress.Commands.add('uploadIndividualsCSV', (numIndividuals) => {
   cy.task('updateCSV', { numIndividuals }).then(() => {
@@ -371,7 +383,7 @@ Cypress.Commands.add('ensureSufficientIndividuals', (expectedNumIndividuals) => 
     cy.visit('/front/individuals')
     cy.uploadIndividualsCSV(numToAdd)
 
-    cy.wait(100*numToAdd) // group creation takes time
+    cy.wait(100 * numToAdd) // group creation takes time
 
     cy.visit('/front/individuals')
     cy.getItemCount("Individual").then(newCount => {
@@ -396,7 +408,7 @@ Cypress.Commands.add('ensureSufficientHouseholds', (expectedNumGroups) => {
     cy.visit('/front/individuals')
     cy.uploadIndividualsCSV(numIndividualsToAdd)
 
-    cy.wait(100*numIndividualsToAdd) // group creation takes time
+    cy.wait(100 * numIndividualsToAdd) // group creation takes time
 
     cy.visit('/front/groups')
     cy.getItemCount("Group").then(newCount => {
@@ -614,13 +626,13 @@ Cypress.Commands.add('enrollGroupBeneficiariesIntoProgram', (
 })
 
 
-Cypress.Commands.add('enterMuiInput', (label, value, inputTag='input') => {
+Cypress.Commands.add('enterMuiInput', (label, value, inputTag = 'input') => {
   cy.contains('label', label)
     .siblings('.MuiInputBase-root')
     .find(inputTag)
     .first()
-    .clear({force: true})
-    .type(value, {force: true});
+    .clear({ force: true })
+    .type(value, { force: true });
 })
 
 Cypress.Commands.add('chooseMuiSelect', (label, value) => {
@@ -633,7 +645,7 @@ Cypress.Commands.add('chooseMuiSelect', (label, value) => {
   cy.get('@option').click()
 })
 
-Cypress.Commands.add('assertMuiInput', (label, value, inputTag='input') => {
+Cypress.Commands.add('assertMuiInput', (label, value, inputTag = 'input') => {
   cy.contains('label', label)
     .siblings('.MuiInputBase-root')
     .find(inputTag)
@@ -641,7 +653,7 @@ Cypress.Commands.add('assertMuiInput', (label, value, inputTag='input') => {
     .and('have.value', value);
 })
 
-Cypress.Commands.add('assertMuiInputDisabled', (label, value=null, inputTag='input') => {
+Cypress.Commands.add('assertMuiInputDisabled', (label, value = null, inputTag = 'input') => {
   const input = cy.contains('label', label)
     .siblings('.MuiInputBase-root')
     .find(inputTag)
@@ -678,27 +690,27 @@ Cypress.Commands.add('chooseMuiAutocomplete', (label, value = null) => {
 })
 
 Cypress.Commands.add('setModuleConfig', (moduleName, configFixtureFile) => {
-    cy.deleteModuleConfig(moduleName)
+  cy.deleteModuleConfig(moduleName)
 
-    cy.contains('a', 'Module configurations').click()
+  cy.contains('a', 'Module configurations').click()
 
-    // Create module config using fixture config file
-    cy.contains('a', 'Add module configuration').click()
-    cy.get('input[name="module"]').type(moduleName)
-    cy.get('select[name="layer"]').select('backend')
-    cy.get('input[name="version"]').type(1)
+  // Create module config using fixture config file
+  cy.contains('a', 'Add module configuration').click()
+  cy.get('input[name="module"]').type(moduleName)
+  cy.get('select[name="layer"]').select('backend')
+  cy.get('input[name="version"]').type(1)
 
-    cy.fixture(configFixtureFile).then((config) => {
-      const configString = JSON.stringify(config, null, 2);
-      cy.get('textarea[name="config"]')
-        .type(configString, {
-          parseSpecialCharSequences: false,
-          delay: 0  // Type faster
-        });
+  cy.fixture(configFixtureFile).then((config) => {
+    const configString = JSON.stringify(config, null, 2);
+    cy.get('textarea[name="config"]')
+      .type(configString, {
+        parseSpecialCharSequences: false,
+        delay: 0  // Type faster
+      });
 
-      cy.get('input[value="Save"]').click()
-      cy.contains("was added successfully")
-    })
+    cy.get('input[value="Save"]').click()
+    cy.contains("was added successfully")
+  })
 })
 
 Cypress.Commands.add('getItemCount', (itemName) => {
@@ -1006,3 +1018,174 @@ Cypress.Commands.add('addGrievanceComment', (commentText, commentData = {}) => {
   // cy.reload();
   cy.contains(commentText).should('exist');
 });
+
+Cypress.Commands.add('openRow', (code) => {
+  cy.contains('td', code)
+    .closest('tr')
+    .dblclick();
+  cy.contains('label', 'Code')
+    .closest('.MuiFormControl-root')
+    .find('input')
+    .should('have.value', code);
+});
+
+Cypress.Commands.add('goToForm', (code) => {
+  if (code === "") {
+    cy.get(SELECTORS.addIcon).click({ force: true });
+  } else {
+    cy.openRow(code);
+  }
+});
+
+Cypress.Commands.add('selectDropdown', (index, value) => {
+  cy.get(SELECTORS.dialog).within(() => {
+    cy.get('[aria-haspopup="listbox"]').eq(index).click();
+  });
+  cy.get(SELECTORS.option).contains(value).click();
+  cy.get(SELECTORS.listbox).should('not.exist');
+});
+
+Cypress.Commands.add('searchByCode', (code) => {
+  cy.enterMuiInput('Code', code, 'input');
+  cy.contains('button', 'Search').click({ force: true });
+  cy.waitForGraphQL('search');
+  cy.get(SELECTORS.table).should('be.visible');
+});
+
+Cypress.Commands.add('goToList', (menuLabel, subMenuLabel, index = 0) => {
+  cy.contains(menuLabel).click();
+  cy.get('a').filter(`:contains("${subMenuLabel}")`).eq(index).click();
+})
+
+Cypress.Commands.add('chooseServiceAutocomplete', (element, index) => {
+  cy.get('input[placeholder="Search Service…"]').eq(index)
+    .clear().type(element.name);
+  cy.get('.MuiAutocomplete-popper').should('be.visible')
+    .find('li').first().click();
+
+  cy.contains('h6', 'Services')
+    .closest('.MuiBox-root')
+    .find('tbody .MuiTableRow-root')
+    .eq(index)
+    .find('input[type="text"]').eq(1)
+    .clear().type(element.qty);
+});
+
+Cypress.Commands.add('chooseItemAutocomplete', (element, index) => {
+  cy.get('input[placeholder="Search Item…"]').eq(index)
+    .clear().type(element.name);
+  cy.get('.MuiAutocomplete-popper').should('be.visible')
+    .find('li').first().click();
+
+  cy.contains('h6', 'Items')
+    .closest('.MuiBox-root')
+    .find('tbody .MuiTableRow-root')
+    .eq(index)
+    .find('input[type="text"]').eq(1)
+    .clear().type(element.qty);
+})
+
+Cypress.Commands.add('save', () => {
+  cy.get(SELECTORS.saveButton).click({ force: true });
+  cy.waitForGraphQL('save');
+});
+
+Cypress.Commands.add('waitForGraphQL', (alias = 'graphqlRequest') => {
+  cy.intercept('POST', '**/api/graphql').as(alias);
+  return cy.wait(`@${alias}`);
+});
+
+Cypress.Commands.add('verifyInput', (labelText, expectedValue) => {
+  cy.contains('label', labelText)
+    .closest('.MuiFormControl-root')
+    .find('input')
+    .should('have.value', expectedValue);
+});
+
+Cypress.Commands.add('verifySelect', (labelText, expectedText) => {
+  cy.contains('label', labelText)
+    .closest('.MuiFormControl-root')
+    .find('.MuiSelect-select')
+    .should('have.text', expectedText);
+});
+
+Cypress.Commands.add('verifyCheckbox', (name, shouldBeChecked = true) => {
+  const assertion = shouldBeChecked ? 'be.checked' : 'not.be.checked';
+  cy.get(`input[name="${name}"]`).should(assertion);
+});
+
+Cypress.Commands.add('verifyServiceRow', (rowIndex, { name, qty }, totalRows) => {
+  const reversedIndex = totalRows - 1 - rowIndex;
+  const formattedQty = parseFloat(qty).toFixed(2).replace('.', ',');
+  const row = () => cy.contains('h6', 'Services')
+    .closest('.MuiBox-root')
+    .find('tbody .MuiTableRow-root')
+    .eq(reversedIndex);
+
+  row()
+    .find('input[placeholder="Search Service…"]')
+    .should('have.value', name);
+
+  row()
+    .find('input.MuiInputBase-input').eq(1)
+    .should('have.value', formattedQty);
+});
+
+Cypress.Commands.add('verifyItemRow', (rowIndex, { name, qty }, totalRows) => {
+  const formattedQty = parseFloat(qty).toFixed(2).replace('.', ',');
+  const row = () => cy.contains('h6', 'Items')
+    .closest('.MuiBox-root')
+    .find('tbody .MuiTableRow-root')
+    .eq(rowIndex);
+
+  row()
+    .find('input[placeholder="Search Item…"]')
+    .invoke('val')
+    .then((val) => {
+      const cleanVal = val.replace(/\u00a0/g, ' ').trim();
+      expect(cleanVal).to.equal(name.trim());
+    });
+
+  row()
+    .find('input.MuiInputBase-input').eq(1)
+    .should('have.value', formattedQty);
+});
+
+Cypress.Commands.add('fillSubServices', (elements) => {
+  elements.forEach((elt, index) => {
+    cy.contains('h6', 'Services')
+      .closest('.MuiBox-root')
+      .find('input[placeholder="Search Service…"]')
+      .eq(index)
+      .then(($input) => {
+        cy.chooseServiceAutocomplete(elt, index);
+      });
+  });
+})
+
+Cypress.Commands.add('fillSubItems', (elements) => {
+  elements.forEach((elt, index) => {
+    cy.contains('h6', 'Items')
+      .closest('.MuiBox-root')
+      .find('input[placeholder="Search Item…"]')
+      .eq(index)
+      .then(($input) => {
+        cy.chooseItemAutocomplete(elt, index);
+      });
+  });
+})
+
+Cypress.Commands.add('delete', (tableLabel, code) => {
+  cy.contains(`${tableLabel}`)
+    .closest('.MuiPaper-root')
+    .within(() => {
+      cy.contains('tr', code)
+        .find(SELECTORS.deleteServiceBtn)
+        .click();
+    });
+
+  cy.get(SELECTORS.dialog).within(() => {
+    cy.get('button').contains('Yes').click();
+  });
+  cy.waitForGraphQL('delete');
+})
