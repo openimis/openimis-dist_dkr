@@ -54,6 +54,7 @@ module.exports = defineConfig({
     defaultCommandTimeout: 15000,
     taskTimeout: timeoutMinutes * 60 * 1000 + 10,
     downloadsFolder: 'cypress/downloads',
+    keystrokeDelay: 100,
     setupNodeEvents(on, config) {
       on('task', {
         checkSetup() {
