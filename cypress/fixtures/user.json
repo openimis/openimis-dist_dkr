@@ -1,0 +1,15 @@
+{
+    "user": {
+        "username": "cypress",
+        "lastname": "test",
+        "givenname": "cypress",
+        "email": "test@gmail.com",
+        "phone": "654327896",
+        "healthFacility": "JMHOS001 Jambero District Hospital",
+        "roles":["Enrolment Officer","Medical Officer", "Claim Administrator", "Manager"],
+        "password": "trdfc23.Y"
+    },
+    "filters": {
+        "village": "R2D1M1V1 Utha"
+    }
+}
