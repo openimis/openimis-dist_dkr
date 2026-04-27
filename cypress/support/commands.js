@@ -6,6 +6,19 @@ const getTodayFormatted = () => {
   return `${day}-${month}-${year}`;
 };
 
+const SELECTORS = {
+  listbox: '[role="listbox"]',
+  option: '[role="option"]',
+  dialog: '[role="dialog"]',
+  addIcon: 'button.MuiFab-primary',
+  deleteBtn: 'button[title="Delete"]',
+  editBtn: '[aria-label="Edit"]',
+  saveButton: '[title="Save changes"] button',
+  restoreButton: '[title="Restore the claim"] button',
+  table: 'table',
+  deleteUserBtn: 'button[title="Delete user"]'
+};
+
 Cypress.Commands.add('login', () => {
   cy.visit('/front');
 
@@ -1005,4 +1018,56 @@ Cypress.Commands.add('addGrievanceComment', (commentText, commentData = {}) => {
 
   // cy.reload();
   cy.contains(commentText).should('exist');
+});
+
+Cypress.Commands.add('waitForGraphQL', (alias = 'graphqlRequest') => {
+  cy.intercept('POST', '**/api/graphql').as(alias);
+  return cy.wait(`@${alias}`);
+});
+
+Cypress.Commands.add('save', () => {
+  cy.get(SELECTORS.saveButton).should('not.have.attr', 'disabled');
+  cy.get(SELECTORS.saveButton).click({ force: true });
+  cy.waitForGraphQL('save');
+});
+
+Cypress.Commands.add('goToList', (menuLabel, subMenuLabel, index = 0) => {
+  cy.contains(menuLabel).click();
+  cy.get('a').filter(`:contains("${subMenuLabel}")`).eq(index).click();
+});
+
+Cypress.Commands.add('selectDropdown', (identifier, value) => {
+  if (typeof identifier === 'number') {
+    cy.get('[aria-haspopup="listbox"]').eq(identifier).click({ force: true});
+  } else {
+    cy.contains('label', identifier)
+      .closest('.MuiFormControl-root')
+      .find('[aria-haspopup="listbox"]')
+      .click({ force: true });
+  }
+
+  if (value) {
+    cy.get(SELECTORS.option)
+      .filter((_, el) => el.innerText.trim() === value)
+      .first()
+      .click();
+  } else {
+    cy.get(SELECTORS.option).first().click();
+  }
+
+  cy.get(SELECTORS.listbox).should('not.exist');
+});
+
+Cypress.Commands.add('openFirstRow', (label) => {
+  cy.get('tbody tr')
+    .first()
+    .dblclick();
+  cy.contains('label', label)
+    .closest('.MuiFormControl-root')
+    .find('input')
+    .should('be.visible');
+});
+
+Cypress.Commands.add('restore', () => {
+  cy.get(SELECTORS.restoreButton).click({ force: true });
 });
