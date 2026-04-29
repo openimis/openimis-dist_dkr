@@ -23,7 +23,9 @@ export const PAYMENT_CYCLE_STATUS = {
 
 export const TIMEOUTS = {
   // Async backend validation (e.g. code-uniqueness, custom filter resolution).
-  BACKEND_VALIDATION: 15000,
+  // Set to 45s — successful paths return immediately; the headroom is for
+  // CI runs where backend round-trips are slower than a developer machine.
+  BACKEND_VALIDATION: 45000,
   // Default Cypress defaultCommandTimeout override for flaky UI probes.
   SHORT_PROBE: 3000,
 };

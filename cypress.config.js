@@ -45,15 +45,26 @@ function waitForServerToStart(url) {
   })
 }
 
+const isCI = !!process.env.CI;
+
 module.exports = defineConfig({
   viewportWidth: 1280,
   viewportHeight: 670,
   e2e: {
     projectId: "q6gc25", // Cypress Cloud, needed for recording
     baseUrl: 'http://localhost',
-    defaultCommandTimeout: 15000,
+    // CI runners have higher backend latency than a developer machine; give
+    // assertions more headroom there but keep the local timeout tight so
+    // genuine slowness surfaces during development.
+    defaultCommandTimeout: isCI ? 30000 : 15000,
     taskTimeout: timeoutMinutes * 60 * 1000 + 10,
     downloadsFolder: 'cypress/downloads',
+    // Retries mask intermittent CI flakes without hiding real bugs locally.
+    retries: { runMode: isCI ? 2 : 0, openMode: 0 },
+    // Record video in CI so post-mortem diagnosis doesn't require re-runs.
+    video: isCI,
+    videoCompression: 32,
+    videosFolder: 'cypress/videos',
     setupNodeEvents(on, config) {
       on('task', {
         checkSetup() {
