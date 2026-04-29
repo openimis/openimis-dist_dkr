@@ -47,6 +47,10 @@ jobs:
           echo 'FE_TAG=develop' >> .env
           echo 'DOMAIN=localhost' >> .env
           echo 'HOSTS=localhost' >> .env
+          # CI resource tuning: GitHub-hosted ubuntu-latest is 2 vCPU / 7 GB RAM,
+          # which is too tight for 3 Celery workers alongside Postgres, OpenSearch,
+          # RabbitMQ, Redis, backend, frontend and Cypress. Cap workers at 1 here.
+          echo 'WORKER_REPLICAS=1' >> .env
           cp .env.openSearch.example .env.openSearch
 
           docker compose up -d
@@ -68,6 +72,18 @@ jobs:
           docker logs $BACKEND_CONTAINER || true
           exit 1
 
+      - name: Capture resource baseline
+        if: always()
+        run: |
+          echo "=== free -m ==="
+          free -m
+          echo "=== nproc ==="
+          nproc
+          echo "=== docker compose ps ==="
+          docker compose ps
+          echo "=== docker stats (single snapshot) ==="
+          docker stats --no-stream --format "table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}\t{{.MemPerc}}"
+
       - name: Cypress run
         uses: cypress-io/github-action@b8ba51a856ba5f4c15cf39007636d4ab04f23e3c
         with:
@@ -77,6 +93,16 @@ jobs:
         env:
           CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Capture resource snapshot after Cypress
+        if: always()
+        run: |
+          echo "=== free -m ==="
+          free -m
+          echo "=== docker stats (single snapshot) ==="
+          docker stats --no-stream --format "table {{.Name}}\t{{.CPUPerc}}\t{{.MemUsage}}\t{{.MemPerc}}" || true
+          echo "=== backend log tail ==="
+          docker compose logs --tail=80 backend || true
 
       - name: Upload test artifacts
         if: always()
