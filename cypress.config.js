@@ -59,8 +59,12 @@ module.exports = defineConfig({
     defaultCommandTimeout: isCI ? 30000 : 15000,
     taskTimeout: timeoutMinutes * 60 * 1000 + 10,
     downloadsFolder: 'cypress/downloads',
-    // Retries mask intermittent CI flakes without hiding real bugs locally.
-    retries: { runMode: isCI ? 2 : 0, openMode: 0 },
+    // No retries: openIMIS rate-limits the Admin account after a handful of
+    // failed logins ("Too many failed attempts. Try again in 4 minutes."),
+    // and auth.cy.js intentionally tries wrong credentials. Retrying those
+    // tests triggers the lockout, which cascades into every later spec's
+    // before-all hook and skips the suite.
+    retries: 0,
     // Record video in CI so post-mortem diagnosis doesn't require re-runs.
     video: isCI,
     videoCompression: 32,
