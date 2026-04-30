@@ -15,6 +15,7 @@ const SELECTORS = {
   editBtn: '[aria-label="Edit"]',
   saveButton: '[title="Save changes"] button',
   restoreButton: '[title="Restore the claim"] button',
+  duplicateButton: '[title="Duplicate the claim"] button',
   table: 'table',
   deleteUserBtn: 'button[title="Delete user"]'
 };
@@ -1071,3 +1072,113 @@ Cypress.Commands.add('openFirstRow', (label) => {
 Cypress.Commands.add('restore', () => {
   cy.get(SELECTORS.restoreButton).click({ force: true });
 });
+
+Cypress.Commands.add('chooseCraMuiDatePicker', (label, dateOrDay, month, year) => {
+  let day;
+  if (dateOrDay && typeof dateOrDay === 'object') {
+    if (dateOrDay instanceof Date) {
+      day = dateOrDay.getDate();
+      month = dateOrDay.getMonth() + 1;
+      year = dateOrDay.getFullYear();
+    } else {
+      ({ day, month, year } = dateOrDay);
+    }
+  } else {
+    day = dateOrDay;
+  }
+
+  cy.contains('label', label)
+    .closest('.MuiFormControl-root')
+    .find('input')
+    .click({ force: true })
+
+  cy.get('.MuiPickersModal-dialogRoot').should('be.visible');
+
+  if (month || year) {
+    cy.get('.MuiPickersCalendarHeader-transitionContainer p').then(($header) => {
+      const headerText = $header.text();
+
+      const months = [
+        'January', 'February', 'March', 'April', 'May', 'June',
+        'July', 'August', 'September', 'October', 'November', 'December'
+      ];
+
+      const currentMonth = months.findIndex((m) => headerText.includes(m)) + 1;
+      const currentYear = parseInt(headerText.match(/\d{4}/)?.[0]);
+
+      const targetMonth = month ?? currentMonth;
+      const targetYear = year ?? currentYear;
+
+      const diff =
+        (targetYear - currentYear) * 12 + (targetMonth - currentMonth);
+
+      const navSelector = diff > 0
+        ? '.MuiPickersCalendarHeader-iconButton:last-child'
+        : '.MuiPickersCalendarHeader-iconButton:first-child';
+
+      Cypress._.times(Math.abs(diff), () => {
+        cy.get(navSelector).click();
+        cy.get('.MuiPickersCalendarHeader-transitionContainer').should('not.have.class', 'MuiPickersSlideTransition-slideEnter');
+      });
+    });
+  }
+
+  cy.get('.MuiPickersCalendar-transitionContainer')
+    .find('.MuiPickersDay-day:not(.MuiPickersDay-hidden)')
+    .each(($el) => {
+      if ($el.find('p').text().trim() === String(day)) {
+        cy.wrap($el).click();
+        return false; // stoppe le .each() dès le premier match
+      }
+    });
+
+  cy.get('.MuiPickersModal-withAdditionalAction')
+    .contains('button', 'OK')
+    .click();
+});
+
+Cypress.Commands.add('chooseServiceAutocomplete', (element, index) => {
+  if(element.name){
+    cy.get('input[placeholder="Search Service…"]').eq(index)
+      .clear().type(element.name);
+  } else {
+    cy.get('input[placeholder="Search Service…"]').eq(index)
+      .clear().type(" ");
+  }
+  cy.get('.MuiAutocomplete-popper').should('be.visible')
+    .find('li').first().click();
+
+});
+
+Cypress.Commands.add('searchInput', (label, value) => {
+  cy.enterMuiInput(label, value, 'input');
+  cy.contains('button', 'Search').click({ force: true });
+  cy.waitForGraphQL('search');
+  cy.get(SELECTORS.table).should('be.visible');
+});
+
+Cypress.Commands.add('goToClaimForm', ()=>{
+  cy.chooseMuiAutocomplete('Claim Administrator')
+  cy.get(SELECTORS.addIcon).click({ force: true });
+});
+
+Cypress.Commands.add('openRow', (label, value) => {
+  cy.contains('td', value)
+    .closest('tr')
+    .dblclick();
+  cy.contains('label', label)
+    .closest('.MuiFormControl-root')
+    .find('input')
+    .should('have.value', value);
+});
+
+Cypress.Commands.add('duplicate', () => {
+  cy.get(SELECTORS.duplicateButton).click({ force: true });
+});
+
+Cypress.Commands.add('filterInputValue', (identifier, value) => {
+  cy.contains('button', 'Reset filters').click({ force: true });
+  cy.enterMuiInput(identifier, value);
+  cy.contains('button', 'Search').click({ force: true });
+  cy.waitForGraphQL('search');
+})

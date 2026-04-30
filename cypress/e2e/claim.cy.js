@@ -16,7 +16,13 @@ describe('Test for claim restoration', ()=>{
 
     it('Claim restoration workflow', ()=>{
         claimPage.openFirstRejectedClaim();
-        claimPage.restoreClaim(data.claim.code);
-        claimPage.verifyClaim(data.claim.code);
+        claimPage.restoreClaim(data.restore.code);
+        claimPage.verifyClaim(data.restore.code);
+    });
+
+    it('Claim duplication workflow', ()=>{
+        claimPage.searchClaim(data.claim);
+        claimPage.duplicateClaim(data.duplicate);
+        claimPage.verifyClaim(data.duplicate.code);
     })
 })

@@ -1,5 +1,18 @@
 {
     "claim": {
-        "code": "TP093"
+        "code": "CL006",
+        "chfId": "777746566",
+        "visitDateTo": {
+            "day": 30,
+            "month": 4,
+            "year": 2026
+        }
+    },
+    "restore": {
+        "code": "RES01"
+    },
+    "duplicate": {
+        "code": "DUP02",
+        "chfId": "104000001"
     }
 }
