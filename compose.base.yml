@@ -13,14 +13,16 @@ x-api: &default-api
     - CELERY_BROKER_URL=amqp://rabbitmq
     - MODE=${MODE:-Prod}
     - HOSTS=${HOSTS}
-    - CACHE_BACKEND=${CACHE_BACKEND}
-    - CACHE_URL=${CACHE_URL}
-    - CACHE_OPTIONS=${CACHE_OPTIONS}
-    - OPENSEARCH_ADMIN=${OPENSEARCH_ADMIN}
-    - OPENSEARCH_PASSWORD=${OPENSEARCH_PASSWORD}
-    - OPENSEARCH_HOSTS=${OPENSEARCH_HOSTS}
+    # - CACHE_BACKEND=${CACHE_BACKEND}
+    # - CACHE_URL=${CACHE_URL}
+    # - CACHE_OPTIONS=${CACHE_OPTIONS}
+    # - OPENSEARCH_ADMIN=${OPENSEARCH_ADMIN}
+    # - OPENSEARCH_PASSWORD=${OPENSEARCH_PASSWORD}
+    # - OPENSEARCH_HOSTS=${OPENSEARCH_HOSTS}
   volumes:
     - photos:/openimis-be/openIMIS/images/insurees
+  ports:
+    - ${HTTP_PORT:-8000}:8000
   depends_on:
     db:
       condition: service_healthy
@@ -28,72 +30,72 @@ x-api: &default-api
     openimis-net:
 
 services:
-  frontend:
-    image: ghcr.io/openimis/openimis-fe:${FE_TAG:-develop}
-    restart: always
-    environment:
-      - REACT_APP_SENTRY_DSN=${REACT_APP_SENTRY_DSN}
-      - REACT_APP_API_URL=api
-      - NEW_OPENIMIS_HOST=${DOMAIN}
-      - OPENIMIS_CONF_JSON=${OPENIMIS_FE_CONF_JSON}
-      - OPENSEARCH_BASIC_TOKEN=${OPENSEARCH_BASIC_TOKEN}
-    networks:
-      openimis-net:
-      # proxy:
-    ports:
-      - ${HTTP_PORT:-80}:80
-      - ${HTTPS_PORT:-443}:443
-    depends_on:
-      - backend
-    volumes:
-      - ./data/certbot/conf:/etc/letsencrypt
-      - ./data/certbot/www:/var/www/certbot
-      # comment the following line if you are using your own gateway
-      - ./conf/nginx:/conf/
-    labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=proxy"
-      - "traefik.http.routers.frontend.entrypoints=websecure"
-      - "traefik.http.routers.frontend.rule=Host(`${DOMAIN}`)"
-      - "traefik.http.routers.frontend.tls=true"
-      - "traefik.http.routers.frontend.tls.certresolver=letsencrypt"
-      - "traefik.http.services.frontend.loadbalancer.server.port=80"
-      # Optional: Redirect HTTP to HTTPS
-      - "traefik.http.routers.frontend-http.entrypoints=web"
-      - "traefik.http.routers.frontend-http.rule=Host(`${DOMAIN}`)"
-      - "traefik.http.routers.frontend-http.middlewares=redirect-to-https"
-      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+  # frontend:
+  #   image: ghcr.io/openimis/openimis-fe:${FE_TAG:-develop}
+  #   restart: always
+  #   environment:
+  #     - REACT_APP_SENTRY_DSN=${REACT_APP_SENTRY_DSN}
+  #     - REACT_APP_API_URL=api
+  #     - NEW_OPENIMIS_HOST=${DOMAIN}
+  #     - OPENIMIS_CONF_JSON=${OPENIMIS_FE_CONF_JSON}
+  #     - OPENSEARCH_BASIC_TOKEN=${OPENSEARCH_BASIC_TOKEN}
+  #   networks:
+  #     openimis-net:
+  #     # proxy:
+  #   ports:
+  #     - ${HTTP_PORT:-80}:80
+  #     - ${HTTPS_PORT:-443}:443
+  #   depends_on:
+  #     - backend
+  #   volumes:
+  #     - ./data/certbot/conf:/etc/letsencrypt
+  #     - ./data/certbot/www:/var/www/certbot
+  #     # comment the following line if you are using your own gateway
+  #     - ./conf/nginx:/conf/
+  #   labels:
+  #     - "traefik.enable=true"
+  #     - "traefik.docker.network=proxy"
+  #     - "traefik.http.routers.frontend.entrypoints=websecure"
+  #     - "traefik.http.routers.frontend.rule=Host(`${DOMAIN}`)"
+  #     - "traefik.http.routers.frontend.tls=true"
+  #     - "traefik.http.routers.frontend.tls.certresolver=letsencrypt"
+  #     - "traefik.http.services.frontend.loadbalancer.server.port=80"
+  #     # Optional: Redirect HTTP to HTTPS
+  #     - "traefik.http.routers.frontend-http.entrypoints=web"
+  #     - "traefik.http.routers.frontend-http.rule=Host(`${DOMAIN}`)"
+  #     - "traefik.http.routers.frontend-http.middlewares=redirect-to-https"
+  #     - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
 
-  migrations:
-    <<: *default-api
-    command: init
-    restart: no
+  # migrations:
+  #   <<: *default-api
+  #   command: init
+  #   restart: no
   backend:
     <<: *default-api
-    command: start
+    command: dev
     restart: always
-    depends_on:
-      migrations:
-        condition: service_completed_successfully   
-      redis:
-        condition: service_healthy
-  worker:
-    <<: *default-api
-    command: worker
-    restart: always
-    depends_on:
-      migrations:
-        condition: service_completed_successfully
-      redis:
-        condition: service_healthy
-    deploy:
-      mode: replicated
-      replicas: ${WORKER_REPLICAS:-3}
-  rabbitmq:
-    image: rabbitmq:3-management
-    restart: always
-    networks:
-      openimis-net:
+    # depends_on:
+    #   migrations:
+    #     condition: service_completed_successfully   
+    #   redis:
+    #     condition: service_healthy
+  # worker:
+  #   <<: *default-api
+  #   command: worker
+  #   restart: always
+  #   depends_on:
+  #     migrations:
+  #       condition: service_completed_successfully
+  #     redis:
+  #       condition: service_healthy
+  #   deploy:
+  #     mode: replicated
+  #     replicas: ${WORKER_REPLICAS:-3}
+  # rabbitmq:
+  #   image: rabbitmq:3-management
+  #   restart: always
+  #   networks:
+  #     openimis-net:
 networks:
   # proxy:
   #   external: true

@@ -4,14 +4,14 @@ include:
   - path: compose.base.yml
     env_file: 
     - .env
-    - .env.openSearch
-  - path: compose.openSearch.yml
-    env_file: 
-     - .env  
-     - .env.openSearch
-  - path: compose.cache.yml
-    env_file: 
-     - .env
+    # - .env.openSearch
+  # - path: compose.openSearch.yml
+  #   env_file: 
+  #    - .env  
+  #    - .env.openSearch
+  # - path: compose.cache.yml
+  #   env_file: 
+  #    - .env
 #  - path: compose.certbot.yml
 
       
