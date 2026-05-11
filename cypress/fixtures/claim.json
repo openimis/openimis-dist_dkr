@@ -1,18 +1,32 @@
 {
     "claim": {
-        "code": "CL006",
-        "chfId": "777746566",
-        "visitDateTo": {
-            "day": 30,
-            "month": 4,
-            "year": 2026
-        }
+        "code": "CYP07",
+        "chfId": "172000001",
+        "services": [
+            {
+                "name": "SCP01",
+                "subservicesItems": [
+                    {
+                        "code": "PARA",
+                        "qty": 3
+                    },
+                    {
+                        "code": "M6",
+                        "qty": 2
+                    },
+                    {
+                        "code": "0003",
+                        "qty": 1
+                    }
+                ]
+            }
+        ]
     },
     "restore": {
-        "code": "RES01"
+        "code": "RES04"
     },
     "duplicate": {
-        "code": "DUP02",
+        "code": "DUP04",
         "chfId": "104000001"
     }
 }

@@ -1128,7 +1128,7 @@ Cypress.Commands.add('chooseCraMuiDatePicker', (label, dateOrDay, month, year) =
     .each(($el) => {
       if ($el.find('p').text().trim() === String(day)) {
         cy.wrap($el).click();
-        return false; // stoppe le .each() dès le premier match
+        return false;
       }
     });
 
@@ -1150,6 +1150,33 @@ Cypress.Commands.add('chooseServiceAutocomplete', (element, index) => {
 
 });
 
+Cypress.Commands.add('chooseComplexServiceAutocomplete', (service, index) => {
+  cy.get('input[placeholder="Search Service…"]')
+      .eq(index)
+      .clear()
+      .type(service.name);
+
+  cy.waitForGraphQL('search service');
+
+  cy.get('.MuiAutocomplete-popper')
+    .should('be.visible')
+    .find('li')
+    .first()
+    .click();
+
+  service.subservicesItems.forEach((subservice) => {
+    cy.get(`input[value="${subservice.code}"]`)
+      .closest('tr')
+      .within(() => {
+        cy.get('input:not([disabled])')
+          .first()
+          .clear()
+          .type(subservice.qty);
+      });
+  });
+
+});
+
 Cypress.Commands.add('searchInput', (label, value) => {
   cy.enterMuiInput(label, value, 'input');
   cy.contains('button', 'Search').click({ force: true });
@@ -1158,7 +1185,6 @@ Cypress.Commands.add('searchInput', (label, value) => {
 });
 
 Cypress.Commands.add('goToClaimForm', ()=>{
-  cy.chooseMuiAutocomplete('Claim Administrator')
   cy.get(SELECTORS.addIcon).click({ force: true });
 });
 
@@ -1181,4 +1207,39 @@ Cypress.Commands.add('filterInputValue', (identifier, value) => {
   cy.enterMuiInput(identifier, value);
   cy.contains('button', 'Search').click({ force: true });
   cy.waitForGraphQL('search');
+});
+
+Cypress.Commands.add('verifyInput', (labelText, expectedValue) => {
+  cy.contains('label', labelText)
+    .closest('.MuiFormControl-root')
+    .find('input')
+    .should('have.value', expectedValue);
+});
+
+Cypress.Commands.add('verifySubServiceItemsQty', (subServiceItems) =>{
+  subServiceItems.forEach((subElt) =>{
+    cy.get(`input[value="${subElt.code}"]`)
+      .closest('tr')
+      .within(() => {
+        cy.get('input:not([disabled])')
+          .first()
+          .should('have.value', String(subElt.qty));
+      });
+  })
 })
+
+Cypress.Commands.add('verifyComplexServiceRow', (rowIndex, service, totalRows) => {
+  const reversedIndex = totalRows - 1 - rowIndex;
+  const row = () => cy.contains('p', 'Services')
+    .should('be.visible')
+    .closest('.MuiBox-root')
+    .find('.MuiBox-root > table tr')
+    .not(':first-child')
+    .eq(reversedIndex);
+
+  row()
+    .find('input[placeholder="Search Service…"]')
+    .should('include.value', service.name);
+
+  cy.verifySubServiceItemsQty(service.subservicesItems);
+});

@@ -24,19 +24,6 @@ export class ClaimPage {
     searchClaim(claim){
         cy.goToList('Claims', 'Health Facility Claims');
         cy.searchInput('Claim No.', claim.code);
-        cy.get('body').then(($body) => {
-            const exists = $body
-                .find('tr')
-                .toArray()
-                .some((row) => row.innerText.includes(claim.code));
-
-            if (!exists) {
-                this.createClaim(claim);
-                cy.goToList('Claims', 'Health Facility Claims');
-                cy.filterInputValue('Claim No.',claim.code);
-            }
-            cy.openRow('Claim No.', claim.code);
-        });
     }
 
     duplicateClaim(claim){
@@ -46,17 +33,35 @@ export class ClaimPage {
         cy.save();
     }
 
-    createClaim(claim){
+    createClaim(claim, type){
         cy.goToClaimForm();
-        this.fillClaim(claim);
+        this.fillClaim(claim, type);
         cy.save();
     }
 
-    fillClaim(claim) {
+    fillClaim(claim, type) {
         cy.enterMuiInput('Insurance No.', claim.chfId);
-        cy.chooseCraMuiDatePicker('Visit Date To', claim.visitDateTo);
+        cy.chooseCraMuiDatePicker('Visit Date To');
         cy.chooseMuiAutocomplete('Main Diagnosis');
         cy.enterMuiInput('Claim No.', claim.code);
-        cy.chooseServiceAutocomplete("", 0);
+        if(type == 'simple'){
+            cy.chooseServiceAutocomplete("", index);
+        } else {
+            claim.services.forEach((service, index) =>{
+                cy.chooseComplexServiceAutocomplete(service, 0);
+            });
+        }
+    }
+
+    verifyContent(claim){
+        const inputFields = [
+            ['Claim No.', claim.code],
+            ['Insurance No.', claim.chfId]
+        ];
+
+        inputFields.forEach(([label, expectedValue]) => cy.verifyInput(label, expectedValue));
+        claim.services.forEach((service, index) => {
+            cy.verifyComplexServiceRow(index, service, claim.services.length);
+        });
     }
 }
