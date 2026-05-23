@@ -1,7 +1,6 @@
 export class ContributionPage {
     openFirstFamily() {
         cy.goToList('Insurees and Policies', 'Families/Groups');
-        cy.contains('.MuiBox-root', 'Head Ins. No.').click();
         cy.openFirstRow('Head Ins. No.');
     }
 
