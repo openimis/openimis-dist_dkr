@@ -6,6 +6,20 @@ const getTodayFormatted = () => {
   return `${day}-${month}-${year}`;
 };
 
+const SELECTORS = {
+  listbox: '[role="listbox"]',
+  option: '[role="option"]',
+  dialog: '[role="dialog"]',
+  addIcon: 'button.MuiFab-primary',
+  deleteBtn: 'button[title="Delete"]',
+  editBtn: '[aria-label="Edit"]',
+  saveButton: '[title="Save changes"] button',
+  restoreButton: '[title="Restore the claim"] button',
+  duplicateButton: '[title="Duplicate the claim"] button',
+  table: 'table',
+  deleteUserBtn: 'button[title="Delete user"]'
+};
+
 Cypress.Commands.add('login', () => {
   cy.visit('/front');
 
@@ -1005,4 +1019,106 @@ Cypress.Commands.add('addGrievanceComment', (commentText, commentData = {}) => {
 
   // cy.reload();
   cy.contains(commentText).should('exist');
+});
+
+Cypress.Commands.add('goToList', (menuLabel, subMenuLabel, index = 0) => {
+  cy.contains(menuLabel).click();
+  cy.get('a').filter(`:contains("${subMenuLabel}")`).eq(index).click();
+});
+
+Cypress.Commands.add('openFirstRow', (label) => {
+  cy.get('tbody tr')
+    .first()
+    .dblclick();
+  cy.contains('label', label)
+    .closest('.MuiFormControl-root')
+    .find('input')
+    .should('be.visible');
+});
+
+Cypress.Commands.add('waitForGraphQL', (alias = 'graphqlRequest') => {
+  cy.intercept('POST', '**/api/graphql').as(alias);
+  return cy.wait(`@${alias}`);
+});
+
+Cypress.Commands.add('save', () => {
+  cy.get(SELECTORS.saveButton).should('not.have.attr', 'disabled');
+  cy.get(SELECTORS.saveButton).click({ force: true });
+});
+
+Cypress.Commands.add('confirm', (label)=>{
+  cy.get(SELECTORS.dialog).within(() => {
+      cy.contains('button', label, { matchCase: false }).click({ force: true });
+  });
+});
+
+Cypress.Commands.add('chooseTodayDatePicker', (label) =>{
+  cy.contains('label', label).closest('.MuiFormControl-root').find('input').click({ force:true });
+  cy.get('.MuiDialogActions-root').contains('button', 'OK').click();
+});
+
+Cypress.Commands.add('selectDropdown', (identifier, value) => {
+  if (typeof identifier === 'number') {
+    cy.get('[aria-haspopup="listbox"]').eq(identifier).click({ force: true});
+  } else {
+    cy.contains('label', identifier)
+      .closest('.MuiFormControl-root')
+      .find('[aria-haspopup="listbox"]')
+      .click({ force: true });
+  }
+
+  if (value) {
+    cy.get(SELECTORS.option)
+      .filter((_, el) => el.innerText.trim() === value)
+      .first()
+      .click();
+  } else {
+    cy.get(SELECTORS.option).first().click();
+  }
+
+  cy.get(SELECTORS.listbox).should('not.exist');
+});
+
+Cypress.Commands.add('selectLastPolicy', () => {
+  cy.get('table').eq(1).find('tbody tr').last().find('td').first().click({ force: true });
+});
+
+Cypress.Commands.add('deleteLastPolicy', () => {
+  cy.get('table').eq(1).find('tbody tr').last().find('td').contains('button', 'Delete').click({ force: true });
+});
+
+Cypress.Commands.add('openFirstContribution', ()=>{
+  cy.get('table').eq(2).find('tbody tr').first().find('td').first().dblclick({ force: true });
+});
+
+Cypress.Commands.add('verifyInput', (labelText, expectedValue) => {
+  let formattedValue = expectedValue;
+  if (
+    (typeof expectedValue === 'number' && Number.isInteger(expectedValue)) ||
+    (typeof expectedValue === 'string' && /^\d+$/.test(expectedValue))
+  ) {
+    const intValue = parseInt(expectedValue, 10);
+    formattedValue = intValue.toLocaleString('fr-FR', {
+      style: 'decimal',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+  }
+  cy.contains('label', labelText)
+    .closest('.MuiFormControl-root')
+    .find('input')
+    .should('have.value', formattedValue);
+});
+
+Cypress.Commands.add('verifySelect', (labelText, expectedText) => {
+  const selector = cy.contains('label', labelText)
+    .closest('.MuiFormControl-root')
+    .find('.MuiSelect-select');
+
+  if (expectedText) {
+    selector.should('have.text', expectedText);
+  } else {
+    selector
+      .should('not.be.empty');
+  }
 });
