@@ -1083,8 +1083,8 @@ Cypress.Commands.add('selectLastPolicy', () => {
   cy.get('table').eq(1).find('tbody tr').last().find('td').first().click({ force: true });
 });
 
-Cypress.Commands.add('deleteLastPolicy', () => {
-  cy.get('table').eq(1).find('tbody tr').last().find('td').contains('button', 'Delete').click({ force: true });
+Cypress.Commands.add('deleteFirstContribution', () => {
+  cy.get('table').eq(2).find('tbody tr').first().find('td').contains('button', 'Delete').click({ force: true });
 });
 
 Cypress.Commands.add('openFirstContribution', ()=>{

@@ -20,8 +20,8 @@ describe('Test for user management', () => {
     });
 
     it('contribution management workflow', () => {
-        //contributionPage.openFirstFamily(); // open first family
-        //contributionPage.createPolicy(); // create policy
+        contributionPage.openFirstFamily(); // open first family
+        contributionPage.createPolicy(); // create policy
         contributionPage.createPremium(data.contribution); // create contribution
         contributionPage.verifyPremium(data.contribution); // verify contribution
     });

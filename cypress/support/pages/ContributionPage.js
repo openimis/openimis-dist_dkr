@@ -1,7 +1,7 @@
 export class ContributionPage {
     openFirstFamily() {
         cy.goToList('Insurees and Policies', 'Families/Groups');
-        cy.contains('.MuiBox-root', 'Head Last Name').click();
+        cy.contains('.MuiBox-root', 'Head Ins. No.').click();
         cy.openFirstRow('Head Ins. No.');
     }
 
@@ -51,8 +51,8 @@ export class ContributionPage {
 
     deletePolicy(){
         this.openFirstFamily();
-        cy.deleteLastPolicy();
-        cy.confirm('OK');
+        cy.deleteFirstContribution();
+        cy.confirm('YES');
         cy.waitForGraphQL('delete policy & contribution');
     }
 }
