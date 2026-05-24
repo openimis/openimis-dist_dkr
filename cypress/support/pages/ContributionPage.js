@@ -25,7 +25,7 @@ export class ContributionPage {
         cy.enterMuiInput('Amount', contribution.amount);
         cy.save();
         cy.confirm('OK');
-        cy.confirm('YES')
+        cy.confirm('YES');
         cy.waitForGraphQL('save premium');
 
         //cy.get('table tbody tr').last().contains('button', 'Renew').click();
