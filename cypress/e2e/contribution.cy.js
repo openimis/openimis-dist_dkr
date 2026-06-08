@@ -16,7 +16,7 @@ describe('Test for user management', () => {
 
     afterEach(function () {
         if (this.currentTest.state === 'failed') return;
-        contributionPage.deletePolicy(); //delete policy and contribution
+        contributionPage.deleteContribution(); //delete contribution
     });
 
     it('contribution management workflow', () => {
