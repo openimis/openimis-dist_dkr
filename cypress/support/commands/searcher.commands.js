@@ -83,22 +83,23 @@ export function registerSearcherCommands() {
   // Two Tooltip-rendering patterns coexist in openIMIS row actions:
   //
   //   A) `withTooltip(<div><IconButton /></div>, 'X')`
-  //      → <div title="X"><button …> or <a …>
-  //      → selector: `[title="X"] button` (or `a`)
+  //      → <div aria-label="X"><button …> or <a …>
+  //      → selector: `[aria-label="X"] button` (or `a`)
   //
   //   B) `<Tooltip title="X"><IconButton /></Tooltip>` (direct child)
-  //      → <button title="X" …> (MUI v4 clones the title onto the child)
-  //      → selector: `button[title="X"]`
+  //      → <button aria-label="X" …> (MUI v7 clones the tooltip text onto
+  //        the child as aria-label; v4 used the `title` attribute)
+  //      → selector: `button[aria-label="X"]`
   //
   // A caller shouldn't have to know which variant a given module uses, so the
   // helpers below try (A) first and fall back to (B) if no descendant tag is
   // found.  Edge-case: Edit often renders as an <a> (IconButton with href) so
   // `tag:'a'` callers still work — and in pattern (B) the <a> would itself
-  // carry the title.
+  // carry the aria-label.
   function rowActionSelectors(actionTitle, tag) {
     return [
-      `[title="${actionTitle}"] ${tag}`, // pattern A
-      `${tag}[title="${actionTitle}"]`,  // pattern B
+      `[aria-label="${actionTitle}"] ${tag}`, // pattern A
+      `${tag}[aria-label="${actionTitle}"]`,  // pattern B
     ];
   }
 

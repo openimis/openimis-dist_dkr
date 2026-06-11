@@ -57,7 +57,7 @@ export function registerPaymentCycleCommands() {
   Cypress.Commands.add('savePaymentCycle', () => {
     cy.contains('label', 'Status')
       .siblings('.MuiInputBase-root')
-      .find('[role="button"]')
+      .find('[role="combobox"], [role="button"]')
       .invoke('text')
       .then((statusText) => {
         const expectDialog = statusText.trim().toUpperCase() === 'ACTIVE';
