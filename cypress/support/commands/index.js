@@ -1,0 +1,25 @@
+import { registerUiCommands } from './ui.commands';
+import { registerAuthCommands } from './auth.commands';
+import { registerAdminCommands } from './admin.commands';
+import { registerFormCommands } from './form.commands';
+import { registerSearcherCommands } from './searcher.commands';
+import { registerLocationCommands } from './location.commands';
+import { registerRegistryCommands } from './registry.commands';
+import { registerTaskCommands } from './tasks.commands';
+import { registerProgramCommands } from './programs.commands';
+import { registerGrievanceCommands } from './grievance.commands';
+import { registerPaymentCommands } from './payments';
+import { claimCommands } from './claim.commands';
+
+registerUiCommands();
+registerAuthCommands();
+registerAdminCommands();
+registerFormCommands();
+registerSearcherCommands();
+registerLocationCommands();
+registerRegistryCommands();
+registerTaskCommands();
+registerProgramCommands();
+registerGrievanceCommands();
+registerPaymentCommands();
+claimCommands();

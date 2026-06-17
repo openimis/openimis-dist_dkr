@@ -26,7 +26,7 @@ describe('Grievance module workflows', () => {
     });
 
     it('Creates a grievance with Individual reporter type', function () {
-      cy.ensureSufficientIndividuals(10);
+      cy.ensureSufficientStandaloneIndividuals(10);
 
       const grievanceData = {
         title: `E2E Individual Reporter Grievance ${timestamp}`,
@@ -136,7 +136,7 @@ describe('Grievance module workflows', () => {
 
     before(function () {
       cy.login();
-      cy.ensureSufficientIndividuals(5);
+      cy.ensureSufficientStandaloneIndividuals(5);
 
       const grievanceData = {
         title: `E2E Comment Test Grievance ${timestamp}`,
@@ -373,12 +373,13 @@ describe('Grievance module workflows', () => {
       channel: 'Channel A',
       priority: 'Normal',
       details: 'Initial grievance details for update testing.',
-      reporterType: 'Attending Staff',
+      reporterType: 'Individual',
     };
     let grievanceCode;
 
     before(function () {
       cy.login();
+      cy.ensureSufficientStandaloneIndividuals(10);
       cy.createGrievance(grievanceData);
       cy.getGrievanceCodeFromList(grievanceData.title).then(code => {
         grievanceCode = code;
@@ -393,7 +394,7 @@ describe('Grievance module workflows', () => {
       };
 
       cy.updateGrievance(grievanceCode, updateData, {
-        reporterFieldLabel: 'User',
+        reporterFieldLabel: 'Individual',
       });
 
       cy.visit('/front/ticket/tickets');
@@ -407,7 +408,7 @@ describe('Grievance module workflows', () => {
       };
 
       cy.updateGrievance(grievanceCode, updateData, {
-        reporterFieldLabel: 'User',
+        reporterFieldLabel: 'Individual',
       });
 
       cy.assertMuiSelectValue('Priority', updateData.priority);
@@ -509,7 +510,7 @@ describe('Grievance module workflows', () => {
   describe('Grievance navigation and UI elements', () => {
     it('Navigates to grievance creation page from menu', function () {
       cy.visit('/front');
-      cy.get('#Grievance-header').click();
+      cy.contains(':visible', /^Grievance$/).click();
       cy.contains('Add Grievance').click();
 
       cy.url().should('include', '/front/ticket/newTicket');
@@ -519,11 +520,14 @@ describe('Grievance module workflows', () => {
 
     it('Navigates to grievance list page from menu', function () {
       cy.visit('/front');
-      cy.get('#Grievance-header').click();
+      cy.contains(':visible', /^Grievance$/).click();
+      cy.aliasGraphqlQuery('tickets(', 'grievanceListLoad');
       cy.contains('Grievances').click();
 
       cy.url().should('include', '/front/ticket/tickets');
-      cy.contains('Grievances').should('exist');
+      cy.awaitSearcherRefresh('grievanceListLoad');
+      // Title format is "(N) Grievance(s)" — note the parens around the count.
+      cy.contains(/\(\d+\) Grievance\(s\)/).should('exist');
     });
 
     it('Displays required field validation on empty form submission', function () {

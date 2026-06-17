@@ -112,6 +112,14 @@ module.exports = defineConfig({
             const row = line.split(',');
             const oldCode = row[groupCodeIdx];
 
+            // Preserve empty group_code — individuals without a group are
+            // needed for individual program enrollment (grouped individuals
+            // are ineligible for individual programs).
+            if (!oldCode) {
+              newLines.push(row.join(','));
+              continue;
+            }
+
             if (!groupMap[oldCode]) {
               groupMap[oldCode] = Math.random().toString(36).substring(2, 8).toUpperCase();
             }
