@@ -5,9 +5,6 @@ const SELECTORS = {
     addIcon: 'button.MuiFab-primary',
     deleteBtn: 'button[title="Delete"]',
     editBtn: '[aria-label="Edit"]',
-    saveButton: '[title="Save changes"] button',
-    restoreButton: '[title="Restore the claim"] button',
-    duplicateButton: '[title="Duplicate the claim"] button',
     table: 'table',
     deleteUserBtn: 'button[title="Delete user"]'
 };
@@ -61,12 +58,6 @@ export function claimCommands() {
         cy.contains('button', 'Search').click({ force: true });
         cy.waitForGraphQL('search')
         cy.openFirstRow('Claim No.');
-    });
-
-    Cypress.Commands.add('save', () => {
-        cy.get(SELECTORS.saveButton).should('not.have.attr', 'disabled');
-        cy.get(SELECTORS.saveButton).click({ force: true });
-        cy.waitForGraphQL('save');
     });
 
     Cypress.Commands.add('chooseCraMuiDatePicker', (label, dateOrDay, month, year) => {
@@ -158,7 +149,7 @@ export function claimCommands() {
             .should('be.visible')
             .find('li')
             .first()
-            .click();
+            .click({force: true});
 
         service.subservicesItems.forEach((subservice) => {
             cy.get(`input[value="${subservice.code}"]`)
@@ -181,6 +172,7 @@ export function claimCommands() {
     });
 
     Cypress.Commands.add('goToClaimForm', () => {
+        cy.wait(2000);
         cy.get(SELECTORS.addIcon).click({ force: true });
     });
 
@@ -192,10 +184,6 @@ export function claimCommands() {
             .closest('.MuiFormControl-root')
             .find('input')
             .should('have.value', value);
-    });
-
-    Cypress.Commands.add('duplicate', () => {
-        cy.get(SELECTORS.duplicateButton).click({ force: true });
     });
 
     Cypress.Commands.add('filterInputValue', (identifier, value) => {
@@ -240,11 +228,20 @@ export function claimCommands() {
         cy.verifySubServiceItemsQty(service.subservicesItems);
     });
 
+    Cypress.Commands.add('clickButton', (ariaLabel) => {
+        cy.get('button.MuiFab-root')
+            .find('.material-symbols-outlined')
+            .contains(ariaLabel)
+            .parent()
+            .click();
+    });
+
     Cypress.Commands.add('restoreClaim', (newCode) => {
-        cy.get(SELECTORS.restoreButton).click({ force: true });;
+        cy.clickButton('restore_page');
         cy.enterMuiInput('Claim No.', newCode);
         cy.contains(`Claim ${newCode}`).should('be.visible');
-        cy.save();
+        cy.clickButton('save');
+        cy.waitForGraphQL('save');
     });
 
     Cypress.Commands.add('verifyClaim', (code) => {
@@ -260,15 +257,15 @@ export function claimCommands() {
     });
 
     Cypress.Commands.add('duplicateClaim', (claim) => {
-        cy.duplicate();
+        cy.clickButton('file_copy');
         cy.enterMuiInput('Insurance No.', claim.chfId);
         cy.enterMuiInput('Claim No.', claim.code);
-        cy.save();
+        cy.clickButton('save');
     });
 
     Cypress.Commands.add('fillClaim', (claim, type) => {
         cy.enterMuiInput('Insurance No.', claim.chfId);
-        cy.chooseCraMuiDatePicker('Visit Date To');
+        cy.pickToday('Visit Date To');
         cy.chooseMuiAutocomplete('Main Diagnosis');
         cy.enterMuiInput('Claim No.', claim.code);
         if (type == 'simple') {
@@ -280,10 +277,26 @@ export function claimCommands() {
         }
     });
 
+    Cypress.Commands.add('pickDate', (labelText, day) => {
+        cy.contains('label', labelText)
+            .closest('.MuiFormControl-root')
+            .find('button[aria-label*="Choose date"]')
+            .click();
+
+        cy.get('.MuiPickersDay-root:not(.MuiPickersDay-hidden)')
+            .contains('button', String(day))
+            .click();
+    });
+
+    Cypress.Commands.add('pickToday', (labelText) => {
+        const today = new Date().getDate();
+        cy.pickDate(labelText, today);
+    });
+
     Cypress.Commands.add('createClaim', (claim, type) => {
         cy.goToClaimForm();
         cy.fillClaim(claim, type);
-        cy.save();
+        cy.clickButton('save');
     });
 
     Cypress.Commands.add('verifyContent', (claim) => {

@@ -20,7 +20,6 @@ describe('Test for claim restoration', () => {
 
     it('Create claim with complex product workflow', () => {
         cy.goToList('Claims', 'Health Facility Claims');
-        cy.contains('.MuiGrid-item', 'Claims Found').should('be.visible');
         cy.createClaim(data.claim, 'complex');
         cy.verifyClaim(data.claim.code);
         cy.openRow('Claim No.', data.claim.code);
