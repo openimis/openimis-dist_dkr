@@ -124,7 +124,7 @@ export function claimCommands() {
             .click();
     });
 
-    Cypress.Commands.add('chooseServiceAutocomplete', (element, index) => {
+    Cypress.Commands.add('chooseServiceAutocomplete', (element, index, qty, explanation) => {
         if (element.name) {
             cy.get('input[placeholder="Search Service…"]').eq(index)
                 .clear().type(element.name);
@@ -134,6 +134,20 @@ export function claimCommands() {
         }
         cy.get('.MuiAutocomplete-popper').should('be.visible')
             .find('li').first().click();
+
+        if (qty !== undefined) {
+            cy.get(`[data-cy="claim-service-${index}-quantity"]`)
+                .should('exist')
+                .clear()
+                .type(qty.toString());
+        }
+
+        if (explanation !== undefined) {
+            cy.get(`[data-cy="claim-service-${index}-explanation"]`)
+                .should('exist')
+                .clear()
+                .type(explanation);
+        }
 
     });
 
@@ -149,7 +163,7 @@ export function claimCommands() {
             .should('be.visible')
             .find('li')
             .first()
-            .click({force: true});
+            .click({ force: true });
 
         service.subservicesItems.forEach((subservice) => {
             cy.get(`input[value="${subservice.code}"]`)
@@ -269,7 +283,7 @@ export function claimCommands() {
         cy.chooseMuiAutocomplete('Main Diagnosis');
         cy.enterMuiInput('Claim No.', claim.code);
         if (type == 'simple') {
-            cy.chooseServiceAutocomplete("", index);
+            cy.chooseServiceAutocomplete("", 0, 3, "Nothing");
         } else {
             claim.services.forEach((service, index) => {
                 cy.chooseComplexServiceAutocomplete(service, 0);
@@ -309,5 +323,62 @@ export function claimCommands() {
         claim.services.forEach((service, index) => {
             cy.verifyComplexServiceRow(index, service, claim.services.length);
         });
+    });
+
+    Cypress.Commands.add('clickIconByText', (iconText) => {
+        cy.get('button.MuiIconButton-root')
+            .find('.material-symbols-outlined')
+            .contains(iconText)
+            .parent()
+            .should('be.visible')
+            .click();
+    });
+
+    Cypress.Commands.add('submitClaim', (code) => {
+        cy.verifyClaim(code);
+        cy.contains('td', code)
+            .closest('tr')
+            .click({ force: true });
+        cy.clickIconByText('more_horiz');
+        cy.contains('.MuiMenuItem-root', 'Submit Selected').click();
+        cy.waitForGraphQL('submit claim');
+    });
+
+    Cypress.Commands.add('changeQty', (rowIndex, qtyIndex, value) => {
+        cy.get('table tbody tr').eq(rowIndex)
+            .find('td').eq(qtyIndex)
+            .find('input')
+            .clear()
+            .type(value);
+    })
+
+    Cypress.Commands.add('reviewClaim', (code) => {
+        cy.goToList('Claims', 'Reviews');
+        cy.searchInput('Claim No.', code)
+        cy.openRow('Claim No.', code);
+        cy.changeQty(1, 4, 2);
+        cy.clickButton('save');
+        cy.waitForGraphQL('save review');
+        cy.clickButton('check');
+    });
+
+    Cypress.Commands.add('processClaim', (code) => {
+        cy.goToList('Claims', 'Reviews');
+        cy.searchInput('Claim No.', code);
+        cy.wait(1000);
+        cy.contains('td', code)
+            .should('be.visible')
+            .closest('tr')
+            .click({ force: true });
+        cy.clickIconByText('more_horiz');
+        cy.contains('.MuiMenuItem-root', 'Process Selected').click();
+        cy.waitForGraphQL('process');
+    });
+
+    Cypress.Commands.add('verifyProcessed', (code) => {
+        cy.goToList('Claims', 'Reviews');
+        cy.selectDropdown('Claim Status', 'Processed');
+        cy.searchInput('Claim No.', code)
+        cy.contains('td', code).should('be.visible')
     });
 }

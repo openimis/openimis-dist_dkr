@@ -1,7 +1,7 @@
 {
     "claim": {
-        "code": "CYP10",
-        "chfId": "101000002",
+        "code": "CL02",
+        "chfId": "104000001",
         "services": [
             {
                 "name": "SCP01",
@@ -23,10 +23,14 @@
         ]
     },
     "restore": {
-        "code": "RES10"
+        "code": "RES15"
     },
     "duplicate": {
-        "code": "DUP09",
+        "code": "DUP23",
         "chfId": "104000001"
+    },
+    "review": {
+        "code": "CD10005",
+        "chfId": "190000012"
     }
 }
