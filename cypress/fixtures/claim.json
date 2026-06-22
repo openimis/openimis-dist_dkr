@@ -1,6 +1,6 @@
 {
     "claim": {
-        "code": "CL02",
+        "code": "CPS01",
         "chfId": "104000001",
         "services": [
             {
@@ -23,14 +23,14 @@
         ]
     },
     "restore": {
-        "code": "RES15"
+        "code": "RES29"
     },
     "duplicate": {
-        "code": "DUP23",
+        "code": "DUP50",
         "chfId": "104000001"
     },
     "review": {
-        "code": "CD10005",
+        "code": "CD10048",
         "chfId": "190000012"
     }
 }

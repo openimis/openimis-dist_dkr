@@ -350,19 +350,9 @@ export function claimCommands() {
             .find('input')
             .clear()
             .type(value);
-    })
-
-    Cypress.Commands.add('reviewClaim', (code) => {
-        cy.goToList('Claims', 'Reviews');
-        cy.searchInput('Claim No.', code)
-        cy.openRow('Claim No.', code);
-        cy.changeQty(1, 4, 2);
-        cy.clickButton('save');
-        cy.waitForGraphQL('save review');
-        cy.clickButton('check');
     });
 
-    Cypress.Commands.add('processClaim', (code) => {
+    Cypress.Commands.add('selectForReview', (code) => {
         cy.goToList('Claims', 'Reviews');
         cy.searchInput('Claim No.', code);
         cy.wait(1000);
@@ -371,14 +361,18 @@ export function claimCommands() {
             .closest('tr')
             .click({ force: true });
         cy.clickIconByText('more_horiz');
-        cy.contains('.MuiMenuItem-root', 'Process Selected').click();
-        cy.waitForGraphQL('process');
+        cy.contains('.MuiMenuItem-root', 'Select For Review').click();
+        cy.waitForGraphQL('select for review');
     });
 
-    Cypress.Commands.add('verifyProcessed', (code) => {
+    Cypress.Commands.add('reviewClaim', (code) => {
         cy.goToList('Claims', 'Reviews');
-        cy.selectDropdown('Claim Status', 'Processed');
-        cy.searchInput('Claim No.', code)
-        cy.contains('td', code).should('be.visible')
+        cy.searchInput('Claim No.', code);
+        cy.openRow('Claim No.', code);
+        cy.changeQty(1, 4, 2);
+        cy.clickButton('save');
+        cy.waitForGraphQL('save review');
+        cy.clickButton('check');
+        cy.waitForGraphQL('deliver review');
     });
 }

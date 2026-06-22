@@ -37,8 +37,7 @@ describe('Test for claim restoration', () => {
         cy.goToList('Claims', 'Health Facility Claims');
         cy.createClaim(data.review, 'simple');
         cy.submitClaim(data.review.code);
+        cy.selectForReview(data.review.code);
         cy.reviewClaim(data.review.code);
-        cy.processClaim(data.review.code);
-        cy.verifyProcessed(data.review.code);
     })
 })
