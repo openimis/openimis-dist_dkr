@@ -34,7 +34,7 @@ services:
   frontend:
     build:
       context: ..
-      dockerfile: openimis-fe_js/Dockerfile
+      dockerfile: openimis-fe_js/Dockerfile.runtime
     image: openimis-fe:claimguard
     restart: always
     environment:
