@@ -32,7 +32,10 @@ x-api: &default-api
 
 services:
   frontend:
-    image: ghcr.io/openimis/openimis-fe:${FE_TAG:-develop}
+    build:
+      context: ..
+      dockerfile: openimis-fe_js/Dockerfile
+    image: openimis-fe:claimguard
     restart: always
     environment:
       - REACT_APP_SENTRY_DSN=${REACT_APP_SENTRY_DSN}
