@@ -71,14 +71,6 @@ For a 48-hour hackathon, we are not building a real banking ledger. The MVP is a
 
 ---
 
-## 🖼️ Conceptual Diagram
-
-*(Replace the placeholder below with the link to your actual diagram image)*
-
-![AfyaCapital Conceptual Diagram](./path/to/your/diagram.png)
-
----
-
 ## ⚙️ Architecture & Technology Stack
 
 ### Technology Stack
