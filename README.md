@@ -1,5 +1,7 @@
 # ClaimGuard — Multi-Track Explainable AI Fraud Overlay
 
+> **Technikali** — openIMIS Hackathon submission
+
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](./LICENSE.md)
 [![Track 3](https://img.shields.io/badge/Track-3%20Claims%20%26%20Fraud-2ea44f)](https://openimis.org)
 [![Track 5](https://img.shields.io/badge/Cross--Track-5%20AI%20%26%20Emerging%20Tech-6f42c1)](https://openimis.org)
