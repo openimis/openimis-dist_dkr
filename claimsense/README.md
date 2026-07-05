@@ -48,7 +48,7 @@ ClaimSense is a **rule-based engine**, not a black-box classifier. Every score i
 [ FastAPI Validation Engine ] ──► [ 7 Deterministic SHA Rules ]
         │                                   │
         │                                   ▼ (score + pass/fail per rule)
-        │                         [ Claude API — Plain-English Explainer ]
+        │                         [ Gemini API — Plain-English Explainer ]
         ▼                                   │
 [ Score Gauge · Error Cards · Corrections ] ◄┘
         │
@@ -61,7 +61,7 @@ ClaimSense is a **rule-based engine**, not a black-box classifier. Every score i
 1. **Draft / fetch** — The dashboard loads a claim, either from mock data or a live openIMIS FHIR `Claim` bundle.
 2. **Rule pass** — Seven deterministic rules run against the claim: required fields, ICD-10 format, visit date sanity, item/service codes, coverage window, amount-vs-items match, and amount-reasonableness thresholds.
 3. **Score** — Each failed rule deducts points (errors −20, warnings −10) off a base of 100, producing a color-coded status: 🟢 Ready · 🟡 Needs Review · 🔴 High Risk.
-4. **Explain** — Every error is batched into a single Claude API call that returns a short, non-technical explanation and fix suggestion per rule.
+4. **Explain** — Every error is batched into a single Gemini API call that returns a short, non-technical explanation and fix suggestion per rule.
 5. **Correct & re-validate** — The clerk edits flagged fields inline; the claim is re-scored instantly, no resubmission needed.
 6. **Submit** — Once all *errors* (not warnings) clear, a FHIR R4 `ClaimResponse` is built and POSTed to openIMIS — or held in mock mode until credentials are live.
 
@@ -86,7 +86,7 @@ claimsense/
 │   │   ├── client.py              ← openIMIS FHIR HTTP client
 │   │   └── builder.py             ← builds ClaimResponse resource
 │   ├── llm/
-│   │   └── explainer.py           ← Claude plain-English explanations
+│   │   └── explainer.py           ← Gemini plain-English explanations
 │   └── tests/
 │       └── test_validation.py
 └── frontend/
@@ -110,7 +110,7 @@ claimsense/
 
 - Python 3.10+
 - Node.js v18+
-- An Anthropic API key (for plain-English explanations — optional, falls back gracefully)
+- An Gemini API key (for plain-English explanations — optional, falls back gracefully)
 - Access to a local openIMIS Docker stack (optional — the app runs entirely on mock data without it)
 
 ### Installation & Local Setup
@@ -118,8 +118,8 @@ claimsense/
 **1. Clone and enter the project**
 
 ```bash
-git clone https://github.com/Aisha-Barasa/claimsense.git
-cd claimsense
+git clone https://github.com/Linnnetteseven/openimis-dist_dkr.git
+cd openimis-dist_dkr/claimsense
 ```
 
 **2. Configure environment variables**
@@ -129,7 +129,7 @@ Create a `.env` file at the project root:
 ```env
 OPENIMIS_URL=https://localhost
 OPENIMIS_TOKEN=            # leave blank to run on mock data
-ANTHROPIC_API_KEY=your_key_here
+GEMINI_API_KEY=your_key_here
 DEBUG=true
 ```
 
@@ -139,7 +139,7 @@ DEBUG=true
 cd backend
 python3 -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
-pytest tests/ -v              # 13 tests should pass
+pytest tests/ -v              # 24 tests should pass
 uvicorn main:app --reload --port 8001
 ```
 
@@ -198,4 +198,4 @@ ClaimSense was built for the **openIMIS Hackathon — Track 3 (Claims Management
 - [ ] Full FHIR `Bundle` parser for live openIMIS claim ingestion
 - [ ] Facility-level analytics on common rejection causes
 - [ ] Coverage lookups via the openIMIS `Coverage` FHIR endpoint
-- [ ] Responsible AI section documenting Claude's role (explanation only — never adjudication)
+- [ ] Responsible AI section documenting Gemini's role (explanation only — never adjudication)
