@@ -38,7 +38,7 @@ async def lifespan(app: FastAPI):
     logger.info("ClaimSense starting")
     logger.info("openIMIS: %s", config.OPENIMIS_URL)
     logger.info("Mode: %s", "MOCK" if config.use_mock else "LIVE")
-    logger.info("LLM: %s", "enabled" if config.llm_enabled else "disabled — set ANTHROPIC_API_KEY")
+    logger.info("LLM: %s", "enabled" if config.llm_enabled else "disabled — set GEMINI_API_KEY")
     logger.info("=" * 50)
     yield
 
