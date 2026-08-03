@@ -79,8 +79,14 @@ services:
         condition: service_healthy
   worker:
     <<: *default-api
-    command: worker
+    command: worker --concurrency=${CELERY_CONCURRENCY:-4} --max-tasks-per-child=${CELERY_MAX_TASK_PER_CHILD:-50} --loglevel=INFO
     restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "celery -A openIMIS inspect ping --timeout=10 --destination celery@$$HOSTNAME || exit 1"]
+      interval: 25s
+      timeout: 12s
+      retries: 4
+      start_period: 40s
     depends_on:
       migrations:
         condition: service_completed_successfully
@@ -88,10 +94,16 @@ services:
         condition: service_healthy
     deploy:
       mode: replicated
-      replicas: ${WORKER_REPLICAS:-3}
+      replicas: ${WORKER_REPLICAS:-3}   # default 3; increase via WORKER_REPLICAS if needed
   rabbitmq:
     image: rabbitmq:3-management
     restart: always
+    healthcheck:
+      test: ["CMD-SHELL", "rabbitmq-diagnostics -q ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
     networks:
       openimis-net:
 networks:
