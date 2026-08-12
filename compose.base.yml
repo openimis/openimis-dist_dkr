@@ -77,6 +77,15 @@ services:
         condition: service_completed_successfully   
       redis:
         condition: service_healthy
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+      # Main router for /api
+      - "traefik.http.routers.backend.rule=Host(`${DOMAIN}`) && PathPrefix(`/api`)"
+      - "traefik.http.routers.backend.entrypoints=websecure"
+      - "traefik.http.routers.backend.tls=true"
+      - "traefik.http.routers.backend.tls.certresolver=letsencrypt"
+      - "traefik.http.services.backend.loadbalancer.server.port=8000"
   worker:
     <<: *default-api
     command: worker
@@ -90,7 +99,7 @@ services:
       mode: replicated
       replicas: ${WORKER_REPLICAS:-3}
   rabbitmq:
-    image: rabbitmq:3-management
+    image: public.ecr.aws/docker/library/rabbitmq:3-management
     restart: always
     networks:
       openimis-net:
