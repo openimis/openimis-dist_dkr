@@ -20,3 +20,6 @@ cypress/fixtures/_generated/
 .env
 .env.local
 .env.*.local
+.DS_Store
+./*.DS_Store
+./.DS_Store

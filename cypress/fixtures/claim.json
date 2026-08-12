@@ -1,0 +1,36 @@
+{
+    "claim": {
+        "code": "CPS01",
+        "chfId": "104000001",
+        "services": [
+            {
+                "name": "SCP01",
+                "subservicesItems": [
+                    {
+                        "code": "PARA",
+                        "qty": 3
+                    },
+                    {
+                        "code": "M6",
+                        "qty": 2
+                    },
+                    {
+                        "code": "0003",
+                        "qty": 1
+                    }
+                ]
+            }
+        ]
+    },
+    "restore": {
+        "code": "RES29"
+    },
+    "duplicate": {
+        "code": "DUP50",
+        "chfId": "104000001"
+    },
+    "review": {
+        "code": "CD10048",
+        "chfId": "190000012"
+    }
+}

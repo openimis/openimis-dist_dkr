@@ -9,6 +9,7 @@ import { registerTaskCommands } from './tasks.commands';
 import { registerProgramCommands } from './programs.commands';
 import { registerGrievanceCommands } from './grievance.commands';
 import { registerPaymentCommands } from './payments';
+import { claimCommands } from './claim.commands';
 
 registerUiCommands();
 registerAuthCommands();
@@ -21,3 +22,4 @@ registerTaskCommands();
 registerProgramCommands();
 registerGrievanceCommands();
 registerPaymentCommands();
+claimCommands();
