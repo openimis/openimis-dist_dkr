@@ -104,4 +104,12 @@ export function registerFormCommands() {
   Cypress.Commands.add('assertSaveEnabled', (tooltipText) => {
     cy.assertSave(true, tooltipText);
   });
+
+  Cypress.Commands.add('save', () => {
+    cy.get('[aria-label="Save changes"]')
+      .find('button')
+      .should('be.visible')
+      .and('not.be.disabled')
+      .click();
+  });
 }

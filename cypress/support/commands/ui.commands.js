@@ -267,4 +267,124 @@ export function registerUiCommands() {
       .first()
       .click({ force: true });
   });
+
+  Cypress.Commands.add('verifyMuiInputValue', (label, expectedValue, inputTag = 'input') => {
+    cy.contains('label', label, { matchCase: false })
+      .siblings('.MuiInputBase-root')
+      .find(inputTag)
+      .first()
+      .invoke('val')
+      .then((actualValue) => {
+        expect(actualValue.toLowerCase()).to.eq(expectedValue.toLowerCase());
+      });
+  });
+
+  Cypress.Commands.add('verifyMuiSelectValue', (label, expectedValue) => {
+    cy.contains('label', label, { matchCase: false })
+      .siblings('.MuiInputBase-root')
+      .find('[role="combobox"]')
+      .invoke('text')
+      .then((actualValue) => {
+        expect(actualValue.trim().toLowerCase()).to.eq(expectedValue.toLowerCase());
+      });
+  });
+
+  Cypress.Commands.add('verifyMuiAutocompleteValue', (label, expectedValue) => {
+    cy.contains('label', label, { matchCase: false })
+      .siblings('.MuiInputBase-root')
+      .find('input')
+      .invoke('val')
+      .then((actualValue) => {
+        expect(actualValue.toLowerCase()).to.eq(expectedValue.toLowerCase());
+      });
+  });
+
+  Cypress.Commands.add('chooseMuiDatePicker', (label, dateOrDay, month, year) => {
+    // Support both chooseMuiDatePicker(label, day, month, year)
+    // and chooseMuiDatePicker(label, { day, month, year })
+    let day;
+    if (dateOrDay && typeof dateOrDay === 'object') {
+      ({ day, month, year } = dateOrDay);
+    } else {
+      day = dateOrDay;
+    }
+
+    // Normalize inputs so that selectors always receive primitive values.
+    let normalizedDay = day;
+    let normalizedMonth = month;
+    let normalizedYear = year;
+
+    if (day && typeof day === 'object') {
+      if (day instanceof Date) {
+        normalizedDay = day.getDate();
+        normalizedMonth = day.getMonth() + 1;
+        normalizedYear = day.getFullYear();
+      } else if (Object.prototype.hasOwnProperty.call(day, 'day')) {
+        normalizedDay = day.day;
+        normalizedMonth = day.month;
+        normalizedYear = day.year;
+      }
+    }
+
+    cy.contains('label', label, { matchCase: false })
+      .siblings('.MuiPickersInputBase-root')
+      .find('button')
+      .first()
+      .click();
+
+    if (normalizedYear) {
+      const normalizedYearText = String(normalizedYear);
+      cy.get('body')
+        .contains('li[role="option"]', normalizedYearText, { timeout: 10000 })
+        .should('be.visible')
+        .click({ force: true });
+      cy.get('[aria-label="calendar view is open, switch to year view"]')
+        .should('be.visible')
+        .click();
+      cy.get('.MuiYearCalendar-button')
+        .contains(normalizedYearText)
+        .click();
+      cy.get('[aria-label="year view is open, switch to calendar view"]')
+        .should('be.visible')
+        .click();
+    }
+    if (normalizedMonth) {
+      const normalizedMonthText = String(normalizedMonth);
+      cy.get('[aria-label="year view is open, switch to calendar view"]')
+        .should('be.visible')
+        .click();
+      cy.get('.MuiYearCalendar-button')
+        .contains(normalizedMonthText)
+        .click();
+    }
+    const normalizedDayText = String(normalizedDay);
+    cy.get('[role="gridcell"]')
+      .contains(normalizedDayText)
+      .should('be.visible')
+      .click();
+  });
+
+  Cypress.Commands.add('verifyMuiDatePickerValue', (label, expectedValue) => {
+    cy.contains('label', label, { matchCase: false })
+      .siblings('.MuiPickersInputBase-root')
+      .find('input')
+      .invoke('val')
+      .then((actualValue) => {
+        expect(actualValue.toLowerCase()).to.eq(expectedValue.toLowerCase());
+      });
+  });
+
+  Cypress.Commands.add('goToSubMenu', (menu, submenu) => {
+    cy.contains(menu).click();
+
+    if (typeof submenu === 'string' && submenu.startsWith('/')) {
+      cy.get(`a[href="${submenu}"]`).click();
+    } else {
+      cy.contains('a', submenu).click();
+    }
+  });
+
+  Cypress.Commands.add('openRowByValue', (value) => {
+    cy.contains(value, { matchCase: false }).parents('tr').first().dblclick({ force: true });
+  });
 }
