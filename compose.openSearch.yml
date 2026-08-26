@@ -9,7 +9,10 @@ services:
       - "cluster.name=${CLUSTER_NAME:-my_opensearch_local}"
       - "http.port=${OPEN_SEARCH_HTTP_PORT:-9200}"
       - "plugins.security.ssl.http.enabled=${SLL_HTTP_ENABLED:-false}"
-      - "plugins.security.disabled=true"
+      - "plugins.security.disabled=${OPENSEARCH_SECURITY_DISABLED:-true}"
+      # The demo installer runs before the node reads plugins.security.disabled
+      # and aborts on an empty password. Set false when enabling security.
+      - "DISABLE_INSTALL_DEMO_CONFIG=${OPENSEARCH_DISABLE_DEMO_CONFIG:-true}"
       - "OPENSEARCH_INITIAL_ADMIN_PASSWORD=${OPENSEARCH_PASSWORD}"
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
@@ -26,7 +29,8 @@ services:
     image: opensearchproject/opensearch-dashboards:2.9.0
     environment:
       - OPENSEARCH_HOSTS=${OPENSEARCH_HOSTS:-http://opensearch:9200}
-      - "DISABLE_SECURITY_DASHBOARDS_PLUGIN=true"
+      # Tracks the node: the plugin must be off here too when it is off there.
+      - "DISABLE_SECURITY_DASHBOARDS_PLUGIN=${OPENSEARCH_SECURITY_DISABLED:-true}"
       - SERVER_BASEPATH=/opensearch
       - SERVER_REWRITEBASEPATH=true
     volumes:
