@@ -77,7 +77,7 @@
     {
       "position": 2,
       "id": "OpenSearchReportsMenu",
-      "name": "Dashboard",
+      "name": "Dashboards",
       "icon": "Dashboard",
       "description": "Main dashboard",
       "submenus": [

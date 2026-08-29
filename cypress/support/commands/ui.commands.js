@@ -11,7 +11,7 @@ export function registerUiCommands() {
   Cypress.Commands.add('chooseMuiSelect', (label, value) => {
     cy.contains('label', label)
       .siblings('.MuiInputBase-root')
-      .find('[role="button"]')
+      .find('[role="combobox"], [role="button"]')
       .click();
 
     cy.contains('[role="listbox"] li', value).click({ force: true });
@@ -25,6 +25,17 @@ export function registerUiCommands() {
     if (value !== undefined) {
       input.and('have.value', value);
     }
+  });
+
+  Cypress.Commands.add('assertMuiDatePickerValue', (label, value) => {
+    cy.contains('label', label).parent().then(($wrap) => {
+      const $sections = $wrap.find('.MuiPickersSectionList-root');
+      if ($sections.length) {
+        cy.wrap($sections).should('have.text', value);
+      } else {
+        cy.wrap($wrap).find('input').first().should('have.value', value);
+      }
+    });
   });
 
   Cypress.Commands.add('assertMuiInputNotEmpty', (label, inputTag = 'input') => {
@@ -99,13 +110,13 @@ export function registerUiCommands() {
     const expected = `${pad(day)}-${pad(month + 1)}-${year}`;
 
     cy.contains('label', label).parent().then(($wrap) => {
-      const isV7 = $wrap.find('.MuiPickersSectionList-root, button[aria-label="Choose date"]').length > 0;
+      const isV7 = $wrap.find('.MuiPickersSectionList-root, button[aria-label^="Choose date"]').length > 0;
 
       const cfg = isV7
         ? {
           // v7 popper — single settled header label, no transition duplication.
           scope: '.MuiPickerPopper-root',
-          open: () => cy.wrap($wrap).find('button[aria-label="Choose date"]').click(),
+          open: () => cy.wrap($wrap).find('button[aria-label^="Choose date"]').click(),
           headerText: '.MuiPickersCalendarHeader-label',
           prev: '.MuiPickersArrowSwitcher-previousIconButton',
           next: '.MuiPickersArrowSwitcher-nextIconButton',
@@ -197,8 +208,19 @@ export function registerUiCommands() {
       }
       cy.get(cfg.scope, { timeout: 5000 }).should('not.exist');
 
-      cy.contains('label', label).parent().find('input').first()
-        .should('have.value', expected);
+      // Value assertion. MUI X v7+ (sectioned `PickersTextField`, default in
+      // v8 via `enableAccessibleFieldDOMStructure: true`) hides the legacy
+      // `<input>` behind `aria-hidden` and renders the visible value as a
+      // `.MuiPickersSectionList-root` of spans. Read that when present;
+      // otherwise fall back to the legacy text input (CRA/v3 build).
+      cy.contains('label', label).parent().then(($wrap2) => {
+        const $sections = $wrap2.find('.MuiPickersSectionList-root');
+        if ($sections.length) {
+          cy.wrap($sections).should('have.text', expected);
+        } else {
+          cy.wrap($wrap2).find('input').first().should('have.value', expected);
+        }
+      });
     });
   });
 
@@ -215,7 +237,7 @@ export function registerUiCommands() {
   Cypress.Commands.add('chooseFirstMuiSelect', (label) => {
     cy.contains('label', label)
       .siblings('.MuiInputBase-root')
-      .find('[role="button"]')
+      .find('[role="combobox"], [role="button"]')
       .click();
     cy.get('[role="listbox"] li')
       .should('have.length.at.least', 1)
