@@ -1,6 +1,21 @@
 
+    # Authorizes Dashboards against openIMIS rights, not merely a valid session.
+    # 200 right held, 403 right missing, 401 no session -> login.
+    location = /check_opensearch/ {
+        internal;
+        proxy_pass http://${backend}/${REACT_APP_API_URL}/opensearch_reports/auth_check;
+        proxy_method GET;
+        proxy_pass_request_body off;
+        proxy_set_header Content-Length "";
+        proxy_set_header Host $host;
+        proxy_set_header X-Original-URI $request_uri;
+    }
+
     location /opensearch/ {
-        auth_request /check_user/;
+        auth_request /check_opensearch/;
+        # auth_request can only deny; 403 passes through unchanged.
+        error_page 401 = @openimis_login;
+
         proxy_pass http://${opensearch};
         proxy_set_header   Host $host;
         proxy_set_header   X-Real-IP $remote_addr;
@@ -8,6 +23,9 @@
         proxy_set_header   X-Forwarded-Proto https;
         proxy_set_header   X-Forwarded-Host $server_name;
         proxy_set_header Authorization "Basic ${OPENSEARCH_BASIC_TOKEN}";
-    
+
     }
 
+    location @openimis_login {
+        return 302 /${PUBLIC_URL}/login;
+    }

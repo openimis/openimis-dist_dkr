@@ -35,19 +35,18 @@ If the implementation involves managing the social protection workflow/import, t
 
 ## OpenSearch/OpenSearch Dashboards setup 
 
-Both OpenSearch and OpenSearch Dashboards are not by default enabled in dockerized instance. To make them work, it's required to: 
+OpenSearch and OpenSearch Dashboards ship in `compose.openSearch.yml`, which `compose.yml` includes - `docker compose up -d` starts them with everything else. Neither service publishes a host port: the only route to Dashboards is the frontend nginx at `/opensearch/`, which authorizes every request against the openIMIS dashboards right (`opensearch_reports/auth_check`) and redirects anonymous users to the login page.
 
-  * Copy `.env.openSearch.example` to `.env.openSearch` and make adjustments
-  * Run container build `docker compose -f docker-compose.yml -f docker-compose.openSearch.yml build opensearch opensearch-dashboards nginx`
-  * Run service `docker compose -f docker-compose.yml -f docker-compose.openSearch.yml up opensearch opensearch-dashboards nginx`
+  * Copy `.env.openSearch.example` to `.env.openSearch` and adjust if needed. The defaults run the cluster with the security plugin disabled and no admin credential configured anywhere; to enable the plugin set `OPENSEARCH_SECURITY_DISABLED=false`, `OPENSEARCH_DISABLE_DEMO_CONFIG=false` and a strong `OPENSEARCH_PASSWORD`.
+  * `OPENSEARCH_BASIC_TOKEN` is only needed when the cluster requires basic auth; leave it empty otherwise. Bare base64: `echo -n "admin:<password>" | base64`.
 
-This build provides also additional nginx proxy server in order to handle OpenSearch Dashboard application on frontend level. 
+Verify the gate once the stack is up:
 
-To run on a dockerized instance of openIMIS (database, backend, and frontend), including OpenSearch, please follow the steps below:
+```
+curl -so /dev/null -w '%{http_code}\n' http://localhost/opensearch/app/home   # 302 -> login
+```
 
-  * Add a value for the OPENSEARCH_BASIC_TOKEN in the environment (`.env`) file. This should be based on the admin and password credentials for OpenSearch.
-  * In the `.env` file in openimis-fe_js, use the following environment variable: `ENV OPENSEARCH_PROXY_ROOT="opensearch"`.
-  * Run the backend and frontend services.
+A logged-in user holding the dashboards right gets 200; without the right, 403.
 
 ## Run openIMIS with Docker
 
