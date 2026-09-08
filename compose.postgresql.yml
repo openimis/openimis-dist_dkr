@@ -13,8 +13,11 @@ services:
       timeout: 5s
       retries: 5
       start_period: 30s
+    # Note: openIMIS used /var/lib/postgresql/data for the volume,
+    # From 26.10 the volume has been changed to reflect the need
+    # for upgrade procedures for postgres for installations
     volumes:
-      - database:/var/lib/postgresql/data
+      - database:/var/lib/postgresql/18/data
     restart: always
     networks:
       openimis-net:
