@@ -19,8 +19,11 @@ x-api: &default-api
     - OPENSEARCH_ADMIN=${OPENSEARCH_ADMIN}
     - OPENSEARCH_PASSWORD=${OPENSEARCH_PASSWORD}
     - OPENSEARCH_HOSTS=${OPENSEARCH_HOSTS}
+    - PYTHONPATH=/openimis-be/openimis-be-claimguard_py
   volumes:
     - photos:/openimis-be/openIMIS/images/insurees
+    - ../openimis-be-claimguard_py:/openimis-be/openimis-be-claimguard_py
+    - ../openimis-be_py/openimis.json:/openimis-be/openimis.json
   depends_on:
     db:
       condition: service_healthy
@@ -29,7 +32,10 @@ x-api: &default-api
 
 services:
   frontend:
-    image: ghcr.io/openimis/openimis-fe:${FE_TAG:-develop}
+    build:
+      context: ..
+      dockerfile: openimis-fe_js/Dockerfile.runtime
+    image: openimis-fe:claimguard
     restart: always
     environment:
       - REACT_APP_SENTRY_DSN=${REACT_APP_SENTRY_DSN}
