@@ -1,0 +1,87 @@
+# PostgreSQL 13 (openimis-pgsql:26.04) -> PostgreSQL 18 dump/restore.
+#
+# All services in this file use profile `migrate_pg_13_18`, so they are not
+# started by `docker compose up`. This file is also not included from
+# compose.yml.
+#
+# Stop the live db first (the pg13 volume cannot be mounted twice):
+#   docker compose stop db
+#
+# Then start both databases and run the migrator:
+#   docker compose --profile migrate_pg_13_18 -f compose.migration_pg_13_18.yaml up migrate_pg_13_18
+#
+# pg13 reuses the existing `database` volume.
+# pg18 uses a new named volume `database_pg18` (Postgres 18 stores PGDATA at
+# /var/lib/postgresql/18/docker, so the volume is mounted at /var/lib/postgresql).
+
+services:
+  db_pg13:
+    image: ghcr.io/openimis/openimis-pgsql:${PG13_TAG:-26.04}
+    profiles: ["migrate_pg_13_18"]
+    environment:
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=${DB_USER}
+    healthcheck:
+      test: pg_isready -U ${DB_USER} -d ${DB_NAME}
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+    volumes:
+      - database:/var/lib/postgresql/data
+    restart: "no"
+    networks:
+      openimis-net:
+
+  db_pg18:
+    image: ${PG18_IMAGE:-postgres:18}
+    profiles: ["migrate_pg_13_18"]
+    environment:
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      PGDATA: /var/lib/postgresql/18/docker
+    healthcheck:
+      test: pg_isready -U ${DB_USER} -d ${DB_NAME}
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+    volumes:
+      - database_pg18:/var/lib/postgresql
+    shm_size: 256mb
+    restart: "no"
+    networks:
+      openimis-net:
+
+  migrate_pg_13_18:
+    image: ubuntu:24.04
+    profiles: ["migrate_pg_13_18"]
+    restart: "no"
+    depends_on:
+      db_pg13:
+        condition: service_healthy
+      db_pg18:
+        condition: service_healthy
+    environment:
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      PG13_HOST: db_pg13
+      PG18_HOST: db_pg18
+    volumes:
+      - ./conf/postgres/migrate_pg_13_18.sh:/migrate_pg_13_18.sh:ro
+      - pg_dump_work:/dump
+    command: ["bash", "/migrate_pg_13_18.sh"]
+    networks:
+      openimis-net:
+
+networks:
+  openimis-net:
+    name: "${PROJECT_NAME:-openimis}-net"
+
+volumes:
+  database:
+  database_pg18:
+  pg_dump_work:
