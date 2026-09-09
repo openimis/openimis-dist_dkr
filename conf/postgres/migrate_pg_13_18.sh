@@ -14,30 +14,19 @@ DST_HOST="${PG18_HOST:-db_pg18}"
 DUMP_PATH="${DUMP_PATH:-/dump/imis.dump}"
 TOC_PATH="${DUMP_PATH}.toc"
 export PGPASSWORD="${DB_PASSWORD}"
-export DEBIAN_FRONTEND=noninteractive
 
 psql_src() { psql -h "$SRC_HOST" -U "$DB_USER" -d "$DB_NAME" -v ON_ERROR_STOP=1 "$@"; }
 psql_dst() { psql -h "$DST_HOST" -U "$DB_USER" -d "$DB_NAME" -v ON_ERROR_STOP=1 "$@"; }
 psql_dst_postgres() { psql -h "$DST_HOST" -U "$DB_USER" -d postgres -v ON_ERROR_STOP=1 "$@"; }
 
-install_pg_client() {
-  if command -v pg_dump >/dev/null 2>&1 && pg_dump --version | grep -q ' 18'; then
-    log "postgresql-client-18 already installed"
-    return
-  fi
-  log "installing postgresql-client-18"
-  apt-get update
-  apt-get install -y --no-install-recommends ca-certificates curl gnupg
-  install -d /usr/share/postgresql-common/pgdg
-  curl -fsSL --proto '=https' --tlsv1.2 \
-    -o /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc \
-    https://www.postgresql.org/media/keys/ACCC4CF8.asc
-  # shellcheck disable=SC1091
-  . /etc/os-release
-  echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt ${VERSION_CODENAME}-pgdg main" \
-    > /etc/apt/sources.list.d/pgdg.list
-  apt-get update
-  apt-get install -y --no-install-recommends postgresql-client-18
+require_pg18_client() {
+  command -v pg_dump >/dev/null 2>&1 || die "pg_dump not found in this image"
+  local v
+  v="$(pg_dump --version | awk '{print $3}')"
+  case "$v" in
+    18.*) log "using PostgreSQL client ${v}" ;;
+    *) die "need a PostgreSQL 18 client to restore into 18 (got ${v})" ;;
+  esac
 }
 
 wait_ready() {
@@ -51,7 +40,7 @@ wait_ready() {
   done
 }
 
-install_pg_client
+require_pg18_client
 wait_ready "$SRC_HOST"
 wait_ready "$DST_HOST"
 
@@ -84,20 +73,28 @@ if ! createdb -h "$DST_HOST" -U "$DB_USER" -O "$DB_USER" -E "$ENCODING" \
   createdb -h "$DST_HOST" -U "$DB_USER" -O "$DB_USER" -E "$ENCODING" -T template0 "$DB_NAME"
 fi
 
-# openimis-pgsql ships postgres-json-schema; stock postgres:18 does not.
-# Install the PL/pgSQL functions, then skip CREATE EXTENSION in the dump.
-log "installing postgres-json-schema functions on pg18"
-curl -fsSL --proto '=https' --tlsv1.2 \
-  https://raw.githubusercontent.com/gavinwahl/postgres-json-schema/master/postgres-json-schema--0.1.1.sql \
-  | sed 's/@extschema@/public/g' \
-  | psql_dst -f -
+# openimis-pgsql packages postgres-json-schema; a stock postgres image does not.
+# When it is packaged, replay the dump's CREATE EXTENSION as-is; otherwise fall
+# back to loading the PL/pgSQL functions into public and skipping that entry.
+RESTORE_ARGS=()
+if [ -n "$(psql_dst -tAc "SELECT 1 FROM pg_available_extensions WHERE name = 'postgres-json-schema'")" ]; then
+  log "postgres-json-schema is packaged on ${DST_HOST}; restoring the extension from the dump"
+else
+  log "postgres-json-schema not packaged; installing its functions into public"
+  command -v curl >/dev/null 2>&1 || die "postgres-json-schema is neither packaged on ${DST_HOST} nor installable here (no curl)"
+  curl -fsSL --proto '=https' --tlsv1.2 \
+    https://raw.githubusercontent.com/gavinwahl/postgres-json-schema/master/postgres-json-schema--0.1.1.sql \
+    | sed 's/@extschema@/public/g' \
+    | psql_dst -f -
+  pg_restore -l "$DUMP_PATH" | grep -vE 'postgres-json-schema' > "$TOC_PATH"
+  RESTORE_ARGS=(-L "$TOC_PATH")
+fi
 
 log "restoring dump into ${DST_HOST}"
-pg_restore -l "$DUMP_PATH" | grep -vE 'postgres-json-schema' > "$TOC_PATH"
 pg_restore \
   -h "$DST_HOST" -U "$DB_USER" -d "$DB_NAME" \
   --no-owner --no-acl --exit-on-error \
-  -L "$TOC_PATH" \
+  "${RESTORE_ARGS[@]+"${RESTORE_ARGS[@]}"}" \
   "$DUMP_PATH"
 
 SRC_TABLES="$(psql_src -tAc "SELECT count(*) FROM pg_tables WHERE schemaname NOT IN ('pg_catalog','information_schema');")"
@@ -107,4 +104,4 @@ log "tables (non-catalog): source=${SRC_TABLES} target=${DST_TABLES}"
 
 psql_dst -c "ANALYZE;"
 log "migration completed successfully"
-log "point the live db service at volume database_pg18 and a PostgreSQL 18 image when ready"
+log "the data is in the live \`database_pg18\` volume — start the stack with 'docker compose up -d'"
