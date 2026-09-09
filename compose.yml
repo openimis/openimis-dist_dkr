@@ -12,7 +12,14 @@ include:
   - path: compose.cache.yml
     env_file: 
      - .env
+  - path: compose.logs.yml
+    env_file:
+     - .env
+     - .env.logs
 #  - path: compose.certbot.yml
+# Migration is profile-scoped (migrate_pg_13_18); do not include it here or
+# `docker compose up` would load those services. Run it with:
+#   docker compose --profile migrate_pg_13_18 -f compose.migration_pg_13_18.yaml up migrate_pg_13_18
 
       
  

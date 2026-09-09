@@ -1,6 +1,9 @@
 services:
   db:
-    image: ghcr.io/openimis/openimis-pgsql:${DB_TAG:-latest}
+    # PostgreSQL 18. The volume layout below only works with an 18 tag; the
+    # PG13 tags (latest, 25.10, 26.04) keep PGDATA at /var/lib/postgresql/data
+    # and have to be migrated first — see compose.migration_pg_13_18.yaml.
+    image: ghcr.io/openimis/openimis-pgsql:${DB_TAG:-develop-18}
     environment:
       - POSTGRES_PASSWORD=${DB_PASSWORD}
       - POSTGRES_DB=${DB_NAME}
@@ -14,7 +17,13 @@ services:
       retries: 5
       start_period: 30s
     volumes:
-      - database:/var/lib/postgresql/data
+      # PGDATA is /var/lib/postgresql/18/docker on PG18, so the volume goes one
+      # level up. `database` stays the PG13 volume and is the migration source.
+      - database_pg18:/var/lib/postgresql
+    shm_size: 256mb
     restart: always
     networks:
       openimis-net:
+
+volumes:
+  database_pg18:

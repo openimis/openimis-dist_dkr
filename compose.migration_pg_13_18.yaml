@@ -1,0 +1,91 @@
+# PostgreSQL 13 (openimis-pgsql:26.04) -> PostgreSQL 18 dump/restore.
+#
+# All services in this file use profile `migrate_pg_13_18`, so they are not
+# started by `docker compose up`. This file is also not included from
+# compose.yml.
+#
+# Stop the live db first — db_pg18 below is that same service on that same
+# volume, and two postgres instances must never share one PGDATA:
+#   docker compose stop db
+#
+# DB_TAG must name a PostgreSQL 18 image (the script aborts otherwise).
+#
+# Then start both databases and run the migrator:
+#   docker compose --profile migrate_pg_13_18 -f compose.migration_pg_13_18.yaml up migrate_pg_13_18
+#
+# pg13 reuses the existing `database` volume. The pg18 side is the `db` service
+# from compose.postgresql.yml, so it writes to `database_pg18` with the image and
+# settings the live stack uses — once this finishes, `docker compose up -d` runs
+# on the migrated data with no further changes.
+
+services:
+  db_pg13:
+    image: ghcr.io/openimis/openimis-pgsql:${PG13_TAG:-26.04}
+    profiles: ["migrate_pg_13_18"]
+    environment:
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+      - POSTGRES_USER=${DB_USER}
+    healthcheck:
+      test: pg_isready -U ${DB_USER} -d ${DB_NAME}
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+    volumes:
+      - database:/var/lib/postgresql/data
+    restart: "no"
+    networks:
+      openimis-net:
+
+  # The PG18 target is the live `db` service from compose.postgresql.yml, so the
+  # restore lands straight in the production volume with the production image —
+  # nothing to swap afterwards, and no second copy of the config to drift.
+  db_pg18:
+    extends:
+      file: compose.postgresql.yml
+      service: db
+    profiles: ["migrate_pg_13_18"]
+    # The dump is the source of truth; skip the image's demo seeding
+    environment:
+      DEMO_DATASET: ""
+    healthcheck:
+      test: pg_isready -U ${DB_USER} -d ${DB_NAME}
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
+    restart: "no"
+
+  # Same image as the target, so the PG18 client tools are already there —
+  # no Docker Hub pull and no apt install at runtime.
+  migrate_pg_13_18:
+    image: ghcr.io/openimis/openimis-pgsql:${DB_TAG:-develop-18}
+    entrypoint: ["bash", "/migrate_pg_13_18.sh"]
+    profiles: ["migrate_pg_13_18"]
+    restart: "no"
+    depends_on:
+      db_pg13:
+        condition: service_healthy
+      db_pg18:
+        condition: service_healthy
+    environment:
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      PG13_HOST: db_pg13
+      PG18_HOST: db_pg18
+    volumes:
+      - ./conf/postgres/migrate_pg_13_18.sh:/migrate_pg_13_18.sh:ro
+      - pg_dump_work:/dump
+    networks:
+      openimis-net:
+
+networks:
+  openimis-net:
+    name: "${PROJECT_NAME:-openimis}-net"
+
+volumes:
+  database:        # legacy PG13 data, read-only source for this migration
+  database_pg18:   # shared with compose.postgresql.yml — the live PG18 data
+  pg_dump_work:

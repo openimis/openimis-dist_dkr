@@ -1,0 +1,165 @@
+# GlitchTip error monitoring. Public access only via Traefik PathPrefix(`/logs`).
+#
+# Included by compose.yml, which feeds it .env and .env.logs — the GlitchTip
+# settings live in .env.logs (copy it from .env.logs.example). Running this file
+# standalone with -f skips that include, so pass the env files yourself:
+#
+#   docker compose --env-file .env --env-file .env.logs -f compose.logs.yml up -d
+#
+# `migrate` applies the schema and `initializer` runs conf/glitchtip/bootstrap.py
+# (superuser, organization, team, projects, project keys). Both are one-shot and
+# idempotent. The generated DSNs land in conf/glitchtip/dsn.env — copy
+# REACT_APP_SENTRY_DSN from there into .env to wire up the frontend.
+
+services:
+  db-glitchtip:
+    image: public.ecr.aws/docker/library/postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${GLITCHTIP_DB_NAME}
+      POSTGRES_USER: ${GLITCHTIP_DB_USER}
+      POSTGRES_PASSWORD: ${GLITCHTIP_DB_PASS}
+    volumes:
+      - db_glitchtip_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${GLITCHTIP_DB_USER}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - proxy
+
+  glitchtip:
+    image: ghcr.io/openimis/glitchtip:latest
+    restart: unless-stopped
+    #command:
+    #  - bin/run-migrate-and-runserver.sh
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      initializer:
+        condition: service_completed_successfully
+      redis:
+        condition: service_started
+    environment:
+      DATABASE_URL: postgres://${GLITCHTIP_DB_USER}:${GLITCHTIP_DB_PASS}@db-glitchtip:5432/${GLITCHTIP_DB_NAME}
+      REDIS_URL: redis://redis:6379/0
+      SECRET_KEY: ${SECRET_KEY}
+      BASE_PATH: /logs
+      GLITCHTIP_ENABLE_LOGS: "True"
+      CSRF_TRUSTED_ORIGINS: "https://${DOMAIN}"
+      PROXY_ENV: "True"
+      ALLOWED_HOSTS: "*"
+      GLITCHTIP_DOMAIN: "https://${DOMAIN}/logs"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=proxy"
+
+      # ========== STATIC ROUTER (strips /logs) ==========
+      - "traefik.http.routers.${PROJECT_NAME}-glitchtip-static.rule=Host(`${DOMAIN}`) && PathPrefix(`/logs/static`)"
+      - "traefik.http.routers.${PROJECT_NAME}-glitchtip-static.entrypoints=websecure"
+      - "traefik.http.routers.${PROJECT_NAME}-glitchtip-static.tls=true"
+      - "traefik.http.routers.${PROJECT_NAME}-glitchtip-static.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.${PROJECT_NAME}-glitchtip-static.priority=200"                    # HIGHER priority
+      - "traefik.http.routers.${PROJECT_NAME}-glitchtip-static.middlewares=${PROJECT_NAME}-glitchtip-strip-static"
+      - "traefik.http.middlewares.${PROJECT_NAME}-glitchtip-strip-static.stripprefix.prefixes=/logs"
+      - "traefik.http.middlewares.${PROJECT_NAME}-glitchtip-strip-static.stripprefix.forceSlash=true"
+      - "traefik.http.services.${PROJECT_NAME}-glitchtip.loadbalancer.server.port=8000"
+
+      # ========== MAIN ROUTER (keeps /logs prefix) ==========
+      - "traefik.http.routers.${PROJECT_NAME}-glitchtip.rule=Host(`${DOMAIN}`) && PathPrefix(`/logs`) && !PathPrefix(`/logs/static`)"
+      - "traefik.http.routers.${PROJECT_NAME}-glitchtip.entrypoints=websecure"
+      - "traefik.http.routers.${PROJECT_NAME}-glitchtip.tls=true"
+      - "traefik.http.routers.${PROJECT_NAME}-glitchtip.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.${PROJECT_NAME}-glitchtip.priority=100"                           # LOWER priority
+      # No strip middleware here — prefix is passed through
+      - "traefik.http.services.${PROJECT_NAME}-glitchtip.loadbalancer.server.port=8000"
+    volumes:
+      - media:/code/media
+    networks:
+      - proxy
+  glitchtip-worker:
+    image: ghcr.io/openimis/glitchtip:latest
+    restart: unless-stopped
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      initializer:
+        condition: service_completed_successfully
+      redis:
+        condition: service_started
+    command: ./bin/run-celery-with-beat.sh
+    environment:
+      DATABASE_URL: postgres://${GLITCHTIP_DB_USER}:${GLITCHTIP_DB_PASS}@db-glitchtip:5432/${GLITCHTIP_DB_NAME}
+      REDIS_URL: redis://redis:6379/0
+      SECRET_KEY: ${SECRET_KEY}
+      BASE_PATH: /logs
+      GLITCHTIP_ENABLE_LOGS: "True"
+      CSRF_TRUSTED_ORIGINS: "https://${DOMAIN}"
+      PROXY_ENV: "True"
+    networks:
+      - proxy
+ 
+  migrate:
+    image: ghcr.io/openimis/glitchtip:latest
+    restart: "no"
+    depends_on:
+      db-glitchtip:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://${GLITCHTIP_DB_USER}:${GLITCHTIP_DB_PASS}@db-glitchtip:5432/${GLITCHTIP_DB_NAME}
+      REDIS_URL: redis://redis:6379/0
+      SECRET_KEY: ${SECRET_KEY}
+      BASE_PATH: /logs
+      GLITCHTIP_ENABLE_LOGS: "True"
+      CSRF_TRUSTED_ORIGINS: "https://${DOMAIN}"
+      PROXY_ENV: "True"
+      ALLOWED_HOSTS: "*"
+      GLITCHTIP_DOMAIN: "https://${DOMAIN}/logs"
+    command: python manage.py migrate --noinput
+    networks:
+      - proxy
+  # Superuser + org/team/projects; writes conf/glitchtip/public-dsn*.txt + dsn.env
+  initializer:
+    image: ghcr.io/openimis/glitchtip:latest
+    restart: "no"
+    # root so the DSN files can be written into the bind-mounted conf/glitchtip
+    user: "0:0"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    environment:
+      DATABASE_URL: postgres://${GLITCHTIP_DB_USER}:${GLITCHTIP_DB_PASS}@db-glitchtip:5432/${GLITCHTIP_DB_NAME}
+      REDIS_URL: redis://redis:6379/0
+      SECRET_KEY: ${SECRET_KEY}
+      BASE_PATH: /logs
+      GLITCHTIP_ENABLE_LOGS: "True"
+      CSRF_TRUSTED_ORIGINS: "https://${DOMAIN}"
+      PROXY_ENV: "True"
+      ALLOWED_HOSTS: "*"
+      GLITCHTIP_DOMAIN: "https://${DOMAIN}/logs"
+      GLITCHTIP_SUPERUSER_EMAIL: ${GLITCHTIP_SUPERUSER_EMAIL:-admin@openimis.org}
+      GLITCHTIP_SUPERUSER_PASSWORD: ${GLITCHTIP_SUPERUSER_PASSWORD:-change_me_in_production}
+      GLITCHTIP_ORG_SLUG: ${GLITCHTIP_ORG_SLUG:-openimis}
+      GLITCHTIP_ORG_NAME: ${GLITCHTIP_ORG_NAME:-OpenIMIS}
+      # Host baked into the generated DSNs (defaults to GLITCHTIP_DOMAIN above)
+      GLITCHTIP_PUBLIC_HOST: ${GLITCHTIP_PUBLIC_HOST:-}
+      # Optional in-network route for the backend, e.g. http://glitchtip:8000/logs
+      GLITCHTIP_INTERNAL_HOST: ${GLITCHTIP_INTERNAL_HOST:-}
+      GLITCHTIP_OUT_DIR: /out
+      # Re-run the bootstrap even if conf/glitchtip/.setup.lock exists
+      FORCE_GLITCHTIP_INIT: ${FORCE_GLITCHTIP_INIT:-0}
+    volumes:
+      # :z relabels for SELinux hosts (RHEL/Fedora); a no-op elsewhere
+      - ./conf/glitchtip:/out:rw,z
+    command: sh /out/init-glitchtip.sh
+    networks:
+      - proxy
+volumes:
+  db_glitchtip_data:
+  media:
+
+networks:
+  proxy:
+    external: true
+
