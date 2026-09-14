@@ -77,7 +77,9 @@ services:
     # needs a Compose tag newer than the documented install supports.
     image: ghcr.io/openimis/openimis-be:${BE_TAG:-develop}
     restart: no
-    entrypoint: ["/bin/sh", "-c", "test -s /run/keys/jwt_signing_key.pem || (umask 077 && openssl genrsa -out /run/keys/jwt_signing_key.pem 2048)"]
+    # Written to .tmp and moved, so the final path never holds a half-written
+    # key: test -s would accept one forever and every login would fail on it.
+    entrypoint: ["/bin/sh", "-c", "test -s /run/keys/jwt_signing_key.pem || (umask 077 && openssl genrsa -out /run/keys/jwt_signing_key.pem.tmp 2048 && mv /run/keys/jwt_signing_key.pem.tmp /run/keys/jwt_signing_key.pem)"]
     volumes:
       - ./data/jwt:/run/keys
     networks:
