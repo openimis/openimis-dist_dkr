@@ -19,8 +19,15 @@ x-api: &default-api
     - OPENSEARCH_ADMIN=${OPENSEARCH_ADMIN}
     - OPENSEARCH_PASSWORD=${OPENSEARCH_PASSWORD}
     - OPENSEARCH_HOSTS=${OPENSEARCH_HOSTS}
+    # Defaults to the key jwt-keygen writes, which completes before anything
+    # here starts. Override to use your own key, by path or inline PEM.
+    - JWT_SIGNING_KEY=${JWT_SIGNING_KEY:-/run/keys/jwt_signing_key.pem}
+    # Setting either of these invalidates every token in circulation; see .env.example.
+    - JWT_ISSUER=${JWT_ISSUER:-}
+    - JWT_AUDIENCE=${JWT_AUDIENCE:-}
   volumes:
     - photos:/openimis-be/openIMIS/images/insurees
+    - ./data/jwt:/run/keys:ro
   depends_on:
     db:
       condition: service_healthy
