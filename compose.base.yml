@@ -19,8 +19,8 @@ x-api: &default-api
     - OPENSEARCH_ADMIN=${OPENSEARCH_ADMIN}
     - OPENSEARCH_PASSWORD=${OPENSEARCH_PASSWORD}
     - OPENSEARCH_HOSTS=${OPENSEARCH_HOSTS}
-    # Defaults to the key jwt-keygen writes, which completes before anything
-    # here starts. Override to use your own key, by path or inline PEM.
+    # Defaults to the key jwt-keygen writes. Override only with a path that
+    # exists inside the container - see .env.example for what that requires.
     - JWT_SIGNING_KEY=${JWT_SIGNING_KEY:-/run/keys/jwt_signing_key.pem}
     # Setting either of these invalidates every token in circulation; see .env.example.
     - JWT_ISSUER=${JWT_ISSUER:-}
@@ -72,9 +72,10 @@ services:
       - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
 
   jwt-keygen:
-    # Generates the token signing key once, before anything that reads it starts.
-    # Not <<: *default-api - that anchor waits on the database, and clearing it
-    # needs a Compose tag newer than the documented install supports.
+    # Generates the token signing key once, before migrations - which backend
+    # and worker in turn wait for - runs. Not <<: *default-api: that anchor
+    # mounts the key read-only, which is exactly what this service must not
+    # inherit, and carries twenty variables a one-file writer has no use for.
     image: ghcr.io/openimis/openimis-be:${BE_TAG:-develop}
     restart: no
     # Written to .tmp and moved, so the final path never holds a half-written
