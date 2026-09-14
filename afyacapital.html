@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AfyaCapital | Enterprise Working Capital Gateway</title>
+    <style>
+        :root { --primary: #005a60; --primary-light: #eaf5f5; --success: #2e7d32; --warning: #ed6c02; --border: #cce3e3; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; background: #f4f9f9; color: #333; }
+        
+        /* Top Navigation Shell */
+        .topbar { background: var(--primary-light); border-bottom: 2px solid var(--primary); padding: 0.8rem 1.5rem; display: flex; justify-content: space-between; align-items: center; }
+        .breadcrumb { font-size: 0.75rem; color: var(--primary); font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px; }
+        .topbar h1 { color: var(--primary); margin: 2px 0 0 0; font-size: 1.5rem; font-weight: normal; }
+        .badge { background: var(--primary); color: #fff; padding: 5px 12px; border-radius: 4px; font-weight: bold; font-size: 0.75rem; }
+
+        /* Module Tabs */
+        .nav-tabs { display: flex; background: #fff; border-bottom: 1px solid var(--border); padding: 0 1.5rem; gap: 20px; }
+        .tab-btn { padding: 12px 16px; border: none; background: none; font-size: 0.9rem; font-weight: bold; color: #666; cursor: pointer; border-bottom: 3px solid transparent; }
+        .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
+
+        .container { max-width: 1200px; margin: 1.5rem auto; padding: 0 1.5rem; }
+        
+        /* Metrics Banner */
+        .metrics-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
+        .metric-card { background: #fff; border: 1px solid var(--border); padding: 1rem; border-left: 4px solid var(--primary); box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+        .metric-label { font-size: 0.75rem; color: #666; text-transform: uppercase; font-weight: bold; }
+        .metric-value { font-size: 1.3rem; color: var(--primary); font-weight: bold; margin-top: 4px; }
+
+        /* Control Panel */
+        .control-panel { background: #fff; border: 1px solid var(--border); padding: 1rem; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; }
+        .slider-group { display: flex; align-items: center; gap: 12px; font-size: 0.85rem; font-weight: bold; color: var(--primary); }
+        
+        /* Content Cards & Tables */
+        .card { background: #fff; border: 1px solid var(--border); padding: 1.2rem; box-shadow: 0 1px 2px rgba(0,0,0,0.05); margin-bottom: 1.5rem; }
+        table { width: 100%; border-collapse: collapse; margin-top: 0.5rem; }
+        th { background: #d5ebeb; text-align: left; color: var(--primary); font-size: 0.8rem; padding: 10px; border-bottom: 2px solid #b2d8d8; }
+        td { padding: 10px; border-bottom: 1px solid #e0eeee; font-size: 0.85rem; }
+        .claim-id { font-weight: bold; color: var(--primary); }
+        .risk-pill { padding: 2px 6px; border-radius: 3px; font-size: 0.7rem; font-weight: bold; }
+        .risk-low { background: #e8f5e9; color: var(--success); border: 1px solid #c8e6c9; }
+        
+        /* Buttons */
+        .btn { background: var(--primary); color: white; border: none; padding: 6px 12px; border-radius: 2px; cursor: pointer; font-weight: bold; font-size: 0.75rem; text-transform: uppercase; transition: 0.2s; }
+        .btn-outline { background: transparent; color: var(--primary); border: 1px solid var(--primary); }
+        .btn:disabled { background: #aaa; cursor: default; }
+
+        /* Side Inspector Drawer */
+        .drawer { display: none; position: fixed; right: 0; top: 0; width: 420px; height: 100%; background: #1e1e1e; color: #00ff66; font-family: monospace; padding: 1.5rem; box-shadow: -5px 0 15px rgba(0,0,0,0.3); z-index: 2000; overflow-y: auto; }
+        .drawer h3 { color: #fff; border-bottom: 1px solid #444; padding-bottom: 8px; margin-top: 0; font-family: 'Segoe UI', sans-serif; }
+        pre { font-size: 0.8rem; line-height: 1.4; white-space: pre-wrap; }
+
+        /* Privacy & Handshake Modal Styling */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.65); z-index: 3000; justify-content: center; align-items: center; }
+        .modal-content { background: #fff; width: 550px; border-top: 5px solid var(--primary); padding: 2rem; border-radius: 4px; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
+        .step-list { margin: 1.5rem 0; list-style: none; padding: 0; }
+        .step-item { padding: 12px 0; border-bottom: 1px dashed #eee; font-size: 0.9rem; display: flex; align-items: center; gap: 10px; }
+        .step-status { font-weight: bold; }
+        .status-pending { color: #999; }
+        .status-active { color: var(--warning); font-weight: bold; }
+        .status-done { color: var(--success); font-weight: bold; }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+    </style>
+</head>
+<body>
+
+<div class="topbar">
+    <div>
+        <div class="breadcrumb">openIMIS &gt; Legal & Finance &gt; Working Capital</div>
+        <h1>AfyaCapital Receivables Financing Portal</h1>
+    </div>
+    <span class="badge">FHIR R4 Gateway Active | v26.04</span>
+</div>
+
+<div class="nav-tabs">
+    <button class="tab-btn active" onclick="switchTab('tab-claims', this)">Adjudicated Claims Pool</button>
+    <button class="tab-btn" onclick="switchTab('tab-ledger', this)">Disbursement Ledger</button>
+    <button class="tab-btn" onclick="switchTab('tab-analytics', this)">Liquidity Analytics</button>
+</div>
+
+<div class="container">
+    <div class="metrics-grid">
+        <div class="metric-card">
+            <div class="metric-label">Total Eligible Pool</div>
+            <div class="metric-value" id="kpi-pool">KES 3,450,000</div>
+        </div>
+        <div class="metric-card">
+            <div class="metric-label">Dynamic Factoring Limit</div>
+            <div class="metric-value" id="kpi-limit">KES 2,415,000</div>
+        </div>
+        <div class="metric-card" style="border-left-color: var(--warning);">
+            <div class="metric-label">Gateway Fee Pool (2.5%)</div>
+            <div class="metric-value" style="color:var(--warning);" id="kpi-fees">KES 60,375</div>
+        </div>
+        <div class="metric-card" style="border-left-color: var(--success);">
+            <div class="metric-label">Settled Disbursements</div>
+            <div class="metric-value" style="color:var(--success);" id="kpi-disbursed">KES 0</div>
+        </div>
+    </div>
+
+    <div id="tab-claims" class="tab-content active">
+        <div class="control-panel">
+            <div class="slider-group">
+                <label for="rate-slider">Liquidity Advance Rate: <span id="rate-val">70%</span></label>
+                <input type="range" id="rate-slider" min="60" max="85" value="70" oninput="updateAdvanceRate(this.value)">
+            </div>
+            <div>
+                <button class="btn" id="batch-btn" onclick="triggerHandshake('BATCH', 0, null)" disabled>Advance Selected Batch (0)</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <table id="claims-table">
+                <thead>
+                    <tr>
+                        <th><input type="checkbox" onchange="toggleSelectAll(this)"></th>
+                        <th>Claim Ref</th>
+                        <th>Healthcare Facility</th>
+                        <th>Adjudicated Value</th>
+                        <th>Available Payout</th>
+                        <th>Audit Risk</th>
+                        <th style="text-align: right;">Operations</th>
+                    </tr>
+                </thead>
+                <tbody id="claims-tbody">
+                    </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="tab-ledger" class="tab-content">
+        <div class="card">
+            <h3 style="margin-top:0; color:var(--primary);">Trust Account Settlement Audit Trail</h3>
+            <p style="font-size:0.85rem; color:#666;">Ledger of real-time RTGS/Mobile Money settlements executed via Partner Bank Gateway.</p>
+            <table>
+                <thead>
+                    <tr><th>Timestamp</th><th>Reference ID</th><th>Facility Trust Account</th><th>Gross Payout</th><th>Status</th></tr>
+                </thead>
+                <tbody id="ledger-tbody">
+                    <tr><td colspan="5" style="text-align:center; color:#888;">No transactions disbursed in current session.</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="tab-analytics" class="tab-content">
+        <div class="card">
+            <h3 style="margin-top:0; color:var(--primary);">System Governance & Portfolio Health</h3>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:20px; margin-top:1rem;">
+                <div style="padding:15px; background:#f9fdfd; border:1px solid var(--border);">
+                    <strong>Automated Adjudication Pass Rate:</strong> 94.2%<br><br>
+                    <small color="#666">Claims evaluated under automated clinical parameters without manual override.</small>
+                </div>
+                <div style="padding:15px; background:#f9fdfd; border:1px solid var(--border);">
+                    <strong>Zero-Knowledge Privacy Audit:</strong> 100% Compliant<br><br>
+                    <small color="#666">Zero patient PII or ICD-11 diagnosis codes transmitted outside openIMIS core.</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="gateway-modal">
+    <div class="modal-content">
+        <h3 style="margin-top:0; color:var(--primary); border-bottom:1px solid #eee; padding-bottom:10px;">
+            AfyaCapital Zero-Knowledge Transmission
+        </h3>
+        <p style="font-size: 0.85rem; color: #555;">Executing privacy-preserving banking handshake for <strong id="modal-claim-id"></strong>...</p>
+        
+        <ul class="step-list">
+            <li class="step-item">
+                <span id="step-1-icon">⏳</span>
+                <span style="flex:1;">1. Adjudication Status Verification</span>
+                <span id="step-1-status" class="step-status status-pending">Waiting...</span>
+            </li>
+            <li class="step-item">
+                <span id="step-2-icon">⏳</span>
+                <span style="flex:1;">2. Extracting FHIR R4 Financial Metadata</span>
+                <span id="step-2-status" class="step-status status-pending">Waiting...</span>
+            </li>
+            <li class="step-item" style="background:#fff3e0; padding:10px; border-radius:4px;">
+                <span id="step-3-icon">🔒</span>
+                <span style="flex:1; font-weight:bold;">3. Privacy Firewall: Redacting Patient PII & Clinical Notes</span>
+                <span id="step-3-status" class="step-status status-pending">Waiting...</span>
+            </li>
+            <li class="step-item">
+                <span id="step-4-icon">🏦</span>
+                <span style="flex:1;">4. Partner Bank Risk Assessment & RTGS Wire Wire</span>
+                <span id="step-4-status" class="step-status status-pending">Waiting...</span>
+            </li>
+        </ul>
+
+        <div style="text-align: right; margin-top: 1.5rem;">
+            <button class="btn" id="modal-close-btn" disabled onclick="closeModal()" style="opacity: 0.5;">Processing Handshake...</button>
+        </div>
+    </div>
+</div>
+
+<div class="drawer" id="json-drawer">
+    <div style="display:flex; justify-content:space-between; align-items:center;">
+        <h3>FHIR R4 Sanitized Payload</h3>
+        <button onclick="closeDrawer()" style="background:red; color:#fff; border:none; padding:4px 8px; cursor:pointer;">X</button>
+    </div>
+    <p style="color:#aaa; font-size:0.75rem;">This payload demonstrates live stripping of clinical records prior to external transmission.</p>
+    <pre id="json-viewer"></pre>
+</div>
+
+<script>
+let currentRate = 0.70;
+let totalDisbursed = 0;
+let selectedClaims = new Set();
+
+const mockClaims = [
+    { id: 'CLM-2026-8841', facility: 'Nairobi West Hospital', amount: 850000, risk: 'LOW' },
+    { id: 'CLM-2026-9012', facility: 'Karen Referral Clinic', amount: 1200000, risk: 'LOW' },
+    { id: 'CLM-2026-9104', facility: 'Aga Khan Outreach (Thika)', amount: 450000, risk: 'LOW' },
+    { id: 'CLM-2026-9220', facility: 'St. MPesa Medical Center', amount: 950000, risk: 'LOW' }
+];
+
+function renderTable() {
+    const tbody = document.getElementById('claims-tbody');
+    tbody.innerHTML = '';
+    mockClaims.forEach(c => {
+        const payout = Math.round(c.amount * currentRate);
+        tbody.innerHTML += `
+            <tr id="row-${c.id}">
+                <td><input type="checkbox" value="${c.id}" onchange="toggleSelect('${c.id}', this.checked)"></td>
+                <td class="claim-id">${c.id}</td>
+                <td>${c.facility}</td>
+                <td>KES ${c.amount.toLocaleString()}</td>
+                <td style="font-weight:bold; color:var(--success);">KES ${payout.toLocaleString()}</td>
+                <td><span class="risk-pill risk-low">${c.risk}</span></td>
+                <td style="text-align: right;">
+                    <button class="btn btn-outline" onclick="inspectFHIR('${c.id}', '${c.facility}', ${payout})">Inspect Payload</button>
+                    <button class="btn" onclick="triggerHandshake('${c.id}', ${payout}, this)">Advance</button>
+                </td>
+            </tr>
+        `;
+    });
+}
+
+function updateAdvanceRate(val) {
+    currentRate = val / 100;
+    document.getElementById('rate-val').innerText = val + '%';
+    renderTable();
+    updateKPIs();
+}
+
+function updateKPIs() {
+    const totalPool = mockClaims.reduce((acc, c) => acc + c.amount, 0);
+    const limit = Math.round(totalPool * currentRate);
+    const fees = Math.round(limit * 0.025);
+    document.getElementById('kpi-pool').innerText = `KES ${totalPool.toLocaleString()}`;
+    document.getElementById('kpi-limit').innerText = `KES ${limit.toLocaleString()}`;
+    document.getElementById('kpi-fees').innerText = `KES ${fees.toLocaleString()}`;
+}
+
+function switchTab(tabId, btn) {
+    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+    document.getElementById(tabId).classList.add('active');
+    btn.classList.add('active');
+}
+
+function inspectFHIR(id, facility, payout) {
+    const payload = {
+        resourceType: "ClaimResponse",
+        id: id,
+        status: "active",
+        type: { coding: [{ system: "http://terminology.hl7.org/CodeSystem/claim-type", code: "institutional" }] },
+        payee: { identifier: { value: facility } },
+        payment: { amount: { value: payout, currency: "KES" } },
+        securityFilter: {
+            clinicalDiagnosis: "[REDACTED_BY_AFYACAPITAL_GATEWAY]",
+            patientIdentifiers: "[REDACTED_HIPAA_COMPLIANCE]"
+        }
+    };
+    document.getElementById('json-viewer').innerText = JSON.stringify(payload, null, 2);
+    document.getElementById('json-drawer').style.display = 'block';
+}
+
+function closeDrawer() { document.getElementById('json-drawer').style.display = 'none'; }
+
+// RESTORED & ENHANCED STEPPED HANDSHAKE MODAL
+function triggerHandshake(claimId, amount, button) {
+    const isBatch = claimId === 'BATCH';
+    const displayRef = isBatch ? `Batch of ${selectedClaims.size} Claims` : claimId;
+    
+    document.getElementById('modal-claim-id').innerText = displayRef;
+    document.getElementById('gateway-modal').style.display = 'flex';
+    
+    // Reset steps UI
+    for(let i=1; i<=4; i++) {
+        document.getElementById(`step-${i}-status`).innerText = 'Waiting...';
+        document.getElementById(`step-${i}-status`).className = 'step-status status-pending';
+    }
+    const closeBtn = document.getElementById('modal-close-btn');
+    closeBtn.disabled = true;
+    closeBtn.innerText = "Processing Handshake...";
+    closeBtn.style.opacity = "0.5";
+
+    // Step 1: Adjudication Check (0.6s)
+    setTimeout(() => {
+        document.getElementById('step-1-status').innerText = 'Verified ✓';
+        document.getElementById('step-1-status').className = 'step-status status-done';
+        document.getElementById('step-2-status').innerText = 'Extracting...';
+        document.getElementById('step-2-status').className = 'step-status status-active';
+    }, 600);
+
+    // Step 2: FHIR R4 Extraction (1.4s)
+    setTimeout(() => {
+        document.getElementById('step-2-status').innerText = 'Extracted ✓';
+        document.getElementById('step-2-status').className = 'step-status status-done';
+        document.getElementById('step-3-status').innerText = 'Redacting PII...';
+        document.getElementById('step-3-status').className = 'step-status status-active';
+    }, 1400);
+
+    // Step 3: Privacy Firewall Execution (2.4s)
+    setTimeout(() => {
+        document.getElementById('step-3-status').innerText = 'Anonymized ✓';
+        document.getElementById('step-3-status').className = 'step-status status-done';
+        document.getElementById('step-4-status').innerText = 'Transmitting...';
+        document.getElementById('step-4-status').className = 'step-status status-active';
+    }, 2400);
+
+    // Step 4: Bank Handshake Complete (3.4s)
+    setTimeout(() => {
+        document.getElementById('step-4-status').innerText = '200 OK (Settled) ✓';
+        document.getElementById('step-4-status').className = 'step-status status-done';
+        
+        // Execute financial settlement logic
+        if (isBatch) {
+            selectedClaims.forEach(id => {
+                const item = mockClaims.find(c => c.id === id);
+                if (item) completeDisbursement(item.id, Math.round(item.amount * currentRate), null);
+            });
+            selectedClaims.clear();
+            document.getElementById('batch-btn').disabled = true;
+            document.getElementById('batch-btn').innerText = `Advance Selected Batch (0)`;
+        } else {
+            completeDisbursement(claimId, amount, button);
+        }
+
+        closeBtn.disabled = false;
+        closeBtn.innerText = "Close & Return to Dashboard";
+        closeBtn.style.opacity = "1";
+    }, 3400);
+}
+
+function completeDisbursement(id, payout, button) {
+    const row = document.getElementById(`row-${id}`);
+    if (row) {
+        row.style.background = '#e8f5e9';
+        if (button) {
+            button.disabled = true;
+            button.innerText = 'Disbursed ✓';
+        } else {
+            row.innerHTML = `<td colspan="7" style="text-align:center; color:var(--success); font-weight:bold;">✓ Wire Settlement Complete for ${id}: KES ${payout.toLocaleString()} Disbursed.</td>`;
+        }
+    }
+    
+    totalDisbursed += payout;
+    document.getElementById('kpi-disbursed').innerText = `KES ${totalDisbursed.toLocaleString()}`;
+    
+    const ledger = document.getElementById('ledger-tbody');
+    if (ledger.innerText.includes('No transactions')) ledger.innerHTML = '';
+    ledger.innerHTML += `<tr><td>${new Date().toLocaleTimeString()}</td><td class="claim-id">${id}</td><td>Verified Facility Trust Account</td><td style="color:var(--success); font-weight:bold;">KES ${payout.toLocaleString()}</td><td>SETTLED ✓</td></tr>`;
+}
+
+function closeModal() {
+    document.getElementById('gateway-modal').style.display = 'none';
+}
+
+function toggleSelect(id, checked) {
+    checked ? selectedClaims.add(id) : selectedClaims.delete(id);
+    const btn = document.getElementById('batch-btn');
+    btn.disabled = selectedClaims.size === 0;
+    btn.innerText = `Advance Selected Batch (${selectedClaims.size})`;
+}
+
+function toggleSelectAll(checkbox) {
+    const checkboxes = document.querySelectorAll('#claims-tbody input[type="checkbox"]');
+    checkboxes.forEach(cb => {
+        cb.checked = checkbox.checked;
+        toggleSelect(cb.value, cb.checked);
+    });
+}
+
+renderTable();
+updateKPIs();
+</script>
+</body>
+</html>

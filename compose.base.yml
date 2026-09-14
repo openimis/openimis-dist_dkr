@@ -19,6 +19,7 @@ x-api: &default-api
     - OPENSEARCH_ADMIN=${OPENSEARCH_ADMIN}
     - OPENSEARCH_PASSWORD=${OPENSEARCH_PASSWORD}
     - OPENSEARCH_HOSTS=${OPENSEARCH_HOSTS}
+    - JWT_COOKIE_SECURE=False
   volumes:
     - photos:/openimis-be/openIMIS/images/insurees
   depends_on:
