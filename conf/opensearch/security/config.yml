@@ -13,6 +13,13 @@ config:
         # container that can reach 9200 assert any identity it likes.
         internalProxies: '__DASHBOARDS_IP_REGEX__'
         remoteIpHeader: 'x-forwarded-for'
+    # Without this block the plugin keeps its defaults, which name a different
+    # Dashboards server user and leave multitenancy on. Both have to agree with
+    # opensearch_dashboards.yml or Dashboards is refused its own index.
+    kibana:
+      multitenancy_enabled: false
+      server_username: dashboards_server
+      index: '.kibana'
     authc:
       proxy_auth_domain:
         description: "Identity asserted by the openIMIS gate: auth_check, nginx, Dashboards, here"

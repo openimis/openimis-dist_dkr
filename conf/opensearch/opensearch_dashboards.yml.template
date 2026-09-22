@@ -1,0 +1,17 @@
+# Rendered by dashboards-start.sh into config/opensearch_dashboards.yml when
+# the security plugin is on. Hosts, the server user, the CA and the base path
+# come from the compose environment (the image turns them into flags, which
+# override this file). Everything under opensearch_security.* can only live
+# here: the image does not map keys with an underscore.
+server.host: "0.0.0.0"
+opensearch.ssl.verificationMode: full
+# Headers relayed from the gate to the cluster. authorization is deliberately
+# absent: the gate clears it, and the cluster must never see a client-sent one.
+opensearch.requestHeadersAllowlist: ["x-forwarded-for", "x-proxy-user", "x-proxy-rights", "securitytenant"]
+opensearch_security.auth.type: "proxy"
+opensearch_security.proxycache.user_header: "x-proxy-user"
+opensearch_security.proxycache.roles_header: "x-proxy-rights"
+opensearch_security.multitenancy.enabled: false
+# The gate recomputes identity on every request; the cookie only caches it.
+opensearch_security.cookie.secure: false
+opensearch_security.cookie.password: "__COOKIE_PASSWORD__"
