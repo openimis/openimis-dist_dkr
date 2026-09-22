@@ -1,5 +1,17 @@
 services:
 
+  opensearch-certgen:
+    # Writes the cluster CA and certificates on the first up; no-op afterwards.
+    # Backend image because it has openssl - the opensearch image does not.
+    image: ghcr.io/openimis/openimis-be:${BE_TAG:-develop}
+    restart: "no"
+    entrypoint: ["/bin/bash", "/conf/certgen.sh"]
+    volumes:
+      - "./conf/opensearch:/conf:ro"
+      - "./data/opensearch:/out"
+    networks:
+      openimis-net:
+
   opensearch:
     image: opensearchproject/opensearch:3.8.0
     env_file:
