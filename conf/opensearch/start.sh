@@ -14,7 +14,8 @@ if [ "${OPENSEARCH_SECURITY_DISABLED:-true}" = "false" ]; then
     # everyone out.
     bcrypt() {
         local h
-        h=$("$OS/plugins/opensearch-security/tools/hash.sh" -p "$1" 2>/dev/null | tail -n1) || return 1
+        h=$("$OS/plugins/opensearch-security/tools/hash.sh" -p "$1" 2>/dev/null | tail -n1) \
+            || { echo "hash.sh exited non-zero - the JVM may have run out of memory" >&2; return 1; }
         case "$h" in
             '$2'[aby]'$'*) printf '%s' "$h" ;;
             *) echo "hash.sh did not return a bcrypt hash - check the container's memory limit" >&2; return 1 ;;
