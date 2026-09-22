@@ -14,27 +14,33 @@ if [ "${OPENSEARCH_SECURITY_DISABLED:-true}" = "false" ]; then
     # everyone out.
     bcrypt() {
         local h
-        h=$("$OS/plugins/opensearch-security/tools/hash.sh" -p "$1" 2>/dev/null | tail -n1)
+        h=$("$OS/plugins/opensearch-security/tools/hash.sh" -p "$1" 2>/dev/null | tail -n1) || return 1
         case "$h" in
             '$2'[aby]'$'*) printf '%s' "$h" ;;
-            *) echo "hash.sh did not return a bcrypt hash - check the container's memory limit" >&2; exit 1 ;;
+            *) echo "hash.sh did not return a bcrypt hash - check the container's memory limit" >&2; return 1 ;;
         esac
     }
+    # Hashed here rather than inside the heredoc below: a failure inside a
+    # command substitution only ends that subshell, so the document would still
+    # be written, with an empty hash, and the node would start unusable.
+    h_admin=$(bcrypt "$OPENSEARCH_SUPERUSER_PASSWORD") || exit 1
+    h_indexer=$(bcrypt "$OPENSEARCH_PASSWORD") || exit 1
+    h_dashboards=$(bcrypt "$OPENSEARCH_DASHBOARDS_PASSWORD") || exit 1
     cat > "$SEC/internal_users.yml" <<EOF
 ---
 _meta:
   type: "internalusers"
   config_version: 2
 admin:
-  hash: "$(bcrypt "$OPENSEARCH_SUPERUSER_PASSWORD")"
+  hash: "$h_admin"
   reserved: true
   description: "Cluster superuser: operators and the healthcheck"
 openimis_indexer:
-  hash: "$(bcrypt "$OPENSEARCH_PASSWORD")"
+  hash: "$h_indexer"
   reserved: true
   description: "openIMIS backend and worker: index creation and document indexing"
 dashboards_server:
-  hash: "$(bcrypt "$OPENSEARCH_DASHBOARDS_PASSWORD")"
+  hash: "$h_dashboards"
   reserved: true
   description: "OpenSearch Dashboards server user"
 EOF
