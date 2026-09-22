@@ -125,9 +125,9 @@ networks:
     name: "${PROJECT_NAME:-openimis}-net"
   # Fixed subnet so Dashboards can hold the address the cluster trusts identity
   # headers from. Only the node, Dashboards and the api containers join it.
-  # Defined here rather than in compose.openSearch.yml so that dropping that
-  # include still leaves a valid project: compose rejects a service that names
-  # an undefined network.
+  # Defined here beside openimis-net because that is where this file keeps
+  # networks. Note that compose.openSearch.yml is required either way:
+  # migrations depends on opensearch-certgen, which lives there.
   opensearch-net:
     name: "${PROJECT_NAME:-openimis}-opensearch-net"
     ipam:
