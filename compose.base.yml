@@ -19,13 +19,19 @@ x-api: &default-api
     - OPENSEARCH_ADMIN=${OPENSEARCH_ADMIN}
     - OPENSEARCH_PASSWORD=${OPENSEARCH_PASSWORD}
     - OPENSEARCH_HOSTS=${OPENSEARCH_HOSTS}
+    # The cluster CA opensearch-certgen writes. Read only for an https
+    # OPENSEARCH_HOSTS; ignored for http and by images that predate it.
+    - OPENSEARCH_CA_CERTS=/run/opensearch-ca/ca.pem
   volumes:
     - photos:/openimis-be/openIMIS/images/insurees
+    - ./data/opensearch/ca:/run/opensearch-ca:ro
   depends_on:
     db:
       condition: service_healthy
   networks:
     openimis-net:
+    # The cluster lives here; the indexer has to reach it.
+    opensearch-net:
 
 services:
   frontend:
@@ -36,7 +42,6 @@ services:
       - REACT_APP_API_URL=api
       - NEW_OPENIMIS_HOST=${DOMAIN}
       - OPENIMIS_CONF_JSON=${OPENIMIS_FE_CONF_JSON}
-      - OPENSEARCH_BASIC_TOKEN=${OPENSEARCH_BASIC_TOKEN}
     networks:
       openimis-net:
       # proxy:
@@ -68,6 +73,13 @@ services:
     <<: *default-api
     command: init
     restart: no
+    depends_on:
+      # A service-level depends_on replaces the anchor's rather than merging
+      # with it, so the database condition is repeated here on purpose.
+      db:
+        condition: service_healthy
+      opensearch-certgen:
+        condition: service_completed_successfully
   backend:
     <<: *default-api
     command: start
