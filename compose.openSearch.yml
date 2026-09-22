@@ -32,8 +32,6 @@ services:
       # Never: the demo installer would write demo certificates and users over
       # the ones conf/opensearch and start.sh provide.
       - "DISABLE_INSTALL_DEMO_CONFIG=true"
-      - "OPENSEARCH_DASHBOARDS_IP=${OPENSEARCH_DASHBOARDS_IP:-172.29.0.250}"
-    command: ["bash", "/conf/start.sh"]
     healthcheck:
       test: ["CMD", "bash", "/conf/healthcheck.sh"]
       interval: 15s
@@ -50,6 +48,29 @@ services:
     depends_on:
       opensearch-certgen:
         condition: service_completed_successfully
+    networks:
+      opensearch-net:
+
+  opensearch-config:
+    # Uploads the security configuration on every start, so a password or a role
+    # mapping change takes effect by itself. Same image as the node: it needs
+    # that image's hashing and securityadmin tools. No-op with the plugin off.
+    image: opensearchproject/opensearch:3.8.0
+    restart: "no"
+    env_file:
+      - ".env.openSearch"
+    environment:
+      - "OPENSEARCH_SECURITY_DISABLED=${OPENSEARCH_SECURITY_DISABLED:-true}"
+      - "OPENSEARCH_DASHBOARDS_IP=${OPENSEARCH_DASHBOARDS_IP:-172.29.0.250}"
+      - "OPENSEARCH_JAVA_OPTS=-Xms256m -Xmx256m"
+    entrypoint: ["/bin/bash", "/conf/configure.sh"]
+    volumes:
+      - "./conf/opensearch:/conf:ro"
+      - "./data/opensearch/ca:/usr/share/opensearch/config/certs/ca:ro"
+      - "./data/opensearch/admin:/usr/share/opensearch/config/certs/admin:ro"
+    depends_on:
+      opensearch:
+        condition: service_started
     networks:
       opensearch-net:
 
@@ -74,6 +95,8 @@ services:
     depends_on:
       opensearch:
         condition: service_healthy
+      opensearch-config:
+        condition: service_completed_successfully
     networks:
       openimis-net:
       opensearch-net:

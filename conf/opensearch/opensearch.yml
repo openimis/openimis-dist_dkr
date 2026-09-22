@@ -15,11 +15,11 @@ plugins.security.ssl.http.pemcert_filepath: certs/node/node.pem
 plugins.security.ssl.http.pemkey_filepath: certs/node/node-key.pem
 plugins.security.ssl.http.pemtrustedcas_filepath: certs/ca/ca.pem
 
-# Load config/opensearch-security/*.yml into the security index when it does
-# not exist yet (first start). Later changes need securityadmin.sh - see
-# CONTRIBUTOR.md.
-plugins.security.allow_default_init_securityindex: true
-# The client certificate securityadmin.sh presents (data/opensearch/admin).
+# Deliberately absent: plugins.security.allow_default_init_securityindex would
+# seed the security index from the image's own demo users, which are published.
+# The opensearch-config service uploads the real configuration instead, on every
+# start, and the node answers "not initialized" until it does.
+# The client certificate that service presents (data/opensearch/admin).
 plugins.security.authcz.admin_dn:
   - "CN=openimis-admin,O=openIMIS"
 plugins.security.restapi.roles_enabled: ["all_access", "security_rest_api_access"]
