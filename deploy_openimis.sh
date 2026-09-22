@@ -7,6 +7,12 @@ else
 echo "creating env files from example"
 cp .env.example .env
 cp .env.openSearch.example .env.openSearch
+# The security plugin needs every internal-user password set, and the node
+# refuses to start naming any that is empty. Generate them once, here, so a
+# fresh install comes up secured without a manual step.
+for v in OPENSEARCH_SUPERUSER_PASSWORD OPENSEARCH_PASSWORD OPENSEARCH_DASHBOARDS_PASSWORD OPENSEARCH_DASHBOARDS_COOKIE_PASSWORD; do
+  sed -i "s|^$v=$|$v=$(openssl rand -base64 36 | tr -d '/+=')|" .env.openSearch
+done
 fi
 
 

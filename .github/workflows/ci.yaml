@@ -70,6 +70,17 @@ jobs:
           echo 'HOSTS=localhost' >> .env
 
           cp .env.openSearch.example .env.openSearch
+          # The example enables the security plugin, which needs a backend image
+          # carrying OPENSEARCH_CA_CERTS to verify the cluster certificate. Until
+          # a develop image has it, CI runs the cluster in legacy mode: drop these
+          # three substitutions when it does.
+          sed -i 's|^OPENSEARCH_SECURITY_DISABLED=.*|OPENSEARCH_SECURITY_DISABLED=true|;s|^OPENSEARCH_HOSTS=.*|OPENSEARCH_HOSTS=http://opensearch:9200|;s|^OPENSEARCH_DASHBOARDS_HOSTS=.*|OPENSEARCH_DASHBOARDS_HOSTS=["http://opensearch:9200"]|' .env.openSearch
+          # Substituted rather than appended: whether a repeated key wins in an
+          # env file is exactly the subtlety .env.example warns about.
+          for v in OPENSEARCH_SUPERUSER_PASSWORD OPENSEARCH_PASSWORD OPENSEARCH_DASHBOARDS_PASSWORD OPENSEARCH_DASHBOARDS_COOKIE_PASSWORD; do
+            sed -i "s|^$v=.*|$v=ci-only-$(openssl rand -hex 16)|" .env.openSearch
+          done
+
           docker compose up -d
 
           echo "Waiting for 'Starting Django...' in backend logs..."
