@@ -20,22 +20,32 @@ services:
       - "discovery.type=${DISCOVERY_TYPE:-single-node}"
       - "cluster.name=${CLUSTER_NAME:-my_opensearch_local}"
       - "http.port=9200"
-      - "plugins.security.ssl.http.enabled=${SLL_HTTP_ENABLED:-false}"
+      # false turns the plugin on: TLS on 9200 and every request authenticated.
+      # start.sh then renders the internal users from .env.openSearch.
       - "plugins.security.disabled=${OPENSEARCH_SECURITY_DISABLED:-true}"
-      # The demo installer runs before the node reads plugins.security.disabled
-      # and aborts on an empty password. Set false when enabling security.
-      - "DISABLE_INSTALL_DEMO_CONFIG=${OPENSEARCH_DISABLE_DEMO_CONFIG:-true}"
-      - "OPENSEARCH_INITIAL_ADMIN_PASSWORD=${OPENSEARCH_PASSWORD}"
+      # Never: the demo installer would write demo certificates and users over
+      # the ones conf/opensearch and start.sh provide.
+      - "DISABLE_INSTALL_DEMO_CONFIG=true"
+      - "OPENSEARCH_DASHBOARDS_IP=${OPENSEARCH_DASHBOARDS_IP:-172.29.0.250}"
+    command: ["bash", "/conf/start.sh"]
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
-      interval: 30s
+      test: ["CMD", "bash", "/conf/healthcheck.sh"]
+      interval: 15s
       timeout: 10s
-      retries: 3
-      start_period: 40s
+      retries: 10
+      start_period: 60s
     volumes:
       - "opensearch-data1:/usr/share/opensearch/data"
+      - "./conf/opensearch:/conf:ro"
+      - "./conf/opensearch/opensearch.yml:/usr/share/opensearch/config/opensearch.yml:ro"
+      - "./data/opensearch/ca:/usr/share/opensearch/config/certs/ca:ro"
+      - "./data/opensearch/node:/usr/share/opensearch/config/certs/node:ro"
+      - "./data/opensearch/admin:/usr/share/opensearch/config/certs/admin:ro"
+    depends_on:
+      opensearch-certgen:
+        condition: service_completed_successfully
     networks:
-      openimis-net:
+      opensearch-net:
 
   opensearch-dashboards:
     image: opensearchproject/opensearch-dashboards:3.8.0

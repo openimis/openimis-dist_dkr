@@ -1,0 +1,21 @@
+---
+_meta:
+  type: "rolesmapping"
+  config_version: 2
+all_access:
+  reserved: false
+  users: ["admin", "openimis_indexer"]
+  description: "Cluster superuser, and the openIMIS indexer until it gets a role of its own"
+kibana_server:
+  reserved: true
+  users: ["dashboards_server"]
+# Right 199001 (view dashboards), as forwarded in x-proxy-rights. kibana_user
+# also lets the holder edit saved objects, which is a known and accepted gap:
+# the gate cannot tell a reading request from a writing one.
+kibana_user:
+  reserved: false
+  backend_roles: ["199001"]
+readall:
+  reserved: false
+  backend_roles: ["199001"]
+  description: "Read every index. Coarse on purpose; per-index roles come later"

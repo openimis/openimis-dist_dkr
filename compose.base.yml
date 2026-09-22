@@ -111,6 +111,16 @@ networks:
   #   external: true
   openimis-net:
     name: "${PROJECT_NAME:-openimis}-net"
+  # Fixed subnet so Dashboards can hold the address the cluster trusts identity
+  # headers from. Only the node, Dashboards and the api containers join it.
+  # Defined here rather than in compose.openSearch.yml so that dropping that
+  # include still leaves a valid project: compose rejects a service that names
+  # an undefined network.
+  opensearch-net:
+    name: "${PROJECT_NAME:-openimis}-opensearch-net"
+    ipam:
+      config:
+        - subnet: ${OPENSEARCH_NET_SUBNET:-172.29.0.0/24}
 volumes:
   database:
   photos:

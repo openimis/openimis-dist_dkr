@@ -1,0 +1,26 @@
+# Mounted over the image's opensearch.yml. Environment entries in compose
+# (cluster.name, discovery.type, plugins.security.disabled) override this
+# file. With plugins.security.disabled=true every plugins.security.* line is
+# ignored and the node speaks plain http - verified against 3.8.0 - so this
+# one file serves both modes.
+network.host: 0.0.0.0
+
+# Certificates from opensearch-certgen, mounted under config/certs.
+plugins.security.ssl.transport.pemcert_filepath: certs/node/node.pem
+plugins.security.ssl.transport.pemkey_filepath: certs/node/node-key.pem
+plugins.security.ssl.transport.pemtrustedcas_filepath: certs/ca/ca.pem
+transport.ssl.enforce_hostname_verification: false
+plugins.security.ssl.http.enabled: true
+plugins.security.ssl.http.pemcert_filepath: certs/node/node.pem
+plugins.security.ssl.http.pemkey_filepath: certs/node/node-key.pem
+plugins.security.ssl.http.pemtrustedcas_filepath: certs/ca/ca.pem
+
+# Load config/opensearch-security/*.yml into the security index when it does
+# not exist yet (first start). Later changes need securityadmin.sh - see
+# CONTRIBUTOR.md.
+plugins.security.allow_default_init_securityindex: true
+# The client certificate securityadmin.sh presents (data/opensearch/admin).
+plugins.security.authcz.admin_dn:
+  - "CN=openimis-admin,O=openIMIS"
+plugins.security.restapi.roles_enabled: ["all_access", "security_rest_api_access"]
+plugins.security.system_indices.enabled: true

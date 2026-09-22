@@ -1,0 +1,41 @@
+---
+_meta:
+  type: "config"
+  config_version: 2
+config:
+  dynamic:
+    http:
+      anonymous_auth_enabled: false
+      xff:
+        enabled: true
+        # Rendered by start.sh from OPENSEARCH_DASHBOARDS_IP: Dashboards' fixed
+        # address on opensearch-net, and nothing else. Any wider match lets any
+        # container that can reach 9200 assert any identity it likes.
+        internalProxies: '__DASHBOARDS_IP_REGEX__'
+        remoteIpHeader: 'x-forwarded-for'
+    authc:
+      proxy_auth_domain:
+        description: "Identity asserted by the openIMIS gate: auth_check, nginx, Dashboards, here"
+        http_enabled: true
+        transport_enabled: false
+        order: 0
+        http_authenticator:
+          type: extended-proxy
+          challenge: false
+          config:
+            user_header: "x-proxy-user"
+            # openIMIS right codes; the plugin files them as backend_roles.
+            roles_header: "x-proxy-rights"
+            attr_header_prefix: "x-proxy-ext-"
+        authentication_backend:
+          type: noop
+      basic_internal_auth_domain:
+        description: "Internal users: admin, the indexer, the Dashboards server"
+        http_enabled: true
+        transport_enabled: true
+        order: 1
+        http_authenticator:
+          type: basic
+          challenge: true
+        authentication_backend:
+          type: intern
