@@ -5,13 +5,22 @@ _meta:
 # The internal users (admin, openimis_indexer, dashboards_server) get their
 # roles in internal_users.yml, which configure.sh writes. No mapping here names
 # a user: a proxy-authenticated openIMIS login with the same name would match.
-# Right 199001 (view dashboards), as forwarded in x-proxy-rights. kibana_user
-# also lets the holder edit saved objects, which is a known and accepted gap:
-# the gate cannot tell a reading request from a writing one.
-kibana_user:
+# Right codes arrive in x-proxy-rights and the plugin files them as backend
+# roles. They are constants in opensearch_reports/apps.py, identical in every
+# deployment, which is why this file ships rather than being hand-written.
+#
+# kibana_user is deliberately absent: the plugin gives Global-tenant write to
+# any holder of a role by that name. openimis_dashboards_user carries the same
+# permissions under a name the plugin does not special-case.
+openimis_dashboards_user:
   reserved: false
   backend_roles: ["199001"]
-readall:
+  description: "Right 199001 (view dashboards): Dashboards, Global tenant read-only, own private tenant"
+openimis_reports_reader:
   reserved: false
   backend_roles: ["199001"]
-  description: "Read every index. Coarse on purpose; per-index roles come later"
+  description: "Right 199001 (view dashboards): read the openIMIS indices"
+openimis_dashboards_author:
+  reserved: false
+  backend_roles: ["199003"]
+  description: "Right 199003 (update dashboards): write in the Global tenant"
