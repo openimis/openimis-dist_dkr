@@ -72,6 +72,7 @@ template=$(cat /conf/security/config.yml)
 printf '%s\n' "${template//__DASHBOARDS_IP_REGEX__/$ip_re}" > "$SEC/config.yml"
 cp /conf/security/roles.yml "$SEC/roles.yml"
 cp /conf/security/roles_mapping.yml "$SEC/roles_mapping.yml"
+cp /conf/security/audit.yml "$SEC/audit.yml"
 cp /conf/security/tenants.yml "$SEC/tenants.yml"
 
 # Port 9200: this tool speaks the REST API, not the transport protocol, despite

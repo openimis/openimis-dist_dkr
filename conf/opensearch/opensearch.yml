@@ -28,3 +28,7 @@ plugins.security.authcz.admin_dn:
 plugins.security.restapi.roles_enabled: ["all_access"]
 plugins.security.system_indices.enabled: true
 
+# Audit records go to security-auditlog-YYYY.MM.dd in this cluster. No shipped
+# role reads that pattern - see security/roles.yml - so only admin can. This is
+# the static half of the audit configuration; the rest is security/audit.yml.
+plugins.security.audit.type: internal_opensearch
