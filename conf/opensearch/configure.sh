@@ -70,6 +70,7 @@ EOF
 ip_re=${OPENSEARCH_DASHBOARDS_IP//./\\.}
 template=$(cat /conf/security/config.yml)
 printf '%s\n' "${template//__DASHBOARDS_IP_REGEX__/$ip_re}" > "$SEC/config.yml"
+cp /conf/security/roles.yml "$SEC/roles.yml"
 cp /conf/security/roles_mapping.yml "$SEC/roles_mapping.yml"
 
 # Port 9200: this tool speaks the REST API, not the transport protocol, despite

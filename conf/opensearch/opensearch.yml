@@ -22,5 +22,9 @@ plugins.security.ssl.http.pemtrustedcas_filepath: certs/ca/ca.pem
 # The client certificate that service presents (data/opensearch/admin).
 plugins.security.authcz.admin_dn:
   - "CN=openimis-admin,O=openIMIS"
-plugins.security.restapi.roles_enabled: ["all_access", "security_rest_api_access"]
+# all_access only. security_rest_api_access is defined in the image's own
+# roles.yml, which security/roles.yml replaces, so naming it here would name
+# a role that no longer exists.
+plugins.security.restapi.roles_enabled: ["all_access"]
 plugins.security.system_indices.enabled: true
+
