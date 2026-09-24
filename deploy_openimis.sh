@@ -7,6 +7,11 @@ else
 echo "creating env files from example"
 cp .env.example .env
 cp .env.openSearch.example .env.openSearch
+# Generated up front so that turning the security plugin on later is a
+# three-line edit rather than a secrets exercise. Unused while it is off.
+for v in OPENSEARCH_SUPERUSER_PASSWORD OPENSEARCH_PASSWORD OPENSEARCH_DASHBOARDS_PASSWORD OPENSEARCH_DASHBOARDS_COOKIE_PASSWORD; do
+  sed -i "s|^$v=$|$v=$(openssl rand -base64 36 | tr -d '/+=')|" .env.openSearch
+done
 fi
 
 

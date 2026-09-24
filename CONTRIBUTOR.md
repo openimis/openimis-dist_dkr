@@ -35,16 +35,41 @@ If the implementation involves managing the social protection workflow/import, t
 
 ## OpenSearch/OpenSearch Dashboards setup 
 
-OpenSearch and OpenSearch Dashboards ship in `compose.openSearch.yml`, which `compose.yml` includes - `docker compose up -d` starts them with everything else. Neither service publishes a host port: the only route to Dashboards is the frontend nginx at `/opensearch/`, which authorizes every request against the openIMIS dashboards right (`opensearch_reports/auth_check`) and redirects anonymous users to the login page. That same check returns the caller's username and OpenSearch right codes, which nginx forwards to Dashboards as `x-proxy-user` / `x-proxy-rights` ready for the security plugin's proxy authenticator, which files the codes as backend roles. Dashboards relays a header to the cluster only if it is listed in `opensearch.requestHeadersAllowlist`, and these two are not there yet, so for now they stop at Dashboards and nothing reads them.
+OpenSearch and OpenSearch Dashboards ship in `compose.openSearch.yml`, which `compose.yml` includes - `docker compose up -d` starts them with everything else. Neither service publishes a host port: the only route to Dashboards is the frontend nginx at `/opensearch/`, which authorizes every request against the openIMIS dashboards right (`opensearch_reports/auth_check`) and redirects anonymous users to the login page. That same check returns the caller's username and OpenSearch right codes, which nginx forwards to Dashboards as `x-proxy-user` / `x-proxy-rights`, and Dashboards relays them to the cluster, whose proxy authenticator files the codes as backend roles.
 
-  * Copy `.env.openSearch.example` to `.env.openSearch` and adjust if needed. The defaults run the cluster with the security plugin disabled and no admin credential configured anywhere; to enable the plugin set `OPENSEARCH_SECURITY_DISABLED=false`, `OPENSEARCH_DISABLE_DEMO_CONFIG=false` and a strong `OPENSEARCH_PASSWORD`.
-  * `OPENSEARCH_BASIC_TOKEN` is only needed when the cluster requires basic auth; leave it empty otherwise. Bare base64: `echo -n "admin:<password>" | base64`.
+**The cluster can run the OpenSearch security plugin:** TLS on 9200, every request authenticated, and identity headers trusted from Dashboards' address and nowhere else. Only nginx can reach Dashboards (`dashboards-net`), and the backend and worker reach the node over a network of their own (`search-net`), so no container can hand Dashboards an identity to relay. It is **off in `.env.openSearch.example`**, temporarily: the backend verifies the cluster's private certificate authority through `OPENSEARCH_CA_CERTS`, which no released backend image carries yet, and with the plugin on against an older `BE_TAG` the whole stack looks healthy while every indexing call fails with a certificate error. Copy `.env.openSearch.example` to `.env.openSearch` either way. To turn the plugin on, once your `BE_TAG` carries that setting, change the three lines named in that file. Then:
 
-Verify the gate once the stack is up:
+  * Set the four passwords (`openssl rand -base64 24` each). If one of the three internal-user passwords is empty, `opensearch-config` exits naming it; an empty or short cookie password stops Dashboards itself. Either way Dashboards does not start. `deploy_openimis.sh` fills them for you on a first install, so they are already there.
+  * `opensearch-certgen` generates the cluster CA, the node certificate and an admin client certificate into `data/opensearch/` on the first `docker compose up`, then does nothing. **Back that directory up together with `data/jwt`.** Losing `ca/` means reissuing and redistributing to every consumer; losing `private/` means you cannot renew.
+  * Three internal users, applied from those passwords on every start by the `opensearch-config` service: `admin` (cluster superuser, for operators), `openimis_indexer` (what the backend and worker connect as - `OPENSEARCH_ADMIN`/`OPENSEARCH_PASSWORD` keep the backend's variable names), and `dashboards_server`. The image's own demo users are never created.
+  * Rights: `199001` maps to the built-in `kibana_user` and `readall` roles. That is deliberately coarse - a holder reads **every** index and every other user's saved objects, and can edit saved objects, because the gate cannot tell a reading request from a writing one. Per-index roles, per-user tenants and the audit log are a separate piece of work.
+  * `openimis_indexer` currently holds `all_access`, which includes the security REST API. A compromised backend could therefore rewrite the trusted-proxy address and assert any identity - the one privilege that undoes the proxy pin. Narrowing it to a role of its own belongs with the per-index work above.
+
+**Changing a password or anything under `conf/opensearch/security/` takes effect on the next `docker compose up`.** The `opensearch-config` service re-applies the whole configuration every time the stack starts, authenticating with the admin certificate rather than a password, so there is no reload to remember and a wrong password cannot lock you out of fixing it. The node reports unhealthy until that service has succeeded, and Dashboards waits for both, so a configuration that fails to apply stops the stack visibly instead of leaving it half-configured.
+
+One consequence worth knowing: the configuration in `conf/` is authoritative. Anything changed through the security API or the Dashboards security screen is overwritten on the next start.
+
+**Upgrading an installation that already enabled the plugin the old way** (with the demo configuration) needs nothing special: the first `docker compose up` replaces the demo users with yours, and the demo `admin` and `kibanaserver` stop working. Installations running with the plugin **off** keep running with it off until they set `OPENSEARCH_SECURITY_DISABLED=false` and switch both `*_HOSTS` to `https`. The upgrade is not a no-op for them, though: three networks are created - `opensearch-net` on a fixed `172.29.0.0/24`, and `search-net` and `dashboards-net` on ranges Docker picks - so `docker compose up` fails with a pool overlap if the host already routes the fixed range: set `OPENSEARCH_NET_SUBNET` and `OPENSEARCH_DASHBOARDS_IP` in `.env.openSearch` if so; the cluster and Dashboards move off `openimis-net`, so the backend and worker no longer reach Dashboards directly and nginx is the only route to it; `opensearch-certgen` runs before `migrations`, so the backend waits on it even in legacy mode; and every api container gains a read-only mount of `data/opensearch/ca`.
+
+**With the plugin off** - the shipped default, `OPENSEARCH_SECURITY_DISABLED=true` and both `*_HOSTS` on `http` - the cluster trusts every container on its network, so network isolation is the only control. Everything above about certificates, users and the configuration service applies only once you turn it on.
+
+**The OpenSearch include is now required.** `compose.base.yml` names `opensearch-certgen`, so removing `compose.openSearch.yml` from `compose.yml` makes every `docker compose` command fail with `depends on undefined service`. To run without the cluster, stop the two services or use legacy mode rather than dropping the include.
+
+Verify the gate once the stack is up, in either mode:
 
 ```
 curl -so /dev/null -w '%{http_code}\n' http://localhost/opensearch/app/home   # 302 -> login
 ```
+
+And, with the security plugin on, that the cluster itself refuses anonymous callers:
+
+```
+docker compose exec backend curl -s -o /dev/null -w '%{http_code}\n' \
+  --cacert /run/opensearch-ca/ca.pem https://opensearch:9200/                  # 401
+```
+
+With it off that probe prints `000` instead: the node speaks plain http, so there is nothing to
+connect to on `https`, and any container on the network can read the cluster without credentials.
 
 A logged-in user holding the dashboards right gets 200; without the right, 403.
 

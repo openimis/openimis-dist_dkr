@@ -31,13 +31,16 @@
         proxy_set_header   X-Forwarded-Host $server_name;
         # The cluster's proxy authenticator reads these two under whatever
         # names its roles_header/user_header are set to, and files the codes
-        # as backend roles. Dashboards relays a header onwards only if it is
-        # listed in opensearch.requestHeadersAllowlist, which these are not
-        # yet - so for now they stop there.
+        # as backend roles. Dashboards only relays a header it has been told
+        # to: with the security plugin on, the deployment configuration in
+        # openimis-dist_dkr (conf/opensearch) lists both of these in
+        # opensearch.requestHeadersAllowlist.
         proxy_set_header   x-proxy-user $auth_user;
         proxy_set_header   x-proxy-rights $auth_rights;
-        proxy_set_header Authorization "Basic ${OPENSEARCH_BASIC_TOKEN}";
-
+        # The identity above is the credential. Clear whatever the browser sent
+        # so no client-supplied Authorization reaches Dashboards or the cluster,
+        # whose basic-auth domain would otherwise honour it.
+        proxy_set_header   Authorization "";
     }
 
     location @openimis_login {

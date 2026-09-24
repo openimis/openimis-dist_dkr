@@ -1,5 +1,17 @@
 services:
 
+  opensearch-certgen:
+    # Writes the cluster CA and certificates on the first up; no-op afterwards.
+    # Backend image because it has openssl - the opensearch image does not.
+    image: ghcr.io/openimis/openimis-be:${BE_TAG:-develop}
+    restart: "no"
+    entrypoint: ["/bin/bash", "/conf/certgen.sh"]
+    volumes:
+      - "./conf/opensearch:/conf:ro"
+      - "./data/opensearch:/out"
+    networks:
+      openimis-net:
+
   opensearch:
     image: opensearchproject/opensearch:3.8.0
     env_file:
@@ -8,35 +20,90 @@ services:
       - "discovery.type=${DISCOVERY_TYPE:-single-node}"
       - "cluster.name=${CLUSTER_NAME:-my_opensearch_local}"
       - "http.port=9200"
-      - "plugins.security.ssl.http.enabled=${SLL_HTTP_ENABLED:-false}"
+      # false turns the plugin on: TLS on 9200 and every request authenticated.
+      # opensearch-config (configure.sh) then renders the internal users from
+      # .env.openSearch and uploads them.
       - "plugins.security.disabled=${OPENSEARCH_SECURITY_DISABLED:-true}"
-      # The demo installer runs before the node reads plugins.security.disabled
-      # and aborts on an empty password. Set false when enabling security.
-      - "DISABLE_INSTALL_DEMO_CONFIG=${OPENSEARCH_DISABLE_DEMO_CONFIG:-true}"
-      - "OPENSEARCH_INITIAL_ADMIN_PASSWORD=${OPENSEARCH_PASSWORD}"
+      # The same value again, under its own name, so that healthcheck.sh cannot
+      # disagree with the node about which mode this is. Without it the script
+      # reads env_file only, while the setting above is
+      # interpolated - and a value set anywhere else would leave the healthcheck
+      # probing the other mode's scheme, reporting a working node unhealthy.
+      - "OPENSEARCH_SECURITY_DISABLED=${OPENSEARCH_SECURITY_DISABLED:-true}"
+      # Never: the demo installer would write demo certificates and users over
+      # the ones certgen.sh and configure.sh provide.
+      - "DISABLE_INSTALL_DEMO_CONFIG=true"
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
-      interval: 30s
+      test: ["CMD", "bash", "/conf/healthcheck.sh"]
+      interval: 15s
       timeout: 10s
-      retries: 3
-      start_period: 40s
+      retries: 10
+      start_period: 60s
     volumes:
       - "opensearch-data1:/usr/share/opensearch/data"
+      - "./conf/opensearch:/conf:ro"
+      - "./conf/opensearch/opensearch.yml:/usr/share/opensearch/config/opensearch.yml:ro"
+      - "./data/opensearch/ca:/usr/share/opensearch/config/certs/ca:ro"
+      - "./data/opensearch/node:/usr/share/opensearch/config/certs/node:ro"
+      # No admin client certificate here: only opensearch-config presents it.
+    depends_on:
+      opensearch-certgen:
+        condition: service_completed_successfully
     networks:
-      openimis-net:
+      opensearch-net:
+      search-net:
+
+  opensearch-config:
+    # Uploads the security configuration on every start, so a password or a role
+    # mapping change takes effect by itself. Same image as the node: it needs
+    # that image's hashing and securityadmin tools. No-op with the plugin off.
+    image: opensearchproject/opensearch:3.8.0
+    restart: "no"
+    env_file:
+      - ".env.openSearch"
+    environment:
+      - "OPENSEARCH_SECURITY_DISABLED=${OPENSEARCH_SECURITY_DISABLED:-true}"
+      - "OPENSEARCH_DASHBOARDS_IP=${OPENSEARCH_DASHBOARDS_IP:-172.29.0.250}"
+      - "OPENSEARCH_JAVA_OPTS=-Xms256m -Xmx256m"
+    entrypoint: ["/bin/bash", "/conf/configure.sh"]
+    volumes:
+      - "./conf/opensearch:/conf:ro"
+      - "./data/opensearch/ca:/usr/share/opensearch/config/certs/ca:ro"
+      - "./data/opensearch/admin:/usr/share/opensearch/config/certs/admin:ro"
+    depends_on:
+      opensearch:
+        condition: service_started
+    networks:
+      opensearch-net:
 
   opensearch-dashboards:
     image: opensearchproject/opensearch-dashboards:3.8.0
     environment:
-      # Dashboards needs the JSON-array form; the backend's OPENSEARCH_HOSTS in
-      # .env.openSearch is host:port. The two are not interchangeable.
-      - 'OPENSEARCH_HOSTS=["http://opensearch:9200"]'
+      # JSON-array form; the backend's OPENSEARCH_HOSTS is a plain URL.
+      - 'OPENSEARCH_HOSTS=${OPENSEARCH_DASHBOARDS_HOSTS:-["http://opensearch:9200"]}'
       # Tracks the node: the plugin must be off here too when it is off there.
       - "DISABLE_SECURITY_DASHBOARDS_PLUGIN=${OPENSEARCH_SECURITY_DISABLED:-true}"
       - SERVER_BASEPATH=/opensearch
       - SERVER_REWRITEBASEPATH=true
+      # Dashboards' own server user; ignored with the plugin off.
+      - OPENSEARCH_USERNAME=dashboards_server
+      - OPENSEARCH_PASSWORD=${OPENSEARCH_DASHBOARDS_PASSWORD:-}
+      - OPENSEARCH_SSL_CERTIFICATEAUTHORITIES=/usr/share/opensearch-dashboards/config/certs/ca.pem
+      - OPENSEARCH_DASHBOARDS_COOKIE_PASSWORD=${OPENSEARCH_DASHBOARDS_COOKIE_PASSWORD:-}
+    command: ["bash", "/conf/dashboards-start.sh"]
+    volumes:
+      - "./conf/opensearch:/conf:ro"
+      - "./data/opensearch/ca:/usr/share/opensearch-dashboards/config/certs:ro"
+    depends_on:
+      opensearch:
+        condition: service_healthy
+      opensearch-config:
+        condition: service_completed_successfully
     networks:
-      openimis-net:
+      dashboards-net:
+      opensearch-net:
+        # The one address the cluster trusts identity headers from.
+        ipv4_address: ${OPENSEARCH_DASHBOARDS_IP:-172.29.0.250}
 
 volumes:
   opensearch-data1:
