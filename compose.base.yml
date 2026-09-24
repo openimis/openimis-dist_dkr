@@ -19,8 +19,14 @@ x-api: &default-api
     - OPENSEARCH_ADMIN=${OPENSEARCH_ADMIN}
     - OPENSEARCH_PASSWORD=${OPENSEARCH_PASSWORD}
     - OPENSEARCH_HOSTS=${OPENSEARCH_HOSTS}
+    # Defaults to the key jwt-keygen writes; override only with an in-container path.
+    - JWT_SIGNING_KEY=${JWT_SIGNING_KEY:-/run/keys/jwt_signing_key.pem}
+    # Setting either logs every user out once; see .env.example.
+    - JWT_ISSUER=${JWT_ISSUER:-}
+    - JWT_AUDIENCE=${JWT_AUDIENCE:-}
   volumes:
     - photos:/openimis-be/openIMIS/images/insurees
+    - ./data/jwt:/run/keys:ro
   depends_on:
     db:
       condition: service_healthy
@@ -64,10 +70,28 @@ services:
       - "traefik.http.routers.frontend-http.middlewares=redirect-to-https"
       - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
 
+  jwt-keygen:
+    # Writes the signing key before migrations, which backend and worker wait for.
+    # Not the anchor: it mounts the key read-only, which a writer cannot inherit.
+    image: ghcr.io/openimis/openimis-be:${BE_TAG:-develop}
+    restart: no
+    # .tmp then mv: test -s would accept a half-written key forever.
+    entrypoint: ["/bin/sh", "-c", "test -s /run/keys/jwt_signing_key.pem || (umask 077 && openssl genrsa -out /run/keys/jwt_signing_key.pem.tmp 2048 && mv /run/keys/jwt_signing_key.pem.tmp /run/keys/jwt_signing_key.pem)"]
+    volumes:
+      - ./data/jwt:/run/keys
+    networks:
+      openimis-net:
+
   migrations:
     <<: *default-api
     command: init
     restart: no
+    depends_on:
+      # Repeated from the anchor: a service-level depends_on replaces it, not merges.
+      db:
+        condition: service_healthy
+      jwt-keygen:
+        condition: service_completed_successfully
   backend:
     <<: *default-api
     command: start
