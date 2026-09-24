@@ -45,7 +45,7 @@ services:
       - "./conf/opensearch/opensearch.yml:/usr/share/opensearch/config/opensearch.yml:ro"
       - "./data/opensearch/ca:/usr/share/opensearch/config/certs/ca:ro"
       - "./data/opensearch/node:/usr/share/opensearch/config/certs/node:ro"
-      - "./data/opensearch/admin:/usr/share/opensearch/config/certs/admin:ro"
+      # No admin client certificate here: only opensearch-config presents it.
     depends_on:
       opensearch-certgen:
         condition: service_completed_successfully
