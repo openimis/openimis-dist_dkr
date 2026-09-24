@@ -55,7 +55,7 @@ admin:
 openimis_indexer:
   hash: "$h_indexer"
   reserved: true
-  opendistro_security_roles: ["all_access"]
+  opendistro_security_roles: ["openimis_indexer_role"]
   description: "openIMIS backend and worker: index creation and document indexing"
 dashboards_server:
   hash: "$h_dashboards"
