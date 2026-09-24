@@ -1,0 +1,77 @@
+---
+_meta:
+  type: "roles"
+  config_version: 2
+
+# Dashboards itself. Deliberately not the built-in kibana_user: the plugin
+# grants Global-tenant write to any holder of a role by that name, and its
+# ".kibana_*" pattern would expose every other user's private tenant index
+# through Discover. ".kibana" exactly is the Global tenant index and is reached
+# by index permission, so without it every Global read is refused; a private
+# tenant needs none, because the plugin's tenant layer resolves it.
+openimis_dashboards_user:
+  reserved: false
+  description: "Open Dashboards; read the shipped dashboards in the Global tenant"
+  cluster_permissions: ["cluster_composite_ops"]
+  index_permissions:
+    - index_patterns: [".kibana"]
+      allowed_actions: ["read"]
+  tenant_permissions:
+    - tenant_patterns: ["global_tenant"]
+      allowed_actions: ["kibana_all_read"]
+
+# "Update dashboards", so the shipped set can be re-imported. The tenant
+# permission is what the saved-objects API checks and the index permission is
+# what a raw request checks, so both belong on the writing role and neither on
+# the reading one. Still no write on an openIMIS index; only the indexer writes
+# there.
+openimis_dashboards_author:
+  reserved: false
+  description: "Write the shipped dashboards in the Global tenant"
+  index_permissions:
+    - index_patterns: [".kibana"]
+      allowed_actions: ["delete", "index", "manage"]
+  tenant_permissions:
+    - tenant_patterns: ["global_tenant"]
+      allowed_actions: ["kibana_all_write"]
+
+# The openIMIS indices by name rather than a pattern, so a Dashboards user reads
+# what the indexer writes and nothing else - not the audit log, not another
+# user's private tenant. A module that adds a document adds its index here.
+# indices:admin/mappings/get is what the index-pattern pages call.
+openimis_reports_reader:
+  reserved: false
+  description: "Read the openIMIS report indices"
+  index_permissions:
+    - index_patterns:
+        - "individual"
+        - "group_individual"
+        - "individual_data_source_upload"
+        - "beneficiary"
+        - "payroll"
+        - "benefit_consumption"
+        - "payroll_benefit_consumption"
+        - "benefit_attachment"
+        - "ticket"
+      allowed_actions: ["read", "indices:admin/mappings/get"]
+
+# Replaces all_access for the backend and the worker: the nine indices, and no
+# cluster administration or security REST API. cluster_composite_ops carries
+# indices:data/write/bulk, which is checked at cluster level before the
+# per-index items.
+openimis_indexer_role:
+  reserved: false
+  description: "Index openIMIS documents; no cluster or security administration"
+  cluster_permissions: ["cluster_monitor", "cluster_composite_ops"]
+  index_permissions:
+    - index_patterns:
+        - "individual"
+        - "group_individual"
+        - "individual_data_source_upload"
+        - "beneficiary"
+        - "payroll"
+        - "benefit_consumption"
+        - "payroll_benefit_consumption"
+        - "benefit_attachment"
+        - "ticket"
+      allowed_actions: ["indices_all"]

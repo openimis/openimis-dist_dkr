@@ -55,7 +55,7 @@ admin:
 openimis_indexer:
   hash: "$h_indexer"
   reserved: true
-  opendistro_security_roles: ["all_access"]
+  opendistro_security_roles: ["openimis_indexer_role"]
   description: "openIMIS backend and worker: index creation and document indexing"
 dashboards_server:
   hash: "$h_dashboards"
@@ -70,7 +70,10 @@ EOF
 ip_re=${OPENSEARCH_DASHBOARDS_IP//./\\.}
 template=$(cat /conf/security/config.yml)
 printf '%s\n' "${template//__DASHBOARDS_IP_REGEX__/$ip_re}" > "$SEC/config.yml"
+cp /conf/security/roles.yml "$SEC/roles.yml"
 cp /conf/security/roles_mapping.yml "$SEC/roles_mapping.yml"
+cp /conf/security/audit.yml "$SEC/audit.yml"
+cp /conf/security/tenants.yml "$SEC/tenants.yml"
 
 # Port 9200: this tool speaks the REST API, not the transport protocol, despite
 # the transport port being its historical default. The node answers "not

@@ -14,10 +14,13 @@ config:
         internalProxies: '__DASHBOARDS_IP_REGEX__'
         remoteIpHeader: 'x-forwarded-for'
     # Without this block the plugin keeps its defaults, which name a different
-    # Dashboards server user and leave multitenancy on. Both have to agree with
-    # opensearch_dashboards.yml or Dashboards is refused its own index.
+    # Dashboards server user. server_username and the two multitenancy flags
+    # have to agree with opensearch_dashboards.yml or Dashboards is refused its
+    # own index. Multitenancy gives every user a private tenant for saved
+    # objects, and makes the security_tenant parameter on dashboard links live.
     kibana:
-      multitenancy_enabled: false
+      multitenancy_enabled: true
+      private_tenant_enabled: true
       server_username: dashboards_server
       index: '.kibana'
     authc:

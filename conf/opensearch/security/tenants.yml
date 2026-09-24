@@ -1,0 +1,9 @@
+---
+_meta:
+  type: "tenants"
+  config_version: 2
+# Empty on purpose, and shipped rather than omitted: the image's own tenants.yml
+# defines a demo tenant, which multitenancy being on would put in every
+# administrator's tenant picker. Uploading this replaces it. The Global tenant
+# is static and needs no entry, and a private tenant is created per user by the
+# plugin, so openIMIS declares no tenant of its own.

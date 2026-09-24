@@ -1,0 +1,42 @@
+---
+_meta:
+  type: "audit"
+  config_version: 2
+config:
+  enabled: true
+  audit:
+    enable_rest: true
+    # Index-level denials are decided on the transport layer; off here and a
+    # 403 on /payroll/_search is never recorded.
+    enable_transport: true
+    # Denials only. GRANTED_PRIVILEGES would record every read - a per-user
+    # access trail, at the cost of several records per dashboard panel and no
+    # retention policy yet. Remove it from the two lines below to turn it on.
+    disabled_rest_categories: ["AUTHENTICATED", "GRANTED_PRIVILEGES"]
+    disabled_transport_categories: ["AUTHENTICATED", "GRANTED_PRIVILEGES", "CLUSTER_SETTINGS_CHANGED", "INDEX_SETTINGS_CHANGED"]
+    # No user is ignored by name: the proxy domain takes the name from the
+    # openIMIS login, so an ignored service-account name would also hide an
+    # openIMIS user who picked it. Their successful traffic is not recorded
+    # anyway (AUTHENTICATED and GRANTED_PRIVILEGES are off above).
+    # Only the node's own healthcheck, which is anonymous by design and would
+    # otherwise write a FAILED_LOGIN record every 15 seconds. Nothing else: this
+    # filter applies to every category, so ignoring "indices:data/read/*" here
+    # would also hide the denied searches the log exists to record.
+    ignore_requests: ["/_cluster/health"]
+    resolve_bulk_requests: false
+    # Not the default. A search body carries the query, and with individual
+    # indexed that is personal data landing in a second index.
+    log_request_body: false
+    resolve_indices: true
+    exclude_sensitive_headers: true
+  compliance:
+    # Who changed the security configuration - roles, users, this file. Kept;
+    # nothing else is watched, so this adds no per-document records.
+    enabled: true
+    internal_config: true
+    external_config: false
+    read_metadata_only: true
+    read_watched_fields: {}
+    write_metadata_only: true
+    write_log_diffs: false
+    write_watched_indices: []
