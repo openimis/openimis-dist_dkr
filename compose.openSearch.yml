@@ -27,8 +27,8 @@ services:
       # The same value again, under its own name, so that healthcheck.sh cannot
       # disagree with the node about which mode this is. Without it the script
       # reads env_file only, while the setting above is
-      # interpolated - and a value set anywhere else would leave the plugin on
-      # with nothing rendered, seeding the image's published demo users.
+      # interpolated - and a value set anywhere else would leave the healthcheck
+      # probing the other mode's scheme, reporting a working node unhealthy.
       - "OPENSEARCH_SECURITY_DISABLED=${OPENSEARCH_SECURITY_DISABLED:-true}"
       # Never: the demo installer would write demo certificates and users over
       # the ones certgen.sh and configure.sh provide.
