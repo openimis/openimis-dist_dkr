@@ -21,16 +21,17 @@ services:
       - "cluster.name=${CLUSTER_NAME:-my_opensearch_local}"
       - "http.port=9200"
       # false turns the plugin on: TLS on 9200 and every request authenticated.
-      # start.sh then renders the internal users from .env.openSearch.
+      # opensearch-config (configure.sh) then renders the internal users from
+      # .env.openSearch and uploads them.
       - "plugins.security.disabled=${OPENSEARCH_SECURITY_DISABLED:-true}"
-      # The same value again, under its own name, so that start.sh and
-      # healthcheck.sh cannot disagree with the node about which mode this is.
-      # Without it they read env_file only, while the setting above is
+      # The same value again, under its own name, so that healthcheck.sh cannot
+      # disagree with the node about which mode this is. Without it the script
+      # reads env_file only, while the setting above is
       # interpolated - and a value set anywhere else would leave the plugin on
       # with nothing rendered, seeding the image's published demo users.
       - "OPENSEARCH_SECURITY_DISABLED=${OPENSEARCH_SECURITY_DISABLED:-true}"
       # Never: the demo installer would write demo certificates and users over
-      # the ones conf/opensearch and start.sh provide.
+      # the ones certgen.sh and configure.sh provide.
       - "DISABLE_INSTALL_DEMO_CONFIG=true"
     healthcheck:
       test: ["CMD", "bash", "/conf/healthcheck.sh"]

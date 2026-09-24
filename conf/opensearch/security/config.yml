@@ -8,7 +8,7 @@ config:
       anonymous_auth_enabled: false
       xff:
         enabled: true
-        # Rendered by start.sh from OPENSEARCH_DASHBOARDS_IP: Dashboards' fixed
+        # Rendered by configure.sh from OPENSEARCH_DASHBOARDS_IP: Dashboards' fixed
         # address on opensearch-net, and nothing else. Any wider match lets any
         # container that can reach 9200 assert any identity it likes.
         internalProxies: '__DASHBOARDS_IP_REGEX__'
