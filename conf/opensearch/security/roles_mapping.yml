@@ -2,13 +2,9 @@
 _meta:
   type: "rolesmapping"
   config_version: 2
-all_access:
-  reserved: false
-  users: ["admin", "openimis_indexer"]
-  description: "Cluster superuser, and the openIMIS indexer until it gets a role of its own"
-kibana_server:
-  reserved: true
-  users: ["dashboards_server"]
+# The internal users (admin, openimis_indexer, dashboards_server) get their
+# roles in internal_users.yml, which configure.sh writes. No mapping here names
+# a user: a proxy-authenticated openIMIS login with the same name would match.
 # Right 199001 (view dashboards), as forwarded in x-proxy-rights. kibana_user
 # also lets the holder edit saved objects, which is a known and accepted gap:
 # the gate cannot tell a reading request from a writing one.

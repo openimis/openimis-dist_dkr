@@ -39,6 +39,9 @@ h_admin=$(bcrypt "$OPENSEARCH_SUPERUSER_PASSWORD") || exit 1
 h_indexer=$(bcrypt "$OPENSEARCH_PASSWORD") || exit 1
 h_dashboards=$(bcrypt "$OPENSEARCH_DASHBOARDS_PASSWORD") || exit 1
 
+# Roles are granted on the user record, never by name in roles_mapping.yml: a
+# mapping by user name also matches a proxy-authenticated user of that name,
+# and the proxy's user name is whatever openIMIS login reached the gate.
 cat > "$SEC/internal_users.yml" <<EOF
 ---
 _meta:
@@ -47,14 +50,17 @@ _meta:
 admin:
   hash: "$h_admin"
   reserved: true
+  opendistro_security_roles: ["all_access"]
   description: "Cluster superuser: operators and manual administration"
 openimis_indexer:
   hash: "$h_indexer"
   reserved: true
+  opendistro_security_roles: ["all_access"]
   description: "openIMIS backend and worker: index creation and document indexing"
 dashboards_server:
   hash: "$h_dashboards"
   reserved: true
+  opendistro_security_roles: ["kibana_server"]
   description: "OpenSearch Dashboards server user"
 EOF
 
