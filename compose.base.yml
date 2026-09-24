@@ -30,8 +30,9 @@ x-api: &default-api
       condition: service_healthy
   networks:
     openimis-net:
-    # The cluster lives here; the indexer has to reach it.
-    opensearch-net:
+    # The node, and nothing else of OpenSearch: not Dashboards, which relays
+    # identity headers to the cluster from the one address it trusts.
+    search-net:
 
 services:
   frontend:
@@ -44,6 +45,8 @@ services:
       - OPENIMIS_CONF_JSON=${OPENIMIS_FE_CONF_JSON}
     networks:
       openimis-net:
+      # The only way to Dashboards, so every request to it passes the gate.
+      dashboards-net:
       # proxy:
     ports:
       - ${HTTP_PORT:-80}:80
@@ -123,11 +126,22 @@ networks:
   #   external: true
   openimis-net:
     name: "${PROJECT_NAME:-openimis}-net"
-  # Fixed subnet so Dashboards can hold the address the cluster trusts identity
-  # headers from. Only the node, Dashboards and the api containers join it.
-  # Defined here beside openimis-net because that is where this file keeps
-  # networks. Note that compose.openSearch.yml is required either way:
-  # migrations depends on opensearch-certgen, which lives there.
+  # OpenSearch is split over three networks so that no container can hand
+  # Dashboards a forged identity: Dashboards relays x-proxy-* headers from its
+  # own address, which the cluster trusts. Defined here beside openimis-net
+  # because that is where this file keeps networks. Note that
+  # compose.openSearch.yml is required either way: migrations depends on
+  # opensearch-certgen, which lives there.
+  #
+  # nginx -> Dashboards: frontend and Dashboards only.
+  dashboards-net:
+    name: "${PROJECT_NAME:-openimis}-dashboards-net"
+  # The indexer -> the node: the api containers and the node. An address here
+  # is never trusted for identity headers.
+  search-net:
+    name: "${PROJECT_NAME:-openimis}-search-net"
+  # Dashboards -> the node, from the fixed address the cluster trusts identity
+  # headers from. Only the node, Dashboards and opensearch-config join it.
   opensearch-net:
     name: "${PROJECT_NAME:-openimis}-opensearch-net"
     ipam:

@@ -50,6 +50,7 @@ services:
         condition: service_completed_successfully
     networks:
       opensearch-net:
+      search-net:
 
   opensearch-config:
     # Uploads the security configuration on every start, so a password or a role
@@ -98,7 +99,7 @@ services:
       opensearch-config:
         condition: service_completed_successfully
     networks:
-      openimis-net:
+      dashboards-net:
       opensearch-net:
         # The one address the cluster trusts identity headers from.
         ipv4_address: ${OPENSEARCH_DASHBOARDS_IP:-172.29.0.250}
