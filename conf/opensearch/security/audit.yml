@@ -14,10 +14,10 @@ config:
     # retention policy yet. Remove it from the two lines below to turn it on.
     disabled_rest_categories: ["AUTHENTICATED", "GRANTED_PRIVILEGES"]
     disabled_transport_categories: ["AUTHENTICATED", "GRANTED_PRIVILEGES", "CLUSTER_SETTINGS_CHANGED", "INDEX_SETTINGS_CHANGED"]
-    # The service accounts, not people: the indexer writes on every model save
-    # and Dashboards polls constantly. admin is deliberately not here - operator
-    # actions are the ones worth keeping.
-    ignore_users: ["openimis_indexer", "dashboards_server"]
+    # No user is ignored by name: the proxy domain takes the name from the
+    # openIMIS login, so an ignored service-account name would also hide an
+    # openIMIS user who picked it. Their successful traffic is not recorded
+    # anyway (AUTHENTICATED and GRANTED_PRIVILEGES are off above).
     # Only the node's own healthcheck, which is anonymous by design and would
     # otherwise write a FAILED_LOGIN record every 15 seconds. Nothing else: this
     # filter applies to every category, so ignoring "indices:data/read/*" here
@@ -37,8 +37,6 @@ config:
     external_config: false
     read_metadata_only: true
     read_watched_fields: {}
-    read_ignore_users: ["openimis_indexer", "dashboards_server"]
     write_metadata_only: true
     write_log_diffs: false
     write_watched_indices: []
-    write_ignore_users: ["openimis_indexer", "dashboards_server"]
