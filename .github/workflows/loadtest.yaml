@@ -1,0 +1,48 @@
+name: Load test
+
+# The scenarios, the stack start-up and the thresholds live in openimis/openimis-loadtest;
+# this workflow runs them against this repository's stack.
+on:
+  schedule:
+    - cron: "0 3 * * *"
+  workflow_dispatch:
+    inputs:
+      be_tag:
+        description: Backend tag/branch (BE_TAG)
+        default: develop
+      fe_tag:
+        description: Frontend tag/branch (FE_TAG)
+        default: develop
+      db_tag:
+        description: Database tag/branch (DB_TAG)
+        default: develop
+      preset:
+        description: seed_synthetic_health_data preset
+        type: choice
+        options: [small, medium, large]
+        default: medium
+      users:
+        description: Concurrent simulated users
+        default: "20"
+      run_time:
+        description: Load duration, e.g. 5m
+        default: 5m
+
+permissions:
+  contents: read
+
+jobs:
+  load-test:
+    uses: openimis/openimis-loadtest/.github/workflows/loadtest.yaml@main
+    with:
+      # Like the end-to-end tests in ci.yaml: develop images unless a manual run names others.
+      be_tag: ${{ inputs.be_tag || 'develop' }}
+      fe_tag: ${{ inputs.fe_tag || 'develop' }}
+      db_tag: ${{ inputs.db_tag || 'develop' }}
+      preset: ${{ inputs.preset || 'medium' }}
+      users: ${{ inputs.users || '20' }}
+      run_time: ${{ inputs.run_time || '5m' }}
+      # The stack of the branch this run started on: develop for the nightly.
+      dist_repository: ${{ github.repository }}
+      dist_ref: ${{ github.ref_name }}
+      loadtest_ref: main
