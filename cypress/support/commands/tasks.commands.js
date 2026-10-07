@@ -124,7 +124,7 @@ export function registerTaskCommands() {
       .filter((_, tr) => texts.every((t) => tr.innerText.includes(t)))
       .first()
       .within(() => {
-        cy.get('button[title="View details"]').click({ force: true });
+        cy.get('button[aria-label="View details"]').click({ force: true });
       });
 
     cy.url({ timeout: TIMEOUTS.BACKEND_VALIDATION }).should('include', '/tasks/task/');

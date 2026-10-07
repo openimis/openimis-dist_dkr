@@ -73,8 +73,8 @@ export function registerGrievanceCommands() {
     cy.get('label[role="button"].MuiIconButton-colorPrimary').click();
 
     // Wait for creation to complete
-    cy.get('ul.MuiList-root li div[role="progressbar"]', { timeout: 15000 }).should('exist');
-    cy.get('ul.MuiList-root li div[role="progressbar"]', { timeout: 15000 }).should('not.exist');
+    cy.get('ul.MuiList-root li [role="progressbar"]', { timeout: 15000 }).should('exist');
+    cy.get('ul.MuiList-root li [role="progressbar"]', { timeout: 15000 }).should('not.exist');
 
     // Check journal for success
     cy.get('ul.MuiList-root li').first().click();
@@ -95,7 +95,7 @@ export function registerGrievanceCommands() {
     cy.contains('td', grievanceCode)
       .parent('tr')
       .within(() => {
-        cy.get('button[title="Edit"]').click();
+        cy.get('button[aria-label="Edit"]').click();
       });
 
     if (immutableFields.reporterType) {
@@ -145,8 +145,8 @@ export function registerGrievanceCommands() {
     cy.get('label[role="button"].MuiIconButton-colorPrimary').click();
 
     // Wait for update to complete
-    cy.get('ul.MuiList-root li div[role="progressbar"]', { timeout: 15000 }).should('exist');
-    cy.get('ul.MuiList-root li div[role="progressbar"]', { timeout: 15000 }).should('not.exist');
+    cy.get('ul.MuiList-root li [role="progressbar"]', { timeout: 15000 }).should('exist');
+    cy.get('ul.MuiList-root li [role="progressbar"]', { timeout: 15000 }).should('not.exist');
 
     // Check journal for success
     cy.get('ul.MuiList-root li').first().click();
@@ -159,11 +159,11 @@ export function registerGrievanceCommands() {
     cy.addGrievanceComment(comment);
 
     // Click the tick mark icon on the first/latest comment to resolve
-    cy.get('button[title="Resolve grievance with this comment."]').first().click();
+    cy.get('button[aria-label="Resolve grievance with this comment."]').first().click();
 
     // Wait for resolve to complete
-    cy.get('ul.MuiList-root li div[role="progressbar"]', { timeout: 15000 }).should('exist');
-    cy.get('ul.MuiList-root li div[role="progressbar"]', { timeout: 15000 }).should('not.exist');
+    cy.get('ul.MuiList-root li [role="progressbar"]', { timeout: 15000 }).should('exist');
+    cy.get('ul.MuiList-root li [role="progressbar"]', { timeout: 15000 }).should('not.exist');
 
     // Check journal for success
     cy.get('ul.MuiList-root li').first().click();
@@ -177,8 +177,8 @@ export function registerGrievanceCommands() {
     // Click the unlock icon (lock icon in header action area)
     cy.get('div[class*="paperHeaderAction"] button.MuiIconButton-root').click();
 
-    cy.get('ul.MuiList-root li div[role="progressbar"]', { timeout: 15000 }).should('exist');
-    cy.get('ul.MuiList-root li div[role="progressbar"]', { timeout: 15000 }).should('not.exist');
+    cy.get('ul.MuiList-root li [role="progressbar"]', { timeout: 15000 }).should('exist');
+    cy.get('ul.MuiList-root li [role="progressbar"]', { timeout: 15000 }).should('not.exist');
 
     cy.get('ul.MuiList-root li').first().click();
     cy.contains('Failed').should('not.exist');
@@ -240,7 +240,7 @@ export function registerGrievanceCommands() {
     cy.contains('td', grievanceCode)
       .parent('tr')
       .within(() => {
-        cy.get('button[title="Edit"]').click();
+        cy.get('button[aria-label="Edit"]').click();
       });
   });
 
@@ -295,8 +295,8 @@ export function registerGrievanceCommands() {
     cy.contains('button', 'Save').click();
 
     // Wait for save mutation to complete before reloading
-    cy.get('ul.MuiList-root li div[role="progressbar"]', { timeout: 15000 }).should('exist');
-    cy.get('ul.MuiList-root li div[role="progressbar"]', { timeout: 15000 }).should('not.exist');
+    cy.get('ul.MuiList-root li [role="progressbar"]', { timeout: 15000 }).should('exist');
+    cy.get('ul.MuiList-root li [role="progressbar"]', { timeout: 15000 }).should('not.exist');
 
     cy.contains(commentText).should('exist');
   });

@@ -58,21 +58,22 @@ describe('Django admin workflows', () => {
       cy.get('div.MuiDrawer-root').first().within(() => {
         cy.shouldHaveMenuItemsInOrder(expectedMenuItems)
 
-        cy.contains('div[role="button"]', 'Social Protection').click();
+        cy.contains('button.MuiAccordionSummary-root', 'Social Protection').click();
 
-        cy.contains('div[role="button"]', 'Social Protection')
-          .siblings('.MuiCollapse-root').within(() => {
+        cy.contains('button.MuiAccordionSummary-root', 'Social Protection')
+          .parents('.MuiAccordion-root')
+          .find('.MuiCollapse-root').within(() => {
             cy.shouldHaveMenuItemsInOrder(expectedSubMenuItems)
 
             // Verify submenu persistence selected state
-            cy.contains('div[role="button"]', programMenuText).click();
-            cy.contains('div.Mui-selected[role="button"]', programMenuText);
+            cy.contains('a.MuiListItem-root', programMenuText).click();
+            cy.contains('a.MuiListItem-root.menuItemActive', programMenuText);
 
-            cy.contains('div[role="button"]', 'Individuals').click();
-            cy.contains('div.Mui-selected[role="button"]', 'Individuals');
+            cy.contains('a.MuiListItem-root', 'Individuals').click();
+            cy.contains('a.MuiListItem-root.menuItemActive', 'Individuals');
 
             cy.visit('/front/benefitPlans')
-            cy.contains('div.Mui-selected[role="button"]', programMenuText);
+            cy.contains('a.MuiListItem-root.menuItemActive', programMenuText);
           })
       });
     })

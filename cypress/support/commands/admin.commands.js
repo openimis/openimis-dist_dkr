@@ -10,13 +10,14 @@ export function registerAdminCommands() {
         });
       } else {
         cy.get('table#result_list').then(($table) => {
-          const configLink = $table.find(`a:contains("${moduleName}")`);
+          const configLinks = $table.find(`a:contains("${moduleName}")`);
 
-          if (configLink.length) {
-            cy.wrap(configLink).click();
+          if (configLinks.length) {
+            cy.wrap(configLinks.first()).click();
             cy.contains('a.deletelink', 'Delete').click();
             cy.get('input[type="submit"][value*="Yes"]').click();
-            cy.contains(`a:contains("${moduleName}")`).should('not.exist');
+            // Recursively delete remaining configs with same name
+            cy.deleteModuleConfig(moduleName);
           } else {
             Cypress.log({
               name: 'deleteModuleConfig',
@@ -29,16 +30,15 @@ export function registerAdminCommands() {
   });
 
   Cypress.Commands.add('shouldHaveMenuItemsInOrder', (expectedMenuNames) => {
-    cy.get('div[role="button"]')
+    expectedMenuNames.forEach((itemText, index) => {
+      cy.get('button.MuiAccordionSummary-root, a.MuiListItem-root')
+        .filter(':visible')
+        .eq(index)
+        .should('contain', itemText);
+    });
+    cy.get('button.MuiAccordionSummary-root, a.MuiListItem-root')
       .filter(':visible')
-      .should(($buttons) => {
-        expect($buttons).to.have.length(expectedMenuNames.length);
-
-        // Check each sub menu item text and order
-        expectedMenuNames.forEach((itemText, index) => {
-          expect($buttons.eq(index)).to.contain(itemText);
-        });
-      });
+      .should('have.length', expectedMenuNames.length);
   });
 
   Cypress.Commands.add('deleteActivities', (activityNames) => {

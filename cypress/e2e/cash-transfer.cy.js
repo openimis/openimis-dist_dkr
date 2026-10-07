@@ -111,7 +111,7 @@ describe('Cash transfer program update workflows', () => {
 
       cy.enterMuiInput('Description', updatedDescription, 'textarea')
 
-      cy.get('[title="Save changes"] button').click()
+      cy.get('[aria-label="Save changes"] button').click()
 
       cy.checkProgramUpdateCompleted()
 
@@ -220,7 +220,7 @@ describe('Cash transfer program update workflows', () => {
 
         cy.contains('h2', 'Assign Active Beneficiaries')
         cy.contains('h6', '0 active beneficiaries selected')
-        cy.get('[role="dialog"] [title="Previous Page"]')
+        cy.get('[role="dialog"] [aria-label="Previous Page"]')
           .next('span')
           .invoke('text')
           .then((text) => {
@@ -232,13 +232,13 @@ describe('Cash transfer program update workflows', () => {
         // filter beneficiaries by number of children
         cy.contains('[role="dialog"] button', '=').trigger('mouseover');
         cy.contains('li', '<').click();
-        cy.get('[role="dialog"] input[type="number"]').clear().type('5');
+        cy.get('[role="dialog"] input[type="number"]').first().clear({force: true}).type('5', {force: true});
 
         cy.get('[role="progressbar"]').should('exist')
         cy.get('[role="progressbar"]').should('not.exist')
 
         cy.get('@numCandidates').then((prevTotal) => {
-          cy.get('[role="dialog"] [title="Previous Page"]')
+          cy.get('[role="dialog"] [aria-label="Previous Page"]')
             .next('span')
             .invoke('text')
             .then((text) => {
@@ -249,7 +249,7 @@ describe('Cash transfer program update workflows', () => {
         });
 
         // assign all matching beneficiaries from the first page
-        cy.get('th input[type="checkbox"]').check()
+        cy.get('[role="dialog"] th input[type="checkbox"]').first().check({force: true})
         cy.contains('h6', '0 active beneficiaries selected').should('not.exist')
         cy.get('[role="dialog"] h6')
           .invoke('text')
@@ -287,7 +287,7 @@ describe('Cash transfer program update workflows', () => {
           .type('Ter')
         cy.wait(500) // give the filter results to settle down
         cy.get('@assignedProjectBeneficiaries').then((assignedProjectBeneficiaries) => {
-          cy.get('[title="Previous Page"]')
+          cy.get('[aria-label="Previous Page"]')
             .next('span')
             .invoke('text')
             .then((text) => {
@@ -320,11 +320,11 @@ describe('Cash transfer program update workflows', () => {
         const workingDaysUpdated = "10"
         cy.enterMuiInput('Working Days', workingDaysUpdated)
 
-        cy.get('[title="Save"] button').click()
+        cy.get('[aria-label="Save"] button').click()
 
         // Wait for update to complete
-        cy.get('ul.MuiList-root li div[role="progressbar"]').should('exist')
-        cy.get('ul.MuiList-root li div[role="progressbar"]').should('not.exist')
+        cy.get('ul.MuiList-root li [role="progressbar"]').should('exist')
+        cy.get('ul.MuiList-root li [role="progressbar"]').should('not.exist')
 
         // Check last journal message
         cy.get('ul.MuiList-root li').first().click()
@@ -356,7 +356,7 @@ describe('Cash transfer program update workflows', () => {
 
             cy.contains('td', name)
               .parent('tr').within(() => {
-                cy.get('button[title="Edit"]').click({force: true});
+                cy.get('button[aria-label="Edit"]').click({force: true});
               })
 
             cy.assertMuiInputDisabled('Name', name)
@@ -367,12 +367,12 @@ describe('Cash transfer program update workflows', () => {
             cy.assertMuiInputDisabled('Status')
             cy.assertMuiInputDisabled('Program')
 
-            cy.get('button[title="Undo Delete"]').click()
+            cy.get('button[aria-label="Undo Delete"]').click()
             cy.contains('button', 'Ok').click();
 
             // Wait for undo to complete
-            cy.get('ul.MuiList-root li div[role="progressbar"]').should('exist')
-            cy.get('ul.MuiList-root li div[role="progressbar"]').should('not.exist')
+            cy.get('ul.MuiList-root li [role="progressbar"]').should('exist')
+            cy.get('ul.MuiList-root li [role="progressbar"]').should('not.exist')
 
             // Check last journal message
             cy.get('ul.MuiList-root li').first().click()
@@ -427,7 +427,7 @@ describe('Cash transfer program update workflows', () => {
 
       cy.enterMuiInput('Description', updatedDescription, 'textarea')
 
-      cy.get('[title="Save changes"] button').click()
+      cy.get('[aria-label="Save changes"] button').click()
 
       cy.checkProgramUpdateCompleted()
 
@@ -557,7 +557,9 @@ describe('Cash transfer program update workflows', () => {
 
         cy.contains('h2', 'Assign Active Beneficiaries')
         cy.contains('h6', '0 active beneficiaries selected')
-        cy.get('[role="dialog"] [title="Previous Page"]')
+
+        // Verify there are candidates to assign
+        cy.get('[role="dialog"] [aria-label="Previous Page"]')
           .next('span')
           .invoke('text')
           .then((text) => {
@@ -644,11 +646,11 @@ describe('Cash transfer program update workflows', () => {
         const workingDaysUpdated = "10"
         cy.enterMuiInput('Working Days', workingDaysUpdated)
 
-        cy.get('[title="Save"] button').click()
+        cy.get('[aria-label="Save"] button').click()
 
         // Wait for update to complete
-        cy.get('ul.MuiList-root li div[role="progressbar"]').should('exist')
-        cy.get('ul.MuiList-root li div[role="progressbar"]').should('not.exist')
+        cy.get('ul.MuiList-root li [role="progressbar"]').should('exist')
+        cy.get('ul.MuiList-root li [role="progressbar"]').should('not.exist')
 
         // Check last journal message
         cy.get('ul.MuiList-root li').first().click()
@@ -680,7 +682,7 @@ describe('Cash transfer program update workflows', () => {
 
             cy.contains('td', name)
               .parent('tr').within(() => {
-                cy.get('button[title="Edit"]').click({force: true});
+                cy.get('button[aria-label="Edit"]').click({force: true});
               })
 
             cy.assertMuiInputDisabled('Name', name)
@@ -691,12 +693,12 @@ describe('Cash transfer program update workflows', () => {
             cy.assertMuiInputDisabled('Status')
             cy.assertMuiInputDisabled('Program')
 
-            cy.get('button[title="Undo Delete"]').click()
+            cy.get('button[aria-label="Undo Delete"]').click()
             cy.contains('button', 'Ok').click();
 
             // Wait for undo to complete
-            cy.get('ul.MuiList-root li div[role="progressbar"]').should('exist')
-            cy.get('ul.MuiList-root li div[role="progressbar"]').should('not.exist')
+            cy.get('ul.MuiList-root li [role="progressbar"]').should('exist')
+            cy.get('ul.MuiList-root li [role="progressbar"]').should('not.exist')
 
             // Check last journal message
             cy.get('ul.MuiList-root li').first().click()

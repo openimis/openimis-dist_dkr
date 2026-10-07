@@ -545,9 +545,9 @@ describe('Grievance module workflows', () => {
       cy.visit('/front/ticket/tickets');
       cy.contains('tfoot', 'Rows Per Page').should('be.visible');
 
-      cy.get('[title="Add Grievance"] button').should('exist');
+      cy.get('[aria-label="Add Grievance"] button').should('exist');
 
-      cy.get('[title="Add Grievance"] button').click();
+      cy.get('[aria-label="Add Grievance"] button').click();
       cy.url().should('include', '/front/ticket/ticket');
     });
   });

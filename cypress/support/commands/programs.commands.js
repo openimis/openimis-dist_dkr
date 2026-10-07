@@ -4,7 +4,7 @@ import { TIMEOUTS } from '../constants';
 export function registerProgramCommands() {
   Cypress.Commands.add('deleteProject', (projectPath) => {
     cy.visit(projectPath);
-    cy.get('button[title="Delete"]').click();
+    cy.get('button[aria-label="Delete"]').click();
     cy.contains('button', 'Ok').click();
 
     // Check redirect
@@ -67,7 +67,7 @@ export function registerProgramCommands() {
         programRows.each((_, row) => {
           cy.wrap(row).within(() => {
             // Find and click the Delete button in this row
-            cy.get('button[title="Delete"]')
+            cy.get('button[aria-label="Delete"]')
               .click({ force: true });
           });
 
@@ -77,7 +77,7 @@ export function registerProgramCommands() {
             .click();
 
           // Wait for deletion to complete
-          cy.get('ul.MuiList-root li div[role="progressbar"]').should('exist');
+          cy.get('ul.MuiList-root li [role="progressbar"]').should('exist');
 
           // Verify deletion in expanded journal drawer
           cy.get('.MuiDrawer-paperAnchorRight button')
@@ -105,23 +105,30 @@ export function registerProgramCommands() {
 
   Cypress.Commands.add('createProgram', (programCode, programName, maxBeneficiaries, programType, schema) => {
     cy.visit('/front/benefitPlans');
-    cy.get('[title="Create"] button').click();
+    cy.get('[aria-label="Create"] button').click();
 
     cy.enterMuiInput('Code', programCode);
 
     cy.enterMuiInput('Name', programName);
 
+    // MUI X v8 DatePicker nests the trigger inside the field as an
+    // InputAdornment button with aria-label starting with "Choose date"
+    // (the suffix carries the current value when one is selected).
     cy.contains('label', 'Date from')
       .parent()
+      .find('button[aria-label^="Choose date"]')
       .click();
-    cy.contains('button', 'OK')
-      .click();
+    cy.get('.MuiPickerPopper-root').should('be.visible')
+      .find('button[aria-current="date"]').click();
+    cy.get('.MuiPickerPopper-root').should('not.exist');
 
     cy.contains('label', 'Date to')
       .parent()
+      .find('button[aria-label^="Choose date"]')
       .click();
-    cy.contains('button', 'OK')
-      .click();
+    cy.get('.MuiPickerPopper-root').should('be.visible')
+      .find('button[aria-current="date"]').click();
+    cy.get('.MuiPickerPopper-root').should('not.exist');
 
     cy.enterMuiInput('Max Beneficiaries', maxBeneficiaries);
 
@@ -191,8 +198,8 @@ export function registerProgramCommands() {
       cy.assertMuiInput('Code', programCode);
       cy.assertMuiInput('Name', programName);
       const today = getTodayFormatted();
-      cy.assertMuiInput('Date from', today);
-      cy.assertMuiInput('Date to', today);
+      cy.assertMuiDatePickerValue('Date from', today);
+      cy.assertMuiDatePickerValue('Date to', today);
       cy.assertMuiInput('Max Beneficiaries', maxBeneficiaries);
       cy.assertMuiInput('Institution', institution);
       cy.assertMuiInput('Description', description, 'textarea');
@@ -234,7 +241,7 @@ export function registerProgramCommands() {
       ? cy.chooseMuiSelect('Value', criterionValue)
       : cy.enterMuiInput('Value', criterionValue);
 
-    cy.get('[title="Save changes"] button').click();
+    cy.get('[aria-label="Save changes"] button').click();
 
     cy.checkProgramUpdateCompleted();
     cy.reload();
@@ -315,14 +322,14 @@ export function registerProgramCommands() {
           .contains(new RegExp(`^${programCode}\\b`))
           .should('exist');
 
-        cy.get('button[title="View details"]').click();
+        cy.get('button[aria-label="View details"]').click();
       });
 
     cy.url({ timeout: TIMEOUTS.BACKEND_VALIDATION }).should('include', '/tasks/task/');
     cy.awaitSearcherRefresh('importTaskDetail');
     cy.contains('Import Valid Items Task', { timeout: TIMEOUTS.BACKEND_VALIDATION });
     cy.chooseMuiAutocomplete('Task Group', 'any');
-    cy.get('[title="Save changes"] button').click();
+    cy.get('[aria-label="Save changes"] button').click();
 
     cy.contains('div', 'Accept All')
       .find('button')
@@ -376,7 +383,7 @@ export function registerProgramCommands() {
     cy.ensureSufficientIndividuals(120);
 
     cy.visit('/front/individuals');
-    cy.contains('a', 'ENROLLMENT').click();
+    cy.contains('li', 'ENROLLMENT').click();
 
     cy.enrollBeneficiariesIntoProgram(
       programName, programCode, status,
@@ -395,7 +402,7 @@ export function registerProgramCommands() {
     cy.ensureSufficientHouseholds(20);
 
     cy.visit('/front/groups');
-    cy.contains('a', 'ENROLLMENT').click();
+    cy.contains('li', 'ENROLLMENT').click();
 
     cy.enrollBeneficiariesIntoProgram(
       programName, programCode, status,

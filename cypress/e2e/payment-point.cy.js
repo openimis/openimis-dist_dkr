@@ -161,7 +161,7 @@ describe('Payment point workflows', () => {
 
     cy.contains('label', 'District')
       .siblings('.MuiInputBase-root')
-      .find('[role="button"]')
+      .find('[role="combobox"], [role="button"]')
       .click();
     cy.get('[role="listbox"] li', { timeout: TIMEOUTS.BACKEND_VALIDATION })
       .should('have.length.at.least', 1);

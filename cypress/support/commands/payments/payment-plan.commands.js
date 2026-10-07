@@ -25,7 +25,7 @@ function fillCriterionRow(index, { field, filter, value, amount }) {
     .should('have.length.at.least', index + 1)
     .eq(index)
     .siblings('.MuiInputBase-root')
-    .find('[role="button"]')
+    .find('[role="combobox"], [role="button"]')
     .click();
   cy.contains('[role="listbox"] li', field, { timeout: TIMEOUTS.BACKEND_VALIDATION }).click();
 
@@ -33,7 +33,7 @@ function fillCriterionRow(index, { field, filter, value, amount }) {
     .should('have.length.at.least', index + 1)
     .eq(index)
     .siblings('.MuiInputBase-root')
-    .find('[role="button"]')
+    .find('[role="combobox"], [role="button"]')
     .click();
   cy.contains('[role="listbox"] li', filter).click();
 
