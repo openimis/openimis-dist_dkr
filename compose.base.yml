@@ -21,6 +21,9 @@ x-api: &default-api
     - OPENSEARCH_HOSTS=${OPENSEARCH_HOSTS}
   volumes:
     - photos:/openimis-be/openIMIS/images/insurees
+    # Uploaded files (default_storage): the backend saves them and the workers
+    # read them, e.g. the individual import pipeline's dispatch in a worker.
+    - file_storage:/openimis-be/openIMIS/file_storage
   depends_on:
     db:
       condition: service_healthy
@@ -114,3 +117,4 @@ networks:
 volumes:
   database:
   photos:
+  file_storage:
