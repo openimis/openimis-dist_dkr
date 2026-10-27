@@ -19,6 +19,12 @@ x-api: &default-api
     - OPENSEARCH_ADMIN=${OPENSEARCH_ADMIN}
     - OPENSEARCH_PASSWORD=${OPENSEARCH_PASSWORD}
     - OPENSEARCH_HOSTS=${OPENSEARCH_HOSTS}
+    - IMPERSONATION_ENABLED=true
+    - EMAIL_HOST=${EMAIL_HOST}
+    - EMAIL_PORT=${EMAIL_PORT}
+    - EMAIL_BACKEND=${EMAIL_BACKEND}
+
+    
   volumes:
     - photos:/openimis-be/openIMIS/images/insurees
     # Uploaded files (default_storage): the backend saves them and the workers
